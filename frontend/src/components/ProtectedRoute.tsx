@@ -6,8 +6,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // TODO: Implement authorization check
-  const isAuthorized: boolean = false;
+  const isAuthorized: boolean =
+    localStorage.getItem("userIsAuthenticated") === "true";
 
   return isAuthorized ? children : <Navigate to="/auth" />;
 }

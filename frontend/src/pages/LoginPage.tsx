@@ -49,6 +49,7 @@ export function LoginPage() {
       try {
         if (verificationResult.validUser) {
           console.log("User was verified by firebase.");
+          localStorage.setItem("userIsAuthenticated", JSON.stringify(true));
           navigate("/");
           return user;
         }
