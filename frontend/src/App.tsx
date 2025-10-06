@@ -1,31 +1,21 @@
-import { useEffect } from "react";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+
+import { HomePage } from "./pages/HomePage";
 import "./style.css"; // Make sure your CSS file is in the same folder or adjust the path
 
+const appRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomePage />,
+  },
+  { path: "/auth", element: <LoginPage /> },
+]);
 function App() {
-  useEffect(() => {
-    const meta = document.createElement("meta");
-    meta.name = "google-signin-client_id";
-    document.head.appendChild(meta);
-
-    const script = document.createElement("script");
-    script.src = "https://apis.google.com/js/platform.js";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-  }, []);
-  return (
-    <div>
-      <nav>
-        <a href="/">Home</a>
-        <a href="/Courses">Courses</a>
-        <a href="/Tasks">Tasks</a>
-      </nav>
-
-      <main id="Home">
-        <button type="button">Connect Calendar</button>
-      </main>
-    </div>
-  );
+  return <RouterProvider router={appRouter}></RouterProvider>;
 }
 
 export default App;
