@@ -17,7 +17,7 @@ class LoginError extends Error {
 }
 
 export function LoginPage() {
-  async function getSignUpResponse(): Promise<User | null> {
+  async function getSignUpResponse() {
     console.log("Clicking sign-in button...");
     try {
       const userCredentials = await signInWithPopup(
@@ -51,7 +51,6 @@ export function LoginPage() {
           console.log("User was verified by firebase.");
           localStorage.setItem("userIsAuthenticated", JSON.stringify(true));
           navigate("/");
-          return user;
         }
         console.log("User could not be verified by firebase.");
         return null;
