@@ -1,0 +1,36 @@
+
+up to date, audited 567 packages in 2s
+
+89 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> mnemonic@0.0.0 dev
+> vite
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+
+  VITE v7.1.7  ready in 347 ms
+
+  ➜  Local:   http://localhost:5175/
+  ➜  Network: use --host to expose
+
+up to date, audited 567 packages in 2s
+
+89 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> mnemonic@0.0.0 dev
+> vite
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+
+  VITE v7.1.7  ready in 340 ms
+
+  ➜  Local:   http://localhost:5175/
+  ➜  Network: use --host to expose
