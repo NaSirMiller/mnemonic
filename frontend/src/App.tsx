@@ -1,12 +1,25 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/LoginPage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
+const appRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <HomePage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/auth",
+    element: <LoginPage />,
+  },
+]);
 function App() {
-
-    return (
-        <>
-            Hello World
-        </>
-    )
+  return <RouterProvider router={appRouter}></RouterProvider>;
 }
 
 export default App;
