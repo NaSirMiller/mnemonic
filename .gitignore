@@ -2,3 +2,5 @@
 client_secret_*.apps.googleusercontent.com.json
 **/node_modules
 mnemonic-*.json
+backend.log
+frontend.log
