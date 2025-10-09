@@ -9,18 +9,36 @@ found 0 vulnerabilities
 > start:dev
 > ts-node --project tsconfig.app.json src/index.ts
 
-[dotenv@17.2.3] injecting env (4) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
-Server running on port 5000...
-
-up to date, audited 334 packages in 1s
-
-39 packages are looking for funding
-  run `npm fund` for details
-
-found 0 vulnerabilities
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+/home/NaSirMiller/Documents/mnemonic/pr/backend/src/firebase_admin.ts:11
+  throw new Error("Missing Firebase environment variables!");
+        ^
+Error: Missing Firebase environment variables!
+    at Object.<anonymous> (/home/NaSirMiller/Documents/mnemonic/pr/backend/src/firebase_admin.ts:11:9)
+    at Module._compile (node:internal/modules/cjs/loader:1529:14)
+    at Module.m._compile (/home/NaSirMiller/Documents/mnemonic/pr/backend/node_modules/ts-node/src/index.ts:1618:23)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1613:10)
+    at Object.require.extensions.<computed> [as .ts] (/home/NaSirMiller/Documents/mnemonic/pr/backend/node_modules/ts-node/src/index.ts:1621:12)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+    at Object.<anonymous> (/home/NaSirMiller/Documents/mnemonic/pr/backend/src/controllers/authController.ts:3:1)
 
 > start:dev
 > ts-node --project tsconfig.app.json src/index.ts
 
-[dotenv@17.2.3] injecting env (4) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (4) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+Server running on port 5000...
+
+> start:dev
+> ts-node --project tsconfig.app.json src/index.ts
+
+[dotenv@17.2.3] injecting env (4) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+Server running on port 5000...
+
+> start:dev
+> ts-node --project tsconfig.app.json src/index.ts
+
+[dotenv@17.2.3] injecting env (4) from .env -- tip: ⚙️  enable debug logging with { debug: true }
 Server running on port 5000...
