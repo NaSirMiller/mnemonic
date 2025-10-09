@@ -1,0 +1,144 @@
+.navbar-cont {
+    margin: 0;
+    padding: 0;
+    height: 50px;
+    width: 100%;
+
+    font-weight: bold;
+
+    box-sizing: border-box;
+    
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+
+    user-select: none;
+    background-color: #2A2A2A;
+    color: #FFFFFF;
+}
+
+.navbar-logo {
+    height: 100%;
+    width: 200px;
+    background-color: #2A2A2A;
+}
+
+.navbar-hamburger {
+    display: none;
+    background-color: #2A2A2A;
+}
+
+.navbar-button-cont {
+    height: 80%;
+    margin-top: 0;
+    padding: 0 15px;
+
+    border: 2px solid transparent;
+    border-radius: 10px 10px 0px 0px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    position: relative;
+
+    background-color: #2A2A2A;
+}
+
+.navbar-button-cont.focused {
+    border: 2px solid #FFFFFF20;
+    border-bottom: 2px solid transparent;
+    background-color: #14181C;
+}
+
+.left::before,
+.right::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+
+    border-radius: 50%;
+
+    position: absolute;
+    bottom: 0;
+
+    background-color: #2A2A2A;
+}
+.left::before { left: -10px; }
+.right::before { right: -10px; }
+
+.left,
+.right {
+    height: 12px;
+    width: 10px;
+
+    position: absolute;
+    bottom: -2px;
+    z-index: 1;
+
+    background-color: #14181C;
+}
+.left{ left: -10px; }
+.right{ right: -10px; }
+/* .left,
+.right {
+    border-radius: 0;
+    background-color: #FFFFFF;
+} */
+
+.navbar-buttons-cont {
+    height: 100%;
+    
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: flex-end;
+
+    background-color: #2A2A2A;
+}
+
+.green-background { background-color: #949D6A; }
+.red-background{ background-color: #D64045; }
+.blue-background{ background-color: #A1B5D8; }
+.blue-color{ color: #A1B5D8; }
+
+@media (max-width: 480px) {
+    .navbar-cont {
+        height: auto;
+        /* flex-direction: column;
+        align-items: flex-start; */
+    }
+
+    .navbar-logo {
+        height: 50px;
+        width: 70%;
+    }
+
+    .navbar-hamburger {
+        width: auto;
+        font-size: 24px;
+        padding: 0 15px;
+
+        display: block;
+    }
+
+    .navbar-hamburger:hover {
+        cursor: pointer;
+    }
+
+    .navbar-buttons-cont {
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        gap: 5px;
+        display: none;
+    }
+
+    .navbar-buttons-cont.open {
+        display: block;
+    }
+
+    .navbar-button-cont {
+        width: 100%;
+        height: 40px;
+    }
+}
