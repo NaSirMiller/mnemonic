@@ -1,4 +1,4 @@
-import { signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,10 @@ export function LoginPage() {
         firebaseAuth,
         googleProvider
       );
+      const credential = GoogleAuthProvider.credentialFromResult(userCredentials);
+      if (credential?.accessToken) {
+        localStorage.setItem("googleAccessToken", credential.accessToken);
+      }
       const user: User = userCredentials.user;
       if (!user) {
         console.log("User was not found upon sign in with Google!");
@@ -32,7 +36,6 @@ export function LoginPage() {
           "auth/user-not-found"
         );
       }
-
       const idToken = await user.getIdToken();
 
       const verificationResponse = await fetch(
@@ -52,8 +55,10 @@ export function LoginPage() {
           localStorage.setItem("userIsAuthenticated", JSON.stringify(true));
           navigate("/");
         }
-        console.log("User could not be verified by firebase.");
-        return null;
+        else{
+          console.log("User could not be verified by firebase.");
+          return null;
+        }
       } catch (error) {
         console.log(`Error while calling api: ${error}`);
         throw new LoginError(
