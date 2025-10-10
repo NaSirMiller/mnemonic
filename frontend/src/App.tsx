@@ -9,10 +9,9 @@ const appRouter = createBrowserRouter([
     {
         path: "/",
         element: (
-        <ProtectedRoute>
-            <NavBar />
-            <HomePage />
-        </ProtectedRoute>
+            <ProtectedRoute>
+                <HomePage />
+            </ProtectedRoute>
         ),
     },
     {
@@ -22,7 +21,10 @@ const appRouter = createBrowserRouter([
 ]);
 
 function App() {
-    return <RouterProvider router={appRouter}></RouterProvider>;
+    return (
+        <RouterProvider router={appRouter}></RouterProvider>
+        // <NavBar />
+    );
 }
 
 export default App;
