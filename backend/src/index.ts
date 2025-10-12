@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 
 import { authRouter } from "./routes/authRoute";
-import { calendarRouter } from "./routes/calendarRoute";
+import calendarRoute from "./routes/calendarRoute";
 
 
 const app: Application = express();
@@ -17,7 +17,7 @@ app.use(express.json()); // Parse JSON request bodies
 
 app.use("/api/auth", authRouter);
 
-app.use("/calendar", calendarRouter);
+app.use("/calendar", calendarRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}...`));
