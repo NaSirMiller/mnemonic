@@ -4,7 +4,7 @@ import { FirebaseError } from "firebase/app";
 import { useNavigate } from "react-router-dom";
 
 import { firebaseAuth, googleProvider } from "../firebase_utils";
-import { Navbar } from "../components/Navbar";
+import Navbar from "../NavBar/NavBar";
 import "../style.css";
 
 class LoginError extends Error {

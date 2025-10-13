@@ -1,12 +1,12 @@
 import "../style.css";
-import { Navbar } from "../components/Navbar";
+import Navbar from "../NavBar/NavBar";
 import GoogleCalendarView from "../components/GoogleCalendarView";
 
 export function HomePage() {
   return (
-    <div>
-      <Navbar></Navbar>
-      <main id="Home">
+    <div className="home-page">
+      <Navbar />
+      <main id="Home" className="main-content">
         <GoogleCalendarView />
       </main>
     </div>

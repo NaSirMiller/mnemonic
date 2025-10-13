@@ -17,36 +17,20 @@ body {
 
 body {
   background: #f0f8ff;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-}
-
-main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
 }
 
 /* ========================
-    Nav Bar
+    Main Content
 =========================== */
-nav {
-  background: #173142;
+main {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  padding: 1rem;
-}
-
-nav a {
-  color: rgb(255, 255, 255);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: color 0.2s ease;
+  justify-content: flex-start; /* align content to left */
+  align-items: flex-start;     /* start from top */
+  padding: 20px;              /* optional spacing from edges */
+  flex: 1;
 }
 
 /* ========================
@@ -97,4 +81,33 @@ button:active {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
+}
+
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 1rem;
+  color: white;
+}
+
+.calendar-title {
+  font-size: 1.5rem;
+}
+
+.calendar-wrapper {
+  width: 100%;
+}
+
+.rbc-calendar {
+  color: white;
+  border: none;
+}
+
+.rbc-off-range-bg {
+  background-color: transparent !important;
+}
+
+.rbc-month-view .rbc-row .rbc-off-range {
+  color: transparent !important;
 }
