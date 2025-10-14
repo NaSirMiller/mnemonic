@@ -1,10 +1,10 @@
 import "../style.css";
-import { Navbar } from "../components/Navbar";
+import NavBar from "../components/NavBar/NavBar";
 
 export function HomePage() {
   return (
     <div>
-      <Navbar></Navbar>
+      <NavBar></NavBar>
       <main id="Home">
         <button type="button">Connect Calendar</button>
       </main>
