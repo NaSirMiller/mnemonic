@@ -6,15 +6,18 @@ import {
 import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 const fs = require("fs");
 const path = require("path");
+import { config } from "dotenv";
+config();
 
 let testEnv;
 
+const projectId = process.env.FIREBASE_PROJECT_ID!;
 const rulesPath = path.join(__dirname, "../../../firestore.rules");
 const rules = fs.readFileSync(rulesPath, "utf8");
 
 beforeAll(async () => {
   testEnv = await initializeTestEnvironment({
-    projectId: "mnemonic-b7d90",
+    projectId: projectId,
     firestore: {
       rules: rules,
     },
