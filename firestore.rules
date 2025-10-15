@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+    match /databases/{database}/documents {
+        function isValidCourse(data) {
+            return data.userId is string &&
+                   data.courseName is string;
+        }
+        function isValidAssignment(data) {
+            return data.userId is string &&
+                   data.title is string &&
+                   data.courseId is string &&
+                   (data.weight is float && (data.weight >=0 && data.weight <= 1.00)) &&
+                   data.dueDate is timestamp &&
+                   data.get("description", "") is string &&
+                   (data.grade is float || data.grade == null) // Grade can be added later by user
+        }
+        function isValidTask(data) {
+            return data.userId is string &&
+                   data.title is string &&
+                   data.description is string &&
+                   data.isComplete is bool &&
+                   (data.assignmentId is string || data.assignmentId == null) && // A task does not necessarily have to be assignment related
+                   data.dueDate is timestamp &&
+                   (data.lastProgressed is timestamp || data.lastProgressed == null) && // Last tracked date where progress was made. For example, this date changes if the the time spent for the session > 0.
+                   // Minutes and seconds in int form
+                   data.timeSpent is int && // Total amount of time spent towards the task
+                   (data.priority is int || data.priority == null) // Task priority
+        }
+
+        // --- Global Defaults ---
+        allow read: if false; // no public reads unless specified
+
+        // --- Courses ---
+        match /courses/{course} {
+            allow read: if request.auth != null &&
+                            resource.data.userId;
+            allow create: if request.auth.uid == request.resource.data.userId &&
+                            isValidCourse(request.resource.data);
+            allow update, delete: if request.auth.uid == resource.data.userId;
+        }
+
+        // --- Assignments ---
+        match /assignments/{assignment} {
+             allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+             allow create: if request.auth != null &&
+                            request.auth.uid == request.resource.data.userId &&
+                            isValidAssignment(request.resource.data);
+             allow update: if request.auth != null &&
+                           request.auth.uid == resource.data.userId &&
+                           isValidAssignment(request.resource.data);
+             allow delete: if request.auth != null &&
+                           request.auth.uid == resource.data.userId;
+           }
+        // --- Tasks ---
+        match /tasks/{task} {
+            allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+            allow create: if request.auth != null &&
+                        request.auth.uid == request.resource.data.userId &&
+                        isValidTask(request.resource.data);
+            allow update: if request.auth != null &&
+                        request.auth.uid == resource.data.userId &&
+                        isValidTask(request.resource.data);
+            allow delete: if request.auth != null &&
+                            request.auth.uid == resource.data.userId;
+               }
+    }
+}
