@@ -4,7 +4,7 @@ import { FirebaseError } from "firebase/app";
 import { useNavigate } from "react-router-dom";
 
 import { firebaseAuth, googleProvider } from "../firebase_utils";
-import Navbar from "../NavBar/NavBar";
+import NavBar from "../components/NavBar/NavBar";
 import "../style.css";
 
 class LoginError extends Error {
@@ -22,7 +22,7 @@ export function LoginPage() {
     try {
       const userCredentials = await signInWithPopup(
         firebaseAuth,
-        googleProvider
+        googleProvider,
       );
       const credential = GoogleAuthProvider.credentialFromResult(userCredentials);
       if (credential?.accessToken) {
@@ -33,7 +33,7 @@ export function LoginPage() {
         console.log("User was not found upon sign in with Google!");
         throw new LoginError(
           "User was not found upon sign in with Google!",
-          "auth/user-not-found"
+          "auth/user-not-found",
         );
       }
       const idToken = await user.getIdToken();
@@ -44,7 +44,7 @@ export function LoginPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ idToken }),
-        }
+        },
       );
 
       const verificationResult = await verificationResponse.json();
@@ -63,7 +63,7 @@ export function LoginPage() {
         console.log(`Error while calling api: ${error}`);
         throw new LoginError(
           `Error while calling api: ${error}`,
-          "auth/api-response-format"
+          "auth/api-response-format",
         );
       }
     } catch (error: unknown) {
@@ -71,13 +71,13 @@ export function LoginPage() {
         console.error("Google Sign-In Error:", error.code, error.message);
         throw new LoginError(
           `Error signing in user: ${error.message}`,
-          error.code
+          error.code,
         );
       } else if (error instanceof Error) {
         console.error("Login failed:", error.message);
         throw new LoginError(
           `Error signing in user: ${error.message}`,
-          "unknown"
+          "unknown",
         );
       } else {
         console.error("Unknown login error", error);
@@ -88,7 +88,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   return (
     <div className="login-page">
-      <Navbar></Navbar>
+      <NavBar />
       <h2>Login Page</h2>
       <h3>Welcome to Mnemonic!</h3>
       <p>
