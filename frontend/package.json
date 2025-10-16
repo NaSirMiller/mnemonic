@@ -11,6 +11,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/google-calendar": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "@react-oauth/google": "^0.12.2",
     "firebase": "^12.3.0",
     "react": "^19.1.1",

@@ -26,7 +26,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh;
+  height: 100vh;
 }
 
 /* ========================
@@ -97,4 +97,22 @@ button:active {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
+}
+
+.calendar-wrapper {
+  width: 35rem;      /* keeps the width */
+  margin: 2.5rem 37.5rem 5rem 0;  /* spacing: top/right/bottom/left */
+  float: left;       /* aligns to the left of its container */
+}
+
+/* Ensure equal space on both sides of the title */
+.fc-toolbar-chunk {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* Left side (prev/next buttons) aligned left */
+.fc-toolbar-chunk:first-child {
+  justify-content: flex-start;
 }
