@@ -32,7 +32,6 @@ export function LoginPage() {
           "auth/user-not-found",
         );
       }
-
       const idToken = await user.getIdToken();
 
       const verificationResponse = await fetch(
@@ -49,10 +48,11 @@ export function LoginPage() {
       try {
         if (verificationResult.validUser) {
           console.log("User was verified by firebase.");
-          localStorage.setItem("userIsAuthenticated", JSON.stringify(true));
           navigate("/");
         }
-        console.log("User could not be verified by firebase.");
+        else{
+          console.log("User could not be verified by firebase.");
+        }
         return null;
       } catch (error) {
         console.log(`Error while calling api: ${error}`);
