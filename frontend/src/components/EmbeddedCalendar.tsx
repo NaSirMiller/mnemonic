@@ -21,6 +21,12 @@ export function EmbeddedCalendar({ events = [] }: EmbeddedCalendarProps) {
         }}
         events={events}
         height="auto"
+        eventDisplay="block" 
+        eventTimeFormat={{
+          hour: "numeric",
+          minute: "2-digit",   // ensures :00 or :30
+          hour12: true         // shows am/pm
+        }}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import admin from "firebase-admin";
 
-dotenv.config(); // load from .env
+dotenv.config();
 
 if (
   !process.env.FIREBASE_PROJECT_ID ||
@@ -19,4 +19,5 @@ admin.initializeApp({
   }),
 });
 
+export const db = admin.firestore();
 export default admin;
