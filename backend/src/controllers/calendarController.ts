@@ -28,47 +28,85 @@ export async function getCalendarEvents(req: Request, res: Response) {
     // Get user's Google tokens from Firestore
     const userRef = admin.firestore().collection("users").doc(uid);
     const userDoc = await userRef.get();
-    if (!userDoc.exists) return res.json({ events: [] });
+
+    if (!userDoc.exists) {
+      console.log("No user document found");
+      return res.json({ events: [] });
+    }
 
     const data = userDoc.data();
     let accessToken = data?.googleTokens?.accessToken;
     const refreshToken = data?.googleTokens?.refreshToken;
 
-    if (!accessToken && !refreshToken) return res.json({ events: [] });
+    if (!refreshToken) {
+      console.log("No refresh token found — user needs to reconnect calendar");
+      return res.json({ events: [] });
+    }
 
-    // Automatically refresh access token if missing
-    if (refreshToken && !accessToken) {
+    // If no access token, try to refresh immediately
+    if (!accessToken) {
+      console.log("No access token — refreshing...");
       accessToken = await refreshAccessToken(refreshToken);
 
-      // Save new access token to Firestore
+      if (!accessToken) {
+        console.log("Failed to refresh access token");
+        return res.json({ events: [] });
+      }
+
+      // Save new token
       await userRef.update({
         "googleTokens.accessToken": accessToken,
         "googleTokens.updatedAt": new Date().toISOString(),
       });
     }
 
-    // Fetch events from Google Calendar
-    const calendarResponse = await fetch(
+    // Attempt to fetch calendar events
+    let calendarResponse = await fetch(
       "https://www.googleapis.com/calendar/v3/calendars/primary/events",
       {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
 
+    // If token expired, refresh and retry once
+    if (calendarResponse.status === 401) {
+      console.log("Access token expired — refreshing...");
+      accessToken = await refreshAccessToken(refreshToken);
+
+      if (!accessToken) {
+        console.log("Failed to refresh expired token");
+        return res.json({ events: [] });
+      }
+
+      // Save new token to Firestore
+      await userRef.update({
+        "googleTokens.accessToken": accessToken,
+        "googleTokens.updatedAt": new Date().toISOString(),
+      });
+
+      // Retry fetching events
+      calendarResponse = await fetch(
+        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+    }
+
+    // Parse Google Calendar API response
     const calendarData = (await calendarResponse.json()) as GoogleCalendarResponse;
 
+    // Extract and map events cleanly
     const events =
       calendarData.items?.map((item) => ({
-        title: item.summary,
-        start: item.start?.dateTime || item.start?.date,
-        end: item.end?.dateTime || item.end?.date,
+        title: item.summary || "Untitled Event",
+        start: item.start?.dateTime || item.start?.date || "",
+        end: item.end?.dateTime || item.end?.date || "",
       })) || [];
 
     return res.json({ events });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching calendar events:", error);
     return res.status(500).json({ events: [] });
   }
 }
@@ -85,10 +123,13 @@ export async function isCalendarConnected(req: Request, res: Response) {
     const userDoc = await admin.firestore().collection("users").doc(uid).get();
     const data = userDoc.data();
 
-    const calendarConnected = !!data?.googleTokens?.accessToken || !!data?.googleTokens?.refreshToken;
+    const hasAccess = !!data?.googleTokens?.accessToken;
+    const hasRefresh = !!data?.googleTokens?.refreshToken;
+
+    const calendarConnected = hasAccess || hasRefresh;
     return res.json({ calendarConnected });
   } catch (error) {
-    console.error(error);
+    console.error("Error checking calendar connection:", error);
     return res.json({ calendarConnected: false });
   }
 }
