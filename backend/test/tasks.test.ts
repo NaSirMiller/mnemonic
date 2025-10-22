@@ -1,8 +1,3 @@
-import {
-  initializeTestEnvironment,
-  assertSucceeds,
-  assertFails,
-} from "@firebase/rules-unit-testing";
 const fs = require("fs");
 const path = require("path");
 const should = require("should");
@@ -15,6 +10,26 @@ import { describe, it } from "node:test";
 config();
 
 describe("Tasks API", () => {
+  let mockTask: {};
+  before(() => {
+    // Runs once before all tests in this block
+    console.log("Setup DB connection");
+  });
+
+  beforeEach(() => {
+    // Runs before each individual test
+    console.log("Seed DB with test data");
+  });
+
+  afterEach(() => {
+    // Runs after each individual test
+    console.log("Clean up DB changes");
+  });
+
+  after(() => {
+    // Runs once after all tests in this block
+    console.log("Close DB connection");
+  });
   // --- CREATE ---
   describe("POST /tasks", () => {
     it("should create a task with valid payload", () => {});
