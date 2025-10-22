@@ -5,11 +5,12 @@ service cloud.firestore {
             return data.userId is string &&
                    data.courseName is string;
         }
-        function isValidTaskDetail(data) {
+        }
+        function isValidTask(data) {
             return data.userId is string &&
                    data.title is string &&
                    data.courseId is string &&
-                   (data.weight is float && (data.weight >=0 && data.weight <= 1.00)) &&
+                   (data.weight is number && (data.weight >=0 && data.weight <= 1.00)) &&
                    data.dueDate is timestamp &&
                    data.get("description", "") is string &&
                    (data.grade is number || data.grade == null) && // Grade can be added later by user
@@ -17,11 +18,6 @@ service cloud.firestore {
                    data.timeSpent is number && // Total amount of time spent towards the task
                    data.isComplete is bool &&
                    (data.priority is number || data.priority == null) // Task priority
-
-        }
-        function isValidTask(data) {
-            return data.userId is string &&
-                   data.taskDetailId is string &&
                    data.createdAt is timestamp &&
                    data.lastUpdatedAt is timestamp
         }
@@ -38,18 +34,6 @@ service cloud.firestore {
             allow update, delete: if request.auth.uid == resource.data.userId;
         }
 
-        // --- Assignments ---
-        match /assignments/{assignment} {
-             allow read: if request.auth != null && request.auth.uid == resource.data.userId;
-             allow create: if request.auth != null &&
-                            request.auth.uid == request.resource.data.userId &&
-                            isValidAssignment(request.resource.data);
-             allow update: if request.auth != null &&
-                           request.auth.uid == resource.data.userId &&
-                           isValidAssignment(request.resource.data);
-             allow delete: if request.auth != null &&
-                           request.auth.uid == resource.data.userId;
-           }
         // --- Tasks ---
         match /tasks/{task} {
             allow read: if request.auth != null && request.auth.uid == resource.data.userId;
@@ -63,4 +47,3 @@ service cloud.firestore {
                             request.auth.uid == resource.data.userId;
                }
     }
-}
