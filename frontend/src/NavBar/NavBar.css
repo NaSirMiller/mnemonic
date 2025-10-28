@@ -13,19 +13,26 @@
     justify-content: space-between;
 
     user-select: none;
-    background-color: #2A2A2A;
+    background-color: #343434;
     color: #FFFFFF;
 }
 
 .navbar-logo {
-    height: 100%;
+    margin-top: 5px;
+    height: 40px;
     width: 200px;
-    background-color: #2A2A2A;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    object-fit: cover;
+    background-color: transparent;
 }
 
 .navbar-hamburger {
     display: none;
-    background-color: #2A2A2A;
+    background-color: #343434;
 }
 
 .navbar-button-cont {
@@ -33,7 +40,6 @@
     margin-top: 0;
     padding: 0 15px;
 
-    border: 2px solid transparent;
     border-radius: 10px 10px 0px 0px;
 
     display: flex;
@@ -42,13 +48,12 @@
 
     position: relative;
 
-    background-color: #2A2A2A;
+    background-color: #343434;
 }
 
 .navbar-button-cont.focused {
-    border: 2px solid #FFFFFF20;
     border-bottom: 2px solid transparent;
-    background-color: #14181C;
+    background-color: #2A2A2A;
 }
 
 .left::before,
@@ -62,7 +67,7 @@
     position: absolute;
     bottom: 0;
 
-    background-color: #2A2A2A;
+    background-color: #343434;
 }
 .left::before { left: -10px; }
 .right::before { right: -10px; }
@@ -76,7 +81,7 @@
     bottom: -2px;
     z-index: 1;
 
-    background-color: #14181C;
+    background-color: #2A2A2A;
 }
 .left{ left: -10px; }
 .right{ right: -10px; }
@@ -93,7 +98,7 @@
     flex-flow: column wrap;
     justify-content: flex-end;
 
-    background-color: #2A2A2A;
+    background-color: #343434;
 }
 
 .green-background { background-color: #949D6A; }

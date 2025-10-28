@@ -1,5 +1,6 @@
 import "./index.css";
 import NavBar from "./NavBar/NavBar";
+import FormContainer from "./formComponents/FormContainer.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -22,8 +23,12 @@ const appRouter = createBrowserRouter([
 
 function App() {
     return (
-        <RouterProvider router={appRouter}></RouterProvider>
-        // <NavBar />
+        // <RouterProvider router={appRouter}></RouterProvider>
+        <div>
+            <NavBar />
+            <FormContainer />
+        </div>
+        
     );
 }
 

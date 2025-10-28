@@ -13,7 +13,7 @@ function NavBar() {
 
     return (
         <div className="navbar-cont">
-            <div className="navbar-logo">Mnemonic Logo</div>
+            <img src="/images/mnemonic_logo.png" alt="mnemonic logo" className="navbar-logo" />
 
             {/* Hamburger button for small screens */}
             <div 
