@@ -14,8 +14,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const unsubscribe = onIdTokenChanged(firebaseAuth, async user => {
       if (user) {
         try {
-          const idToken = await user.getIdToken(true);
-          localStorage.setItem("firebaseIdToken", idToken);
+          // The token is refreshed internally
+          await user.getIdToken(true);
           setIsAuthorized(true);
         } catch (error) {
           console.error("Failed to refresh ID token:", error);
