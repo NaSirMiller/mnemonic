@@ -28,7 +28,7 @@ function HomePage() {
         { name: "Homework 23", date: "Nov 19"},
         { name: "Homework 24", date: "Nov 19"},
         { name: "Homework 25", date: "Nov 19"},
-        // { name: "Homework Menmonic Data Struct...", date: "Nov 11"}
+        { name: "Homework Menmonic Data Structures 99999999", date: "Nov 11"}
     ];
     
     const [ days, setDays ] = useState( [] );
@@ -73,11 +73,11 @@ function HomePage() {
                 <div className="home-page-task-cont">
                     { tasks.map( ( task, i ) => (
                         <div key={ "home-page-task-" + i } className="home-page-task">
-                            <div className="width trunc-text">
+                            <div className="home-page-task-name">
                                 { task.name } 
                             </div>
-                            <div className="width trunc-text">
-                                { task.date }
+                            <div className="home-page-task-date">
+                                { task.date.length === 5 ? task.date + '\u00A0' : task.date }
                             </div>
                         </div>
                     ) ) }

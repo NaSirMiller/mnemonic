@@ -1,126 +1,159 @@
-import { useEffect, useState } from "react";
-import "./HomePage.css";
+import { useState, useEffect } from "react";
+import TaskCard from "./TaskCard";
+import "./TaskPage.css";
+
 
 function TaskPage() {
-    const tasks = [
-        { name: "Homework 1", date: "Nov 1"},
-        { name: "Homework 2", date: "Nov 2"},
-        { name: "Homework 3", date: "Nov 3"},
-        { name: "Homework 4", date: "Nov 4"},
-        { name: "Homework 5", date: "Nov 5"},
-        { name: "Homework 6", date: "Nov 6"},
-        { name: "Homework 7", date: "Nov 7"},
-        { name: "Homework 8", date: "Nov 8"},
-        { name: "Homework 9", date: "Nov 9"},
-        { name: "Homework 10", date: "Nov 10"},
-        { name: "Homework 11", date: "Nov 11"},
-        { name: "Homework 12", date: "Nov 12"},
-        { name: "Homework 13", date: "Nov 13"},
-        { name: "Homework 14", date: "Nov 14"},
-        { name: "Homework 15", date: "Nov 15"},
-        { name: "Homework 16", date: "Nov 16"},
-        { name: "Homework 17", date: "Nov 17"},
-        { name: "Homework 18", date: "Nov 18"},
-        { name: "Homework 19", date: "Nov 19"},
-        { name: "Homework 20", date: "Nov 19"},
-        { name: "Homework 21", date: "Nov 19"},
-        { name: "Homework 22", date: "Nov 19"},
-        { name: "Homework 23", date: "Nov 19"},
-        { name: "Homework 24", date: "Nov 19"},
-        { name: "Homework 25", date: "Nov 19"},
-        // { name: "Homework Menmonic Data Struct...", date: "Nov 11"}
-    ];
-    
-    const [ days, setDays ] = useState( [] );
-    const [ month, setMonth ] = useState( new Date().getMonth() );
-    const months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
+    const [ email, setEmail ] = useState( "catlover@gmail.com" );
+    const [ courses, setCourses ] = useState( [ "All Courses" ] );
+    const filters = [ "Name", "Course", "% of Grade", "Time Spent", "Due Date" ];
+
+    const [ tasks, setTasks ] = useState( [] );
+    const [ checkedMap, setCheckedMap ] = useState( {} ); // key = task index, value = boolean
+    const [ selectedCourse, setSelectedCourse ] = useState( "All Courses" );
+    const [ selectedGrade, setSelectedGrade ] = useState( 0.00 );
 
     useEffect( () => {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
-        const firstDayOfMonth = new Date(year, month, 1);
-        const startDay = firstDayOfMonth.getDay();
-        const startDate = new Date(year, month, 1 - startDay);
+        fetch("/courses.json")
+            .then( res => res.json() )
+            .then( data => {
+                if ( data.courses ) {
+                    const names = data.courses.map( course => course.name );
+                    setCourses( [ "All Courses", ...names ] );
+                }
+      })
 
-        const tempDays = [];
-        for (let i = 0; i < 35; i++) {
-            const day = new Date( startDate );
-            day.setDate( startDate.getDate() + i );
-            tempDays.push( day );
+        // console.log( tasks );
+    }, [] );
+
+    useEffect( () => {
+        const initialMap = {};
+        tasks.forEach( ( _, i ) => {
+            initialMap[ i ] = false;
+        } );
+        setCheckedMap( initialMap );
+    }, [ tasks ] );
+
+    useEffect( () => {
+        if (selectedCourse === "All Courses") {
+            fetch( "/tasks.json" )
+                .then( ( res ) => res.json() )
+                .then( ( data ) => setTasks( data.tasks ) );
+        } else {
+            fetch( "/courses_with_tasks.json" )
+                .then( res => res.json() )
+                .then( data => {
+                    const course = data.courses.find( c => c.name === selectedCourse );
+                    setTasks( course.tasks );
+                    setSelectedGrade( course.currentGrade );
+                } );
         }
-        setDays( tempDays );
-    }, [ month ] );
+    }, [ selectedCourse ]);
 
-    const abrvMonth = ( month ) => {
-        return months[ month ].slice( 0, 3 );
+    const toggleChecked = ( index ) => {
+        setCheckedMap( prev => ( {
+            ...prev,
+            [ index ]: !prev[ index ],
+        } ) );
+        // console.log( checkedMap[ index ] );
     };
 
     return (
-        <>
-            <div className="home-page">
-                <div className="home-page-left">
-                    <div className="home-page-title">
-                        Tasks
+        <div className="task-page">
+            <div className="task-page-profile-cont">
+                <img src="/images/profile.png" alt={ email + "'s profile picture" }  className="task-page-profile-pic"/>
+                { selectedCourse === "All Courses" ? (
+                    <div className="task-page-profile-name">
+                        { email }
                     </div>
-                    <div className="home-page-task-type-cont">
-                        <div className="home-page-task-type">
-                            Name
+                ) : (
+                    <div className="task-page-course-info">
+                        <div className="task-page-course-name">
+                            { selectedCourse }
                         </div>
-                        <div className="home-page-task-type">
-                            Date
-                        </div>
-                    </div>
-                    <div className="home-page-task-cont">
-                        { tasks.map( ( task, i ) => (
-                            <div key={ "home-page-task-" + i } className="home-page-task">
-                                <div className="width trunc-text">
-                                    { task.name } 
+                        <div className="task-page-course-details-cont">
+                            <div className="task-page-course-detail">
+                                <div>
+                                    Number of Tasks
                                 </div>
-                                <div className="width trunc-text">
-                                    { task.date }
+                                <div className="color-blue">
+                                    { tasks.length }
                                 </div>
                             </div>
-                        ) ) }
+                            <div className="task-page-course-detail">
+                                <div>
+                                    Current Grade
+                                </div>
+                                <div className="color-blue">
+                                    { selectedGrade }
+                                </div>
+                            </div>
+                            <div className="task-page-course-detail">
+                                <div>
+                                    Total Time Spent
+                                </div>
+                                <div className="color-blue">
+                                    0 hr 0 min
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                ) }
+            </div>
+            <div className="task-page-edit-cont">
+                <div className="task-page-edit-button">
+                    Edit Tasks
                 </div>
-                <div className="home-page-right">
-                    <div className="home-page-title">
-                        { months[ month ] }
-                    </div>
-                    <div className="home-page-week-cont">
-                        <div className="home-page-week">
-                            SUN
-                        </div>
-                        <div className="home-page-week">
-                            MON
-                        </div>
-                        <div className="home-page-week">
-                            TUE
-                        </div>
-                        <div className="home-page-week">
-                            WED
-                        </div>
-                        <div className="home-page-week">
-                            THU
-                        </div>
-                        <div className="home-page-week">
-                            FRI
-                        </div>
-                        <div className="home-page-week">
-                            SAT
-                        </div>
-                    </div>
-                    <div className="home-page-calendar-cont">
-                        { days.map( ( day, i ) => (
-                            <div key={ "calendar-card-" + i } className="home-page-calendar-card">
-                                { day.getDate() == 1 ? abrvMonth( day.getMonth() ) + " " + day.getDate() : day.getDate() }
-                            </div>
-                        ) ) }
-                    </div>
+                <div className="task-page-edit-button">
+                    Edit Courses
                 </div>
             </div>
-        </>
+            <div className="task-page-course-cont">
+                { courses.map( ( course, i ) => ( 
+                    <div 
+                        key={ "task-page-" + course + "-" + i} 
+                        className={ `task-page-course ${ selectedCourse === course ? "selected" : "" }` }
+                        onClick={ () => setSelectedCourse( course ) }
+                    >
+                        { course }
+                    </div>
+                ) ) }
+            </div>
+            <div className="task-page-task-cont">
+                <div className="task-page-task-label-cont">
+                    <div className="task-page-task-label-checkbox"></div>
+                    <div className="task-page-task-label-name">
+                        Name
+                    </div>
+                    <div className="task-page-task-label-course">
+                        Course
+                    </div>
+                    <div className="task-page-task-label-grade">
+                        Grade
+                    </div>
+                    <div className="task-page-task-label-time-spent">
+                        Time Spent
+                    </div>
+                    <div className="task-page-task-label-due-date">
+                        Due Date
+                    </div>
+                </div>
+                <div className="task-page-task-flex-cont">
+                    { tasks.map( ( task, i ) => (
+                        <TaskCard 
+                            key={ "task-card-" + i }
+                            name={ task.taskName }
+                            course={ task.courseName }
+                            grade={ task.grade }
+                            dueDate={ task.dueDate }
+                            timeSpent={ task.timeSpent.completed + " / " + task.timeSpent.estimated }
+                            checked={ checkedMap[ i ] }
+                            onClick={ () => toggleChecked( i ) }
+                        />
+                    ) ) }
+                </div>
+            </div>
+        </div>
     );
 }
 

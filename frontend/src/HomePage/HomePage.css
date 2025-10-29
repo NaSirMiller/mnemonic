@@ -58,7 +58,7 @@
     flex-shrink: 0;
     height: 60px;
     width: 100%;
-    max-width: 100%;
+    min-width: 0;
     padding: 0 30px;
 
     font-size: 24px;
@@ -72,10 +72,15 @@
     align-items: center;
 }
 .home-page-task-name {
-    width: 100%;
+    flex: 4;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .home-page-task-date {
-    width: 100%;
+    flex: 1;
+    text-align: right;
 }
 
 

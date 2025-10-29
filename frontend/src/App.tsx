@@ -5,6 +5,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import FrontEndHomePage from "./HomePage/HomePage";
+import TaskPage from "./TaskPage/TaskPage";
 const appRouter = createBrowserRouter([
     {
         path: "/",
@@ -22,7 +23,8 @@ const appRouter = createBrowserRouter([
 
 function App() {
     // return <RouterProvider router={appRouter}></RouterProvider>;
-    return <FrontEndHomePage />
+    // return <FrontEndHomePage />;
+    return <TaskPage />;
 }
 
 export default App;
