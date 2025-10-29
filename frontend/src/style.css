@@ -1,7 +1,7 @@
 /* ========================
     Body
 =========================== */
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -27,12 +27,12 @@ main {
   justify-content: center;
   align-items: center;
   height: 80vh;
-}
+} */
 
 /* ========================
     Nav Bar
 =========================== */
-nav {
+/* nav {
   background: #173142;
   display: flex;
   justify-content: center;
@@ -47,12 +47,12 @@ nav a {
   font-weight: 600;
   font-size: 1.1rem;
   transition: color 0.2s ease;
-}
+} */
 
 /* ========================
     Connect Calendar Button
 =========================== */
-button {
+/* button {
   background-color: #4caf50;
   color: white;
   border: none;
@@ -69,12 +69,12 @@ button:hover {
 
 button:active {
   transform: scale(0.97);
-}
+} */
 
 /* ========================
    Login Page
 =========================== */
-.login-page {
+/* .login-page {
   color: black;
   text-align: center;
   padding: 2rem;
@@ -90,11 +90,11 @@ button:active {
 
 .login-page p {
   margin-bottom: 2rem;
-}
+} */
 
 /* GoogleLogin wrapper spacing */
-.login-page .google-login-wrapper {
+/* .login-page .google-login-wrapper {
   display: flex;
   justify-content: center;
   margin-top: 1rem;
-}
+} */
