@@ -1,11 +1,11 @@
 /* ========================
-    Body
+   Global & Theme
 =========================== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 html,
@@ -16,85 +16,226 @@ body {
 }
 
 body {
-  background: #f0f8ff;
-  display: flex;
-  flex-direction: column;
+  background: #252525;
+  color: #E0E0E0;
+  font-size: 14px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* ========================
+   Main App Layout
+=========================== */
+.app-container {
+  display: grid;
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
 }
 
-main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
+.main-content {
+  padding: 2rem 4rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 /* ========================
-    Nav Bar
+   New Main Nav Bar
 =========================== */
-nav {
-  background: #173142;
+.main-navbar {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 2rem;
-  padding: 1rem;
+  background: #333333;
+  padding: 0.75rem 4rem;
+  border-bottom: 1px solid #444;
 }
 
-nav a {
-  color: rgb(255, 255, 255);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: color 0.2s ease;
+.navbar-left .navbar-logo {
+  font-weight: bold;
+  font-size: 1.25rem;
 }
 
-/* ========================
-    Connect Calendar Button
-=========================== */
-button {
-  background-color: #4caf50;
+.navbar-center {
+  display: flex;
+  gap: 1rem;
+}
+
+.navbar-tab-btn {
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.navbar-tab-btn.active,
+.navbar-tab-btn:hover {
+  background-color: #4a4a4a;
+}
+
+.navbar-right .navbar-logout-btn {
+  background-color: #007AFF;
   color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.1s ease;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
 }
 
-button:hover {
-  background-color: #45a049;
-}
-
-button:active {
-  transform: scale(0.97);
+.navbar-right .navbar-logout-btn:hover {
+  background-color: #0056b3;
 }
 
 /* ========================
-   Login Page
+   Home Tab (Simple)
 =========================== */
-.login-page {
-  color: black;
+.tab-content {
+  padding-top: 2rem;
   text-align: center;
-  padding: 2rem;
 }
-
-.login-page h2 {
+.tab-content h2 {
+  font-size: 2rem;
   margin-bottom: 1rem;
 }
 
-.login-page h3 {
+/* ========================
+   Tasks Tab Layout
+=========================== */
+.tasks-tab-container {
+  width: 100%;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #555;
+}
+
+.profile-email {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #fff;
+}
+
+.course-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #444;
+}
+
+.course-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+.course-filter-bar {
+  -ms-overflow-style: none; /* Edge I think*/
+  scrollbar-width: none; /* Firefox */
+}
+
+.course-filter-btn {
+  background-color: #444;
+  padding: 0.6rem 1rem;
+  border-radius: 18px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.course-filter-btn.active,
+.course-filter-btn:hover {
+  background-color: #007AFF;
+  color: white;
+}
+
+.task-list-header,
+.task-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.task-list-header {
+  color: #8A8A8E;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid #444;
   margin-bottom: 0.5rem;
 }
 
-.login-page p {
-  margin-bottom: 2rem;
+.task-list {
+  list-style: none;
 }
 
-/* GoogleLogin wrapper spacing */
-.login-page .google-login-wrapper {
+.task-item {
+  background-color: #333333;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.task-item:hover {
+  background-color: #3a3a3a;
+}
+
+.task-item.completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.task-item.completed .task-checkbox {
+  background-color: #555;
+  border-color: #777;
+}
+
+.task-col-name {
   display: flex;
-  justify-content: center;
-  margin-top: 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  background: #444;
+  border: 1px solid #555;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.task-col-course,
+.task-col-grade,
+.task-col-time,
+.task-col-due {
+  color: #BFBFBF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-col-due {
+  text-align: right;
 }

@@ -1,10 +1,9 @@
-import { signInWithPopup } from "firebase/auth";
-import type { User } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+import type { User } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 import { firebaseAuth, googleProvider } from "../firebase_utils";
-import NavBar from "../components/NavBar/NavBar";
 import "../style.css";
 
 class LoginError extends Error {
@@ -81,17 +80,22 @@ export function LoginPage() {
     }
   }
   const navigate = useNavigate();
+
   return (
-    <div className="login-page">
-      <NavBar />
-      <h2>Login Page</h2>
-      <h3>Welcome to Mnemonic!</h3>
+    <div className="login-page-container">
+      {/* navbar removed */}
+      
+      {/* main heading? */}
+      <h1>Welcome to Mnemonic!</h1>
       <p>
         Mnemonic is a student focused application, intending on helping students
         succeed.
       </p>
       <div className="google-login-wrapper">
-        <button onClick={getSignUpResponse}>Sign in with Google</button>
+        {/* using blue button style */}
+        <button className="google-signin-button" onClick={getSignUpResponse}>
+          Sign in with Google
+        </button>
       </div>
     </div>
   );
