@@ -2,6 +2,14 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    color: #FFFFFF;
-    background-color: #14181C;
+    font-family: "Andale Mono", AndaleMono, monospace;
+}
+
+.page {
+    height: 100vh;
+    width: 100%;
+}
+
+.color-blue {
+    color: #A1B5D8;
 }
