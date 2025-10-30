@@ -58,69 +58,66 @@ function HomePage() {
     };
 
     return (
-        <div className="home-page-with-nav-bar">
-            <NavBar />
-            <div className="home-page">
-                
-                <div className="home-page-left">
-                    <div className="home-page-title">
-                        Tasks
+        <div className="home-page">
+            
+            <div className="home-page-left">
+                <div className="home-page-title">
+                    Tasks
+                </div>
+                <div className="home-page-task-type-cont">
+                    <div className="home-page-task-type">
+                        Name
                     </div>
-                    <div className="home-page-task-type-cont">
-                        <div className="home-page-task-type">
-                            Name
-                        </div>
-                        <div className="home-page-task-type">
-                            Date
-                        </div>
-                    </div>
-                    <div className="home-page-task-cont">
-                        { tasks.map( ( task, i ) => (
-                            <div key={ "home-page-task-" + i } className="home-page-task">
-                                <div className="home-page-task-name">
-                                    { task.name } 
-                                </div>
-                                <div className="home-page-task-date">
-                                    { task.date.length === 5 ? task.date + '\u00A0' : task.date }
-                                </div>
-                            </div>
-                        ) ) }
+                    <div className="home-page-task-type">
+                        Date
                     </div>
                 </div>
-                <div className="home-page-right">
-                    <div className="home-page-title">
-                        { months[ month ] }
-                    </div>
-                    <div className="home-page-week-cont">
-                        <div className="home-page-week">
-                            SUN
-                        </div>
-                        <div className="home-page-week">
-                            MON
-                        </div>
-                        <div className="home-page-week">
-                            TUE
-                        </div>
-                        <div className="home-page-week">
-                            WED
-                        </div>
-                        <div className="home-page-week">
-                            THU
-                        </div>
-                        <div className="home-page-week">
-                            FRI
-                        </div>
-                        <div className="home-page-week">
-                            SAT
-                        </div>
-                    </div>
-                    <div className="home-page-calendar-cont">
-                        { days.map( ( day, i ) => (
-                            <div key={ "calendar-card-" + i } className="home-page-calendar-card">
-                                { day.getDate() == 1 ? abrvMonth( day.getMonth() ) + " " + day.getDate() : day.getDate() }
+                <div className="home-page-task-cont">
+                    { tasks.map( ( task, i ) => (
+                        <div key={ "home-page-task-" + i } className="home-page-task">
+                            <div className="home-page-task-name">
+                                { task.name } 
                             </div>
-                        ) ) }
+                            <div className="home-page-task-date">
+                                { task.date.length === 5 ? task.date + '\u00A0' : task.date }
+                            </div>
+                        </div>
+                    ) ) }
+                </div>
+            </div>
+            <div className="home-page-right">
+                <div className="home-page-title">
+                    { months[ month ] }
+                </div>
+                <div className="home-page-week-cont">
+                    <div className="home-page-week">
+                        SUN
                     </div>
+                    <div className="home-page-week">
+                        MON
+                    </div>
+                    <div className="home-page-week">
+                        TUE
+                    </div>
+                    <div className="home-page-week">
+                        WED
+                    </div>
+                    <div className="home-page-week">
+                        THU
+                    </div>
+                    <div className="home-page-week">
+                        FRI
+                    </div>
+                    <div className="home-page-week">
+                        SAT
+                    </div>
+                </div>
+                <div className="home-page-calendar-cont">
+                    { days.map( ( day, i ) => (
+                        <div key={ "calendar-card-" + i } className="home-page-calendar-card">
+                            { day.getDate() == 1 ? abrvMonth( day.getMonth() ) + " " + day.getDate() : day.getDate() }
+                        </div>
+                    ) ) }
                 </div>
             </div>
         </div>
