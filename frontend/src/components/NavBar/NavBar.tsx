@@ -11,11 +11,11 @@ function NavBar() {
     const navigate = useNavigate();
 
     const handleClick = ( text: string ) => {
-        setClickedButton( text );
         if ( text === "Home" )
             navigate( "/" );
         if ( text === "Tasks" )
             navigate( "/tasks" );
+        setClickedButton( text );
     };
 
     return (
