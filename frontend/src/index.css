@@ -2,6 +2,9 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    color: #FFFFFF;
-    background-color: #14181C;
+    font-family: "Andale Mono", AndaleMono, monospace;
+}
+
+.color-blue {
+    color: #A1B5D8;
 }

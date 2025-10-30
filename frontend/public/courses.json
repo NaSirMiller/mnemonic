@@ -1,0 +1,42 @@
+{
+  "courses": [
+    {
+      "name": "Software Design and Documentation",
+      "currentGrade": 94.25,
+      "gradeTypes": {
+        "Tests": 35.0,
+        "Projects": 40.0,
+        "Presentations": 15.0,
+        "Homework": 10.0
+      }
+    },
+    {
+      "name": "Data Structures",
+      "currentGrade": 96.0,
+      "gradeTypes": {
+        "Projects": 50.0,
+        "Tests": 25.0,
+        "Presentations": 25.0
+      }
+    },
+    {
+      "name": "Intro to Computer Science",
+      "currentGrade": 89.75,
+      "gradeTypes": {
+        "Homework": 25.0,
+        "Quizzes": 25.0,
+        "Projects": 30.0,
+        "Tests": 20.0
+      }
+    },
+    {
+      "name": "Computer Architecture and Operating Systems",
+      "currentGrade": 98.56,
+      "gradeTypes": {
+        "Tests": 39.75,
+        "Projects": 30.25,
+        "Presentations": 15.0
+      }
+    }
+  ]
+}
