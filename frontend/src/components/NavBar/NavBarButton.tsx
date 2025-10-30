@@ -10,7 +10,7 @@ function NavBarButton( { text, focused, onClick }: NavBarButtonProps ) {
     return (
         <div
             className={ `navbar-button-cont ${ focused ? "focused" : "" }` }
-            onClick={onClick}
+            onClick={ onClick }
         >
             { text }
 
