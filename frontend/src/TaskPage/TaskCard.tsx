@@ -17,7 +17,7 @@ function TaskCard( { name, course, grade, dueDate, timeSpent, checked, onClick }
                 { course }
             </div>
             <div className="task-card-grade">
-                { grade }
+                { grade ? grade + "%" : "" }
             </div>
             <div className="task-card-time-spent">
                 { timeSpent }

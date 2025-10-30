@@ -1,7 +1,7 @@
 .task-page {
     box-sizing: border-box;
     width: 100%;
-    min-height: 100vh;
+    min-height: calc( 100vh - 70px );
     padding: 70px 5%;
 
     background-color: #2A2A2A;
@@ -9,6 +9,10 @@
 }
 ::-webkit-scrollbar {
     display: none;
+}
+.task-page-with-navbar {
+    width: 100%;
+    min-height: 100vh;
 }
 
 /* all courses info */
@@ -119,6 +123,9 @@
     border-radius: 10px;
     background-color: #343434;
 }
+.task-page-course:hover {
+    cursor: pointer;
+}
 .task-page-course.selected {
     background-color: #2F4872;
 }
@@ -141,6 +148,8 @@
     flex-direction: row;
     justify-content: space-around;
     gap: 20px;
+
+    user-select: none;
 }
 .task-page-task-label-checkbox { height: 25px; width: 25px; }
 .task-page-task-label-name { flex: 5; }
