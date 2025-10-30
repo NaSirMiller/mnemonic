@@ -1,12 +1,7 @@
-.home-page-with-nav-bar {
-    width: 100%;
-    height: 100vh;
-    box-sizing: border-box;
-}
 .home-page {
     box-sizing: border-box;
     width: 100%;
-    height: calc( 100% - 70px );
+    height: calc( 100vh - 70px );
     padding: 70px 5%;
 
     display: grid;
