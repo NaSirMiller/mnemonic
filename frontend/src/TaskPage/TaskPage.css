@@ -10,6 +10,13 @@
 ::-webkit-scrollbar {
     display: none;
 }
+<<<<<<< HEAD
+=======
+.task-page-with-navbar {
+    width: 100%;
+    min-height: 100vh;
+}
+>>>>>>> 7ca0032843adc16fd489f3bcda3050ce8694ba9e
 
 /* all courses info */
 .task-page-profile-cont {
