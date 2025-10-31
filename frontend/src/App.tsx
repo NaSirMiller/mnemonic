@@ -1,12 +1,10 @@
 import "./index.css";
-
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-// import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import TaskPage from "./TaskPage/TaskPage.tsx";
 import HomePage from "./HomePage/HomePage.tsx";
 import NavBar from "./components/NavBar/NavBar.tsx";
+import { AuthProvider } from "./context/AuthContext"; 
 
 function Layout() {
     return (
@@ -37,9 +35,11 @@ const appRouter = createBrowserRouter([
 ]);
 
 function App() {
-    return <RouterProvider router={appRouter} />;
-    // return <FrontEndHomePage />;
-    // return <TaskPage />;
+    return (
+        <AuthProvider>
+            <RouterProvider router={appRouter} />
+        </AuthProvider>
+    );
 }
 
 export default App;

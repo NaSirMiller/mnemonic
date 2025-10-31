@@ -4,6 +4,9 @@ import {
   GoogleAuthProvider,
   setPersistence,
   browserLocalPersistence,
+  signInWithPopup,
+  type UserCredential,
+  OAuthCredential,
 } from "firebase/auth";
 
 const {
@@ -26,11 +29,32 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const firebaseAuth = getAuth(firebaseApp);
-const googleProvider = new GoogleAuthProvider();
 
-setPersistence(firebaseAuth, browserLocalPersistence)
-  .catch(error => {
-    console.error("Error setting Firebase auth persistence:", error);
-  });
+// Request full calendar access (read + write)
+const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope("https://www.googleapis.com/auth/calendar");
+
+setPersistence(firebaseAuth, browserLocalPersistence).catch((error) => {
+  console.error("Error setting Firebase auth persistence:", error);
+});
+
+export async function signInWithGoogle(): Promise<{
+  userCredential?: UserCredential;
+  googleAccessToken?: string | null;
+  error?: unknown;
+}> {
+  try {
+    const userCredential = await signInWithPopup(firebaseAuth, googleProvider);
+    const oauthCredential = GoogleAuthProvider.credentialFromResult(
+      userCredential
+    ) as OAuthCredential | null;
+
+    const accessToken = oauthCredential?.accessToken ?? null;
+    return { userCredential, googleAccessToken: accessToken };
+  } catch (error) {
+    console.error("Google sign-in failed:", error);
+    return { error };
+  }
+}
 
 export { firebaseApp, firebaseAuth, googleProvider };
