@@ -1,4 +1,4 @@
-import admin from "firebase-admin";
+import admin from "../firebase_admin";
 import { Task, TaskModel, TaskUpdate } from "../models/task";
 
 export class FirebaseRepository {

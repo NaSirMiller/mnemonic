@@ -9,5 +9,5 @@ export const tasksRouter = Router();
 
 tasksRouter.post("/", createUserTask);
 tasksRouter.get("/:userId", getUserTasks);
-tasksRouter.put("/:userId", updateUserTask);
+tasksRouter.put("/:userId/:taskId", updateUserTask);
 tasksRouter.delete("/:userId/:taskId", deleteUserTask);

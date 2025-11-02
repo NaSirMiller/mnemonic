@@ -1,10 +1,11 @@
-const request = require("supertest");
+/// <reference types="mocha" />
+require("../setupTests");
+import request from "supertest";
 import { expect } from "chai";
 import { config } from "dotenv";
-import { describe, it } from "node:test";
-import { Task, TaskUpdate } from "../src/models/task";
+const app = require("../../src/app");
+import { Task, TaskUpdate } from "../../src/models/task";
 config();
-const app = require("../src/index");
 
 function checkTaskFormatFromResponse(t: Record<string, unknown>): void {
   expect(t).to.have.property("userId").that.is.a("string");
@@ -56,6 +57,7 @@ function checkTaskFormatFromResponse(t: Record<string, unknown>): void {
     .to.be.true;
 }
 
+console.log("✅ test file loaded");
 describe("Tasks API", () => {
   let mockTaskPayload: Task;
   let mockTaskUpdatePayload: TaskUpdate;
@@ -123,22 +125,18 @@ describe("Tasks API", () => {
     };
   });
 
-  beforeEach(() => {
-    async () => {
-      const response = await request(app)
-        .post("/tasks")
-        .send(mockTaskPayload)
-        .expect(200);
-      validTaskId = response.body.task.id; // capture the real generated id
-    };
+  beforeEach(async () => {
+    const response = await request(app)
+      .post("/tasks")
+      .send(mockTaskPayload)
+      .expect(200);
+    validTaskId = response.body.task.id;
   });
 
-  afterEach(() => {
-    async () => {
-      await request(app)
-        .delete(`/tasks/${validUserId}?taskId=${validTaskId}`)
-        .expect(200);
-    };
+  afterEach(async () => {
+    await request(app)
+      .delete(`/tasks/${validUserId}?taskId=${validTaskId}`)
+      .expect(200);
   });
 
   // --- CREATE ---
@@ -294,3 +292,18 @@ describe("Tasks API", () => {
     });
   });
 });
+
+// /// <reference types="mocha" />
+// import { strict as assert } from "assert";
+// // const request = require("supertest");
+// import { expect } from "chai";
+// import { config } from "dotenv";
+// import app from "../../src/app";
+// import { Task, TaskUpdate } from "../../src/models/task";
+// config();
+
+// describe("Tasks API", function () {
+//   it("should return all tasks", function () {
+//     assert.equal(1 + 1, 2);
+//   });
+// });
