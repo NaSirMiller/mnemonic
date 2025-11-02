@@ -48,13 +48,26 @@ export class FirebaseRepository {
   }
 
   async createTask(task: Task): Promise<Task> {
-    const docRef = await this.db.collection("tasks").add(task);
+    let validatedTask;
+    try {
+      validatedTask = new TaskModel(task);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    const docRef = await this.db
+      .collection("tasks")
+      .add(validatedTask.toJson());
+
     const newDoc = await docRef.get();
     const firestoreDocData = newDoc.data() as Task;
-    let newTask = TaskModel.fromJson({
+
+    const newTask = TaskModel.fromJson({
       ...firestoreDocData,
       taskId: newDoc.id,
     });
+
     return newTask.toJson();
   }
 
