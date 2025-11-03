@@ -1,6 +1,7 @@
 import admin from "../firebase_admin";
 import { Task, TaskModel, TaskUpdate } from "../models/task";
 import { User, UserModel, UserUpdate } from "../models/user";
+import { google } from "googleapis";
 
 export class FirebaseRepository {
   private db = admin.firestore();
@@ -171,6 +172,34 @@ export class FirebaseRepository {
 
     await userRef.delete();
   }
+  async refreshAccessToken(userId: string): Promise<string> {
+    const userDoc = await this.db.collection("users").doc(userId).get();
+    if (!userDoc.exists) throw new Error("User not found");
+
+    const data = userDoc.data();
+    if (!data) throw new Error("No user data found in Firestore document");
+
+    // Include the document ID explicitly
+    const userData = UserModel.fromJson({
+      ...data,
+      userId: userDoc.id,
+    });
+
+    const refreshToken = userData.refreshToken;
+    if (!refreshToken) throw new Error("No refresh token stored for user");
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+    const { credentials } = await oauth2Client.refreshAccessToken();
+    if (!credentials.access_token) throw new Error("Failed to get access token");
+
+    return credentials.access_token;
+  }
+
 }
 
 

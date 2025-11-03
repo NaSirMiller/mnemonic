@@ -73,6 +73,7 @@ function TaskPage() {
   };
 
   // Fetch Google Calendar events
+  //DDEELETE ME!
   useEffect(() => {
     if (!accessToken) return;
 
@@ -99,6 +100,7 @@ function TaskPage() {
 
     fetchCalendarEvents();
   }, [accessToken]);
+  //END DELETE
 
   return (
     <div className="task-page">

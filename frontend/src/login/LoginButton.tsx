@@ -1,10 +1,10 @@
-// src/components/LoginButton.tsx
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { signInWithGoogle, LoginError } from "./Login";
 
 export const LoginButton = () => {
   const { setUid, setAccessToken } = useAuth();
-
+  const [,setIsAuthorized] = useState<boolean | null>(null);
   const handleGoogleLogin = async () => {
     try {
       const { user, googleAccessToken } = await signInWithGoogle();
@@ -12,7 +12,7 @@ export const LoginButton = () => {
       // Store UID and access token in context
       setUid(user.uid);
       setAccessToken(googleAccessToken);
-
+      setIsAuthorized(true);
       console.log("Login successful", user.uid, googleAccessToken);
     } catch (error) {
       if (error instanceof LoginError) {
