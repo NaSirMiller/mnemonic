@@ -1,11 +1,9 @@
-import NavBar from "../components/NavBar/NavBar";
 import "../style.css";
 import { LoginButton } from "../login/LoginButton"; // import the login button component
 
 export function LoginPage() {
   return (
     <div className="login-page">
-      <NavBar />
       <h2>Login Page</h2>
       <h3>Welcome to Mnemonic!</h3>
       <p>

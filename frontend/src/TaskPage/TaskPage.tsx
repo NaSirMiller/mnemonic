@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import TaskCard from "./TaskCard";
 import "./TaskPage.css";
-import NavBar from "../components/NavBar/NavBar";
 import { useAuth } from "../context/AuthContext"; // adjust path if needed
 
 function TaskPage() {
@@ -103,7 +102,6 @@ function TaskPage() {
 
   return (
     <div className="task-page">
-      <NavBar />
       <div className="task-page-profile-cont">
         <img
           src="/images/profile.png"

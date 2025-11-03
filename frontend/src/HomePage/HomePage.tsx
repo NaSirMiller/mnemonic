@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "./HomePage.css";
-import NavBar from "../components/NavBar/NavBar";
 
 function HomePage() {
     const tasks = [
