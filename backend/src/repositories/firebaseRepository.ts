@@ -1,5 +1,6 @@
 import admin from "../firebase_admin";
 import { Task, TaskModel, TaskUpdate } from "../models/task";
+import { User, UserModel, UserUpdate } from "../models/user";
 
 export class FirebaseRepository {
   private db = admin.firestore();
@@ -112,6 +113,65 @@ export class FirebaseRepository {
 
     await taskRef.update(data);
   }
+  
+  async createUser(user: User): Promise<User> {
+    let validatedUser: UserModel;
+    try {
+      validatedUser = new UserModel(user);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    const docRef = this.db.collection("users").doc(validatedUser.userId);
+    await docRef.set(validatedUser.toJson());
+
+    const newDoc = await docRef.get();
+    const firestoreDocData = newDoc.data() as User;
+
+    const newUser = UserModel.fromJson({
+      ...firestoreDocData,
+      userId: newDoc.id,
+    });
+
+    return newUser.toJson();
+  }
+
+  async getUser(userId: string): Promise<User> {
+    const doc = await this.db.collection("users").doc(userId).get();
+    if (!doc.exists) {
+      throw new Error("User not found");
+    }
+
+    const data = doc.data() as User;
+    return UserModel.fromJson(data).toJson();
+  }
+
+  async updateUser(userId: string, data: UserUpdate): Promise<void> {
+    const userRef = this.db.collection("users").doc(userId);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      throw new Error("User not found");
+    }
+
+    const docData = doc.data() as User;
+    UserModel.fromJson({ ...docData, ...data }).toJson();
+
+    await userRef.update(data);
+  }
+
+  async deleteUser(userId: string): Promise<void> {
+    const userRef = this.db.collection("users").doc(userId);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      throw new Error("User not found");
+    }
+
+    await userRef.delete();
+  }
 }
+
 
 export const firebaseRepo = new FirebaseRepository();
