@@ -15,12 +15,16 @@ export async function signInWithGoogle(): Promise<{
   user: User;
   idToken: string;
   googleAccessToken: string | null;
+  googleIdToken: string | null;
 }> {
   try {
+    // Add scopes and force consent
     googleProvider.addScope("https://www.googleapis.com/auth/calendar");
     googleProvider.addScope("email");
     googleProvider.addScope("profile");
+    googleProvider.setCustomParameters({ prompt: "consent" }); 
 
+    // Sign in via popup
     const userCredentials = await signInWithPopup(firebaseAuth, googleProvider);
     const user: User = userCredentials.user;
 
@@ -28,11 +32,15 @@ export async function signInWithGoogle(): Promise<{
       throw new LoginError("User not found upon Google sign-in!", "auth/user-not-found");
     }
 
+    // Firebase ID token
     const idToken = await user.getIdToken();
+
+    // Google OAuth credentials from Firebase (access token only)
     const credential = GoogleAuthProvider.credentialFromResult(userCredentials);
     const googleAccessToken = credential?.accessToken ?? null;
+    const googleIdToken = credential?.idToken ?? null;
 
-    // Backend verification
+    // Verify ID token with backend
     const verificationResponse = await fetch(
       "http://localhost:5000/api/auth/verifyIdToken",
       {
@@ -43,12 +51,14 @@ export async function signInWithGoogle(): Promise<{
     );
 
     const verificationResult = await verificationResponse.json();
-
     if (!verificationResult.validUser) {
       throw new LoginError("User could not be verified by backend", "auth/verification-failed");
     }
 
-    return { user, idToken, googleAccessToken };
+    // redirect to backend endpoint to exchange for refresh token 
+    window.location.href = `http://localhost:5000/api/auth/google/connect?userId=${user.uid}`;
+
+    return { user, idToken, googleAccessToken, googleIdToken };
   } catch (error: unknown) {
     if (error instanceof FirebaseError) {
       console.error("Google Sign-In Error:", error.code, error.message);

@@ -152,14 +152,14 @@ export class FirebaseRepository {
     const doc = await userRef.get();
 
     if (!doc.exists) {
-      throw new Error("User not found");
+      // If user doesn't exist, create it with the given data
+      await userRef.set(data);
+      return;
     }
-
-    const docData = doc.data() as User;
-    UserModel.fromJson({ ...docData, ...data }).toJson();
 
     await userRef.update(data);
   }
+
 
   async deleteUser(userId: string): Promise<void> {
     const userRef = this.db.collection("users").doc(userId);
