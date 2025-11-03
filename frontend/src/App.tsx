@@ -1,6 +1,6 @@
 import "./index.css";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage } from "./login/LoginPage.tsx";
 import TaskPage from "./TaskPage/TaskPage.tsx";
 import HomePage from "./HomePage/HomePage.tsx";
 import NavBar from "./components/NavBar/NavBar.tsx";

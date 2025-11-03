@@ -26,6 +26,10 @@ service cloud.firestore {
                    data.timeSpent is int && // Total amount of time spent towards the task
                    (data.priority is int || data.priority == null) // Task priority
         }
+        function isValidUser(data) {
+            return data.userId is string &&
+                (data.refreshToken is string || data.refreshToken == null);
+        }
 
         // --- Global Defaults ---
         allow read: if false; // no public reads unless specified
@@ -63,5 +67,16 @@ service cloud.firestore {
             allow delete: if request.auth != null &&
                             request.auth.uid == resource.data.userId;
                }
+        // --- Users ---
+        match /users/{userId} {
+            allow read: if request.auth != null &&
+                        request.auth.uid == userId &&
+                        !("refreshToken" in resource.data); // clients cannot read refreshToken
+            allow create, update: if request.auth != null &&
+                                request.auth.uid == request.resource.data.userId &&
+                                isValidUser(request.resource.data);
+            allow delete: if request.auth != null &&
+                        request.auth.uid == resource.data.userId;
+        }
     }
 }
