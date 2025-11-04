@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext"; // adjust path
+import { useAuth } from "../context/AuthContext";
 import "./HomePage.css";
 
 function HomePage() {
     const { accessToken } = useAuth();
 
+    // Local hardcoded tasks
     const tasks = [
         { name: "Homework 1", date: "Nov 1" },
         { name: "Homework 2", date: "Nov 2" },
@@ -36,6 +37,7 @@ function HomePage() {
 
     const [days, setDays] = useState<Date[]>([]);
     const [month, setMonth] = useState(new Date().getMonth());
+    const [events, setEvents] = useState<any[]>([]);
     const months = [
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
@@ -60,14 +62,20 @@ function HomePage() {
 
     const abrvMonth = (monthIndex: number) => months[monthIndex].slice(0, 3);
 
+    const getDateKey = (date: Date) => date.toISOString().split("T")[0];
+
     // Fetch Google Calendar events
     useEffect(() => {
         if (!accessToken) return;
 
         const fetchCalendarEvents = async () => {
             try {
+                const now = new Date();
+                const timeMin = new Date(now.getFullYear(), month, 1).toISOString();
+                const timeMax = new Date(now.getFullYear(), month + 1, 0).toISOString();
+
                 const response = await fetch(
-                    "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                    `https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin}&timeMax=${timeMax}&singleEvents=true&orderBy=startTime`,
                     {
                         headers: {
                             Authorization: `Bearer ${accessToken}`,
@@ -76,22 +84,31 @@ function HomePage() {
                     }
                 );
 
-                if (!response.ok) {
-                    throw new Error(`Error fetching events: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Error fetching events: ${response.statusText}`);
 
                 const data = await response.json();
-                console.log("Google Calendar Events:", data.items);
+                setEvents(data.items || []);
             } catch (error) {
                 console.error("Failed to fetch Google Calendar events:", error);
             }
         };
 
         fetchCalendarEvents();
-    }, [accessToken]);
+    }, [accessToken, month]);
+
+    // Group events by date
+    const eventsByDate: Record<string, any[]> = {};
+    events.forEach((event) => {
+        const startDateStr = event.start?.date || event.start?.dateTime?.split("T")[0];
+        if (startDateStr) {
+            if (!eventsByDate[startDateStr]) eventsByDate[startDateStr] = [];
+            eventsByDate[startDateStr].push(event);
+        }
+    });
 
     return (
         <div className="home-page">
+            {/* LEFT SIDE — TASK LIST */}
             <div className="home-page-left">
                 <div className="home-page-title">Tasks</div>
                 <div className="home-page-task-type-cont">
@@ -100,29 +117,42 @@ function HomePage() {
                 </div>
                 <div className="home-page-task-cont">
                     {tasks.map((task, i) => (
-                        <div key={"home-page-task-" + i} className="home-page-task">
+                        <div key={"task-" + i} className="home-page-task">
                             <div className="home-page-task-name">{task.name}</div>
-                            <div className="home-page-task-date">
-                                {task.date.length === 5 ? task.date + '\u00A0' : task.date}
-                            </div>
+                            <div className="home-page-task-date">{task.date}</div>
                         </div>
                     ))}
                 </div>
             </div>
 
+            {/* RIGHT SIDE — CALENDAR */}
             <div className="home-page-right">
-                <div className="home-page-title">{months[month]}</div>
+                <div className="home-page-title">Calendar</div>
                 <div className="home-page-week-cont">
                     {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
                         <div key={day} className="home-page-week">{day}</div>
                     ))}
                 </div>
                 <div className="home-page-calendar-cont">
-                    {days.map((day, i) => (
-                        <div key={"calendar-card-" + i} className="home-page-calendar-card">
-                            {day.getDate() === 1 ? abrvMonth(day.getMonth()) + " " + day.getDate() : day.getDate()}
-                        </div>
-                    ))}
+                    {days.map((day, i) => {
+                        const dayKey = getDateKey(day);
+                        const dayEvents = eventsByDate[dayKey] || [];
+
+                        return (
+                            <div key={"calendar-card-" + i} className="home-page-calendar-card">
+                                <div className="home-page-date-label">
+                                    {day.getDate() === 1
+                                        ? abrvMonth(day.getMonth()) + " " + day.getDate()
+                                        : day.getDate()}
+                                </div>
+                                {dayEvents.map((event, j) => (
+                                    <div key={j} className="calendar-event">
+                                        {event.summary || "Untitled Event"}
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </div>
