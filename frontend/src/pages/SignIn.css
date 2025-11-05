@@ -1,0 +1,32 @@
+.login-page {
+    padding-top: 70px;
+    background-color: #2a2a2a;
+    color: white;
+    text-align: center;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+}
+
+h2 {
+    font-size: 64px;
+}
+
+h3 {
+    font-size: 48px;
+}
+
+p {
+    font-size: 24px;
+}
+
+button {
+    padding: 15px 30px;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    background-color: #2F4872;
+}

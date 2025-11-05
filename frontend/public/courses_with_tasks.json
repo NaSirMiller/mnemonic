@@ -15,21 +15,21 @@
           "timeSpent": { "completed": "10h 30m", "estimated": "28h 30m" },
           "dueDate": "2025-10-08T08:00:00Z",
           "grade": 92,
-          "gradeType": "Project"
+          "gradeType": "Projects"
         },
         {
           "taskName": "2s Complex Exam",
           "timeSpent": { "completed": "3h 30m", "estimated": "5h" },
           "dueDate": "2025-11-01T09:00:00Z",
           "grade": 88,
-          "gradeType": "Test"
+          "gradeType": "Tests"
         },
         {
           "taskName": "Cane Project",
           "timeSpent": { "completed": "5h", "estimated": "20h" },
           "dueDate": "2025-10-08T08:00:00Z",
           "grade": 95,
-          "gradeType": "Project"
+          "gradeType": "Projects"
         }
       ]
     },
@@ -47,7 +47,7 @@
           "timeSpent": { "completed": "3h", "estimated": "3h" },
           "dueDate": "2025-10-20T09:00:00Z",
           "grade": 99,
-          "gradeType": "Test"
+          "gradeType": "Tests"
         }
       ]
     },
@@ -66,7 +66,7 @@
           "timeSpent": { "completed": "2h", "estimated": "4h" },
           "dueDate": "2025-10-12T21:30:00Z",
           "grade": 90,
-          "gradeType": "Presentation"
+          "gradeType": "Projects"
         },
         {
           "taskName": "Homework 6",
@@ -80,7 +80,7 @@
           "timeSpent": { "completed": "0h", "estimated": "6h" },
           "dueDate": "2025-12-15T10:00:00Z",
           "grade": null,
-          "gradeType": "Test"
+          "gradeType": "Tests"
         }
       ]
     },
@@ -98,14 +98,14 @@
           "timeSpent": { "completed": "4h 15m", "estimated": "10h" },
           "dueDate": "2025-11-10T13:00:00Z",
           "grade": 94,
-          "gradeType": "Project"
+          "gradeType": "Projects"
         },
         {
           "taskName": "Linux Operating System Imitation and Virtual Machines in C#",
           "timeSpent": { "completed": "0h", "estimated": "12h" },
           "dueDate": "2025-12-25T13:00:00Z",
           "grade": null,
-          "gradeType": "Project"
+          "gradeType": "Projects"
         }
       ]
     }
