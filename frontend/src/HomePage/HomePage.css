@@ -25,7 +25,7 @@
     border: 3px solid #FFFFFF30;
 }
 .home-page-title {
-    font-size: 64px;
+    font-size: 48px;
     font-weight: bold;
 }
 .home-page-task-type-cont {
@@ -35,7 +35,7 @@
     justify-content: space-between;
 }
 .home-page-task-type {
-    font-size: 32px;
+    font-size: 28px;
 }
 
 .home-page-task-cont {
@@ -45,7 +45,7 @@
 
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 
     overflow-y: auto;
     scrollbar-width: none;
@@ -61,7 +61,7 @@
     min-width: 0;
     padding: 0 30px;
 
-    font-size: 24px;
+    font-size: 20px;
 
     border-radius: 10px;
     background-color: #525252;
@@ -104,12 +104,14 @@
     justify-content: space-around;
 }
 .home-page-week {
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .home-page-calendar-cont {
     height: 100%;
     width: 100%;
+
+    font-size: 18px;
     
     display: grid;
     grid-template-columns: repeat(7, 1fr);
