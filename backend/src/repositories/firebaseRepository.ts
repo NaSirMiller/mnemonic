@@ -1,5 +1,4 @@
 import admin from "firebase-admin";
-import { Task, TaskModel, TaskUpdate } from "../models/task";
 import { Course, CourseModel, CourseUpdate} from "../models/course"
 
 export class FirebaseRepository {
@@ -21,97 +20,15 @@ export class FirebaseRepository {
   }
 
 
-  async getAllUserTasks(userId: string): Promise<Task[]> {
-    const snapshot = await this.db
-      .collection("tasks")
-      .where("userId", "==", userId)
-      .get();
-    let docAsTask: Task;
-    return snapshot.docs.map((doc) => {
-      docAsTask = doc.data() as Task;
-      const task = TaskModel.fromJson({ ...docAsTask, taskId: doc.id });
-      return task.toJson();
-    });
-  }
-
-  async getSingleUserTask(userId: string, taskId: string): Promise<Task> {
-    const doc = await this.db.collection("tasks").doc(taskId).get();
-    if (!doc.exists) {
-      throw new Error("Task not found");
-    }
-
-    const data = doc.data() as Task;
-    if (data?.userId !== userId) {
-      throw new Error("Unauthorized: user does not own this task");
-    }
-    let docAsTask: Task = data as Task;
-    const task = TaskModel.fromJson({ ...docAsTask, taskId: doc.id });
-    return task.toJson();
-  }
-
-  async createTask(task: Task): Promise<Task> {
-    const docRef = await this.db.collection("tasks").add(task);
-    const newDoc = await docRef.get();
-    const firestoreDocData = newDoc.data() as Task;
-    let newTask = TaskModel.fromJson({
-      ...firestoreDocData,
-      taskId: newDoc.id,
-    });
-    return newTask.toJson();
-  }
-
-  async deleteTask(userId: string, taskId: string): Promise<void> {
-    const taskRef = this.db.collection("tasks").doc(taskId);
-    const doc = await taskRef.get();
-
-    if (!doc.exists) {
-      throw new Error("Task not found");
-    }
-
-    const data = doc.data();
-    if (data?.userId !== userId) {
-      throw new Error("Unauthorized: user does not own this task");
-    }
-
-    await taskRef.delete();
-  }
-
-  async updateTask(
-    userId: string,
-    taskId: string,
-    data: TaskUpdate
-  ): Promise<void> {
-    const taskRef = this.db.collection("tasks").doc(taskId);
-    const doc = await taskRef.get();
-
-    if (!doc.exists) {
-      throw new Error("Task not found");
-    }
-
-    const docData = doc.data() as Task | undefined;
-    if (!docData || docData.userId !== userId) {
-      throw new Error("Unauthorized: user does not own this task");
-    }
-
-    // Validate the update using TaskModel
-    TaskModel.fromJson({
-      ...docData,
-      ...data,
-    }).toJson();
-
-    await taskRef.update(data);
-  }
-
-
-
-
-
-
-  async getAllCourses(userId: string): Promise<Task[]> {
+  async getAllCourses(userId: string): Promise<Course[]> {
     const snapshot = await this.db
       .collection("courses")
       .where("userId", "==", userId)
       .get();
+    if (snapshot.size < 1) {
+      console.log(snapshot.size);
+      throw new Error("Courses not found");
+    }
     let docAsCourse: Course;
     return snapshot.docs.map((doc) => {
       docAsCourse = doc.data() as Course;
@@ -120,10 +37,10 @@ export class FirebaseRepository {
     });
   }
 
-  async getSingleCourse(userId: string, courseName: string): Promise<Course> {
-    const doc = await this.db.collection("courses").doc(courseName).get();
+  async getSingleCourse(userId: string, courseId: string): Promise<Course> {
+    const doc = await this.db.collection("courses").doc(courseId).get();
     if (!doc.exists) {
-      throw new Error("Task not found");
+      throw new Error("Course not found");
     }
 
     const data = doc.data() as Course;
@@ -131,23 +48,41 @@ export class FirebaseRepository {
       throw new Error("Unauthorized: user does not own this course");
     }
     let docAsCourse: Course = data as Course;
-    const task = CourseModel.fromJson({ ...docAsCourse});
-    return task.toJson();
+    const course = CourseModel.fromJson({ ...docAsCourse});
+    return course.toJson();
   }
 
   async createCourse(course: Course): Promise<Course> {
-    const docRef = await this.db.collection("courses").add(course);
+    let validatedCourse;
+    try {
+      validatedCourse = new CourseModel(course);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+
+    const exists = await this.db.collection("courses").doc(course.courseId).get();
+    if (exists.exists){
+      throw new Error("Course already exists");
+    }
+    const docRef = await this.db
+      .collection("courses")
+      .add(validatedCourse.toJson());
+
     const newDoc = await docRef.get();
     const firestoreDocData = newDoc.data() as Course;
-    let newTask = CourseModel.fromJson({
-      ...firestoreDocData
+
+    const newTask = CourseModel.fromJson({
+      ...firestoreDocData,
+      courseId: newDoc.id,
     });
+
     return newTask.toJson();
   }
 
-  async deleteCourse(userId: string, courseName: string): Promise<void> {
-    const taskRef = this.db.collection("courses").doc(courseName);
-    const doc = await taskRef.get();
+  async deleteCourse(userId: string, courseId: string): Promise<void> {
+    const courseRef = this.db.collection("courses").doc(courseId);
+    const doc = await courseRef.get();
 
     if (!doc.exists) {
       throw new Error("Course not found");
@@ -158,19 +93,20 @@ export class FirebaseRepository {
       throw new Error("Unauthorized: user does not own this course");
     }
 
-    await taskRef.delete();
+    await courseRef.delete();
   }
 
   async updateCourse(
     userId: string,
-    courseName: string,
+    courseId: string,
     data: CourseUpdate
   ): Promise<void> {
-    const courseRef = this.db.collection("courses").doc(courseName);
+    console.log(courseId)
+    const courseRef = this.db.collection("courses").doc(courseId);
     const doc = await courseRef.get();
 
     if (!doc.exists) {
-      throw new Error("Task not found");
+      throw new Error("Course not found");
     }
 
     const docData = doc.data() as Course | undefined;

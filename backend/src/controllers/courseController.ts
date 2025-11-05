@@ -1,18 +1,16 @@
 import { Request, Response } from "express";
-
-import admin from "../firebase_admin";
 import { firebaseRepo } from "../repositories/firebaseRepository";
 import { Course } from "../models/course";
 
 export async function getCourse (request: Request, response: Response){
-    const {userID} = request.params
-    const coursename: string | undefined = request.query.coursename as string | undefined;
+    const {userId} = request.params;
+    const courseId: string | undefined = request.query.courseId as string | undefined;
     let coursesRetrieved: Course[];
     try{
-        if (coursename == undefined){
-            coursesRetrieved = await firebaseRepo.getAllCourses(userID);
+        if (courseId == undefined){
+            coursesRetrieved = await firebaseRepo.getAllCourses(userId);
         } else {
-            let course: Course = await firebaseRepo.getSingleCourse(userID, coursename);
+            let course: Course = await firebaseRepo.getSingleCourse(userId, courseId);
             coursesRetrieved = [course];
         }
     } catch (err) {
@@ -30,12 +28,17 @@ export async function getCourse (request: Request, response: Response){
         message: "Successfully retrieved courses",
         courses: coursesRetrieved
     });
-};
+}
+
 export async function createCourse (request: Request, response: Response){
     const coursePayload = request.body;
     let createdCourse: Course;
     try{
-        createdCourse = await firebaseRepo.createCourse(coursePayload as Course)
+        createdCourse = await firebaseRepo.createCourse(coursePayload as Course);
+        return response.json({
+            message: "Successfully created a course",
+            course: createdCourse
+        }).status(200);
     } catch (err) {
         let errorMessage: string;
         if (err instanceof Error) {
@@ -47,15 +50,13 @@ export async function createCourse (request: Request, response: Response){
         console.log(errorMessage);
         return response.json({ message: errorMessage }).status(400);
     }
-    return response.json({
-        message: "Successfully created a course",
-        course: createdCourse
-    }).status(200);
+    
 };
+//Needs to be updated to change the current grade and grade types
 export async function updateCourse (request: Request, response: Response){
-    const {userID, courseName, coursePayload} = request.body;
+    const {userId, courseId, courseName} = request.body;
     try{
-        await firebaseRepo.updateCourse(userID, courseName, coursePayload as Course);
+        await firebaseRepo.updateCourse(userId, courseId, request.body as Course);
     } catch (err) {
         let errorMessage: string;
         if (err instanceof Error) {
@@ -74,9 +75,10 @@ export async function updateCourse (request: Request, response: Response){
     .status(200);
 };
 export async function deleteCourse (request: Request, response: Response){
-     const { userId, courseName } = request.params;
+     const { userId, courseId } = request.params;
     try{
-        firebaseRepo.deleteCourse(userId, courseName);
+        firebaseRepo.deleteCourse(userId, courseId);
+        return response.json({ message: `Successfully deleted course ${courseId}` }).status(200);
     } catch (err) {
         let errorMessage: string;
         if (err instanceof Error) {
@@ -88,7 +90,5 @@ export async function deleteCourse (request: Request, response: Response){
         console.log(errorMessage);
         return response.json({ message: errorMessage }).status(400);
     }
-    return response
-    .json({ message: `Successfully deleted course ${courseName}` })
-    .status(200);
+    
 };

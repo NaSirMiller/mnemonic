@@ -2,9 +2,9 @@ import { Router } from "express";
 
 import { getCourse, createCourse, deleteCourse, updateCourse } from "../controllers/courseController";
 
-export const authRouter = Router();
+export const courseRouter = Router();
 
-authRouter.post("/", createCourse);
-authRouter.get("/:userId", getCourse);
-authRouter.put("/:userId", updateCourse);
-authRouter.delete("/:userId/:coursename", deleteCourse)
+courseRouter.post("/", createCourse);
+courseRouter.get("/:userId", getCourse);
+courseRouter.put("/:userId", updateCourse);
+courseRouter.delete("/:userId/:courseId", deleteCourse)

@@ -1,6 +1,8 @@
 export interface Course {
     userId: string;
+    courseId: string;
     courseName: string;
+    currentGrade: number;
 }
 
 export type CourseUpdate = Partial<Course>;
@@ -8,14 +10,17 @@ export type CourseUpdate = Partial<Course>;
 export class CourseModel implements Course {
     userId: string;
     courseName: string;
+    currentGrade: number;
+    courseId: string;
 
     constructor(data: Course | CourseUpdate){
         if (CourseModel._isFullCourse(data)) {
             this._validateCourse(data);
         }
-
         this.userId! = data.userId!;
+        this.courseId! = data.courseId!;
         this.courseName! = data.courseName!;
+        this.currentGrade! = 0;
     }
 
     private static _isFullCourse(data: Course | CourseUpdate): data is Course {
@@ -31,14 +36,18 @@ export class CourseModel implements Course {
     public toJson(): Course {
         return {
             userId: this.userId,
+            courseId: this.courseId,
             courseName: this.courseName,
+            currentGrade: this.currentGrade
         };
     }
 
     static fromJson(json : Course): CourseModel {
         return new CourseModel({
             userId: json.userId,
-            courseName: json.courseName
+            courseId: json.courseId,
+            courseName: json.courseName,
+            currentGrade: json.currentGrade
         })
     } 
 }
