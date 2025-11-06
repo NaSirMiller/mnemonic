@@ -23,6 +23,15 @@ service cloud.firestore {
                    data.createdAt is timestamp &&
                    data.lastUpdatedAt is timestamp
         }
+        function isValidUser(data) {
+            return data.userId is string &&
+                (data.displayName is string || data.displayName == null) &&
+                (data.email is string || data.email == null);
+        }
+
+        function isValidRefreshToken(data) {
+            return data.refreshToken is string;
+        }
 
         // --- Global Defaults ---
         allow read: if false; // no public reads unless specified
@@ -48,4 +57,26 @@ service cloud.firestore {
             allow delete: if request.auth != null &&
                             request.auth.uid == resource.data.userId;
                }
+        // --- Users ---
+         match /users/{userId} {
+        
+            // Clients can read their own user info, but NEVER refreshToken
+            allow read: if request.auth != null &&
+                        request.auth.uid == userId &&
+                        !("refreshToken" in resource.data);
+
+            // Clients can create/update their own user document (without touching refreshToken)
+            allow create, update: if request.auth != null &&
+                                    request.auth.uid == request.resource.data.userId &&
+                                    isValidUser(request.resource.data);
+
+            // Server or trusted environment can update refreshToken
+            allow update: if request.auth != null &&
+                            request.auth.uid == userId &&
+                            isValidRefreshToken(request.resource.data);
+
+            // Clients can delete their own document
+            allow delete: if request.auth != null &&
+                            request.auth.uid == resource.data.userId;
+        }
     }
