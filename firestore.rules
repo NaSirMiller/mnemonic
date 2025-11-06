@@ -7,26 +7,21 @@ service cloud.firestore {
                    data.courseGrade is float &&
                    data.courseName is string;
         }
-        function isValidAssignment(data) {
-            return data.userId is string &&
-                   data.title is string &&
-                   data.courseId is string &&
-                   (data.weight is float && (data.weight >=0 && data.weight <= 1.00)) &&
-                   data.dueDate is timestamp &&
-                   data.get("description", "") is string &&
-                   (data.grade is float || data.grade == null) // Grade can be added later by user
         }
         function isValidTask(data) {
             return data.userId is string &&
                    data.title is string &&
-                   data.description is string &&
-                   data.isComplete is bool &&
-                   (data.assignmentId is string || data.assignmentId == null) && // A task does not necessarily have to be assignment related
+                   data.courseId is string &&
+                   (data.weight is number && (data.weight >=0 && data.weight <= 1.00)) &&
                    data.dueDate is timestamp &&
+                   data.get("description", "") is string &&
+                   (data.grade is number || data.grade == null) && // Grade can be added later by user
                    (data.lastProgressed is timestamp || data.lastProgressed == null) && // Last tracked date where progress was made. For example, this date changes if the the time spent for the session > 0.
-                   // Minutes and seconds in int form
-                   data.timeSpent is int && // Total amount of time spent towards the task
-                   (data.priority is int || data.priority == null) // Task priority
+                   data.timeSpent is number && // Total amount of time spent towards the task
+                   data.isComplete is bool &&
+                   (data.priority is number || data.priority == null) // Task priority
+                   data.createdAt is timestamp &&
+                   data.lastUpdatedAt is timestamp
         }
 
         // --- Global Defaults ---
@@ -41,18 +36,6 @@ service cloud.firestore {
             allow update, delete: if request.auth.uid == resource.data.userId;
         }
 
-        // --- Assignments ---
-        match /assignments/{assignment} {
-             allow read: if request.auth != null && request.auth.uid == resource.data.userId;
-             allow create: if request.auth != null &&
-                            request.auth.uid == request.resource.data.userId &&
-                            isValidAssignment(request.resource.data);
-             allow update: if request.auth != null &&
-                           request.auth.uid == resource.data.userId &&
-                           isValidAssignment(request.resource.data);
-             allow delete: if request.auth != null &&
-                           request.auth.uid == resource.data.userId;
-           }
         // --- Tasks ---
         match /tasks/{task} {
             allow read: if request.auth != null && request.auth.uid == resource.data.userId;
@@ -66,4 +49,3 @@ service cloud.firestore {
                             request.auth.uid == resource.data.userId;
                }
     }
-}
