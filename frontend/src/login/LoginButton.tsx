@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { signInWithGoogle, LoginError } from "./Login";
 import "./SignIn.css";
 
-export const LoginButton = ({ className: string, onClick, buttonText }) => {
+export const LoginButton = () => {
   const { setUid, setAccessToken } = useAuth();
   const [, setIsAuthorized] = useState<boolean | null>(null);
   const handleGoogleLogin = async () => {
