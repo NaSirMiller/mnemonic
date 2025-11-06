@@ -13,13 +13,6 @@ type Task = {
     gradeType: string;
 };
 
-// type Course = {
-//     name: string;
-//     currentGrade: number;
-//     gradeTypes: Record<string, number>;
-//     tasks: Task[];
-// };
-
 function EditTask() {
     const sectionList = [ "Selct Task", "Task Name", "Task Grade", "Task Grade Weighting", "Time Spent", "Due Date" ];
     
@@ -47,8 +40,6 @@ function EditTask() {
                     setSelectedCourse( names[ 0 ] );
                 }
         } );
-    
-        console.log( tasks );
     }, [ ] );
 
     useEffect( () => {
