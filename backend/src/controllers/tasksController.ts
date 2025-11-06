@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { firebaseRepo } from "../repositories/firebaseRepository";
-import { Task } from "../models/task";
+import { Task } from "../../../shared/models/task";
 
 export async function createUserTask(request: Request, response: Response) {
   const taskPayload = request.body;

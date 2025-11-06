@@ -1,5 +1,5 @@
 import admin from "../firebase_admin";
-import { Task, TaskModel, TaskUpdate } from "../models/task";
+import { Task, TaskModel, TaskUpdate } from "../../../shared/models/task";
 
 export class FirebaseRepository {
   private db = admin.firestore();

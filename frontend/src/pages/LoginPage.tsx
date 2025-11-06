@@ -1,11 +1,19 @@
 import { signInWithPopup } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { FirebaseError } from "firebase/app";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { firebaseAuth, googleProvider } from "../firebase_utils";
+import {
+  isValidIdToken,
+  IdTokenVerificationError,
+} from "../services/authService";
 import NavBar from "../components/NavBar/NavBar";
 import "../style.css";
+import { useState } from "react";
+
+// toast.configure();
 
 class LoginError extends Error {
   code: string;
@@ -17,70 +25,49 @@ class LoginError extends Error {
 }
 
 export function LoginPage() {
+  const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   async function getSignUpResponse() {
-    console.log("Clicking sign-in button...");
+    console.log("User clicked sign-in button.");
     try {
       const userCredentials = await signInWithPopup(
         firebaseAuth,
-        googleProvider,
+        googleProvider
       );
       const user: User = userCredentials.user;
       if (!user) {
         console.log("User was not found upon sign in with Google!");
         throw new LoginError(
           "User was not found upon sign in with Google!",
-          "auth/user-not-found",
+          "auth/user-not-found"
         );
       }
-      const idToken = await user.getIdToken();
+      console.log("Retrieved id token, verifying now.");
 
-      const verificationResponse = await fetch(
-        "http://localhost:5000/api/auth/verifyIdToken",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken }),
-        },
-      );
+      const idToken: string = await user.getIdToken();
+      const validToken: boolean = await isValidIdToken(idToken);
 
-      const verificationResult = await verificationResponse.json();
-
-      try {
-        if (verificationResult.validUser) {
-          console.log("User was verified by firebase.");
-          navigate("/");
-        }
-        else{
-          console.log("User could not be verified by firebase.");
-        }
-        return null;
-      } catch (error) {
-        console.log(`Error while calling api: ${error}`);
-        throw new LoginError(
-          `Error while calling api: ${error}`,
-          "auth/api-response-format",
-        );
+      if (!validToken) {
+        // The id token produced by Google or the use, is not valid
+        toast.error("Could not verify your login. Please try again.");
+        console.log("Could not verify your login. Please try again.");
+        return;
       }
+      console.log("User is authenticated, redirecting to homepage");
+      navigate("/");
     } catch (error: unknown) {
-      if (error instanceof FirebaseError) {
-        console.error("Google Sign-In Error:", error.code, error.message);
-        throw new LoginError(
-          `Error signing in user: ${error.message}`,
-          error.code,
-        );
-      } else if (error instanceof Error) {
-        console.error("Login failed:", error.message);
-        throw new LoginError(
-          `Error signing in user: ${error.message}`,
-          "unknown",
-        );
+      if (error instanceof IdTokenVerificationError || error instanceof Error) {
+        console.error("Login error:", error.message);
+        setErrorMessage(error.message);
+        toast(errorMessage);
       } else {
-        console.error("Unknown login error", error);
-        throw new LoginError("Unknown error during login", "unknown");
+        console.error("Unknown login error:", error);
+        setErrorMessage("An unexpected error occurred. Please try again.");
+        toast(errorMessage);
       }
     }
   }
-  const navigate = useNavigate();
   return (
     <div className="login-page">
       <NavBar />
@@ -92,6 +79,7 @@ export function LoginPage() {
       </p>
       <div className="google-login-wrapper">
         <button onClick={getSignUpResponse}>Sign in with Google</button>
+        {errorMessage && <div className="login-error">{errorMessage}</div>}
       </div>
     </div>
   );
