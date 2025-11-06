@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import TaskCard from "./TaskCard";
 import EditTask from "./EditTask/EditTask";
 import "./TaskPage.css";
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 // import NavBar from "../components/NavBar/NavBar";
 import type { Task } from "../../../shared/models/task";
 import type { Course } from "../../../shared/models/course";
@@ -19,6 +20,16 @@ function TaskPage() {
   const [ checkedMap, setCheckedMap ] = useState( {} ); // key = task index, value = boolean
   const [ selectedGrade, setSelectedGrade ] = useState( 0.00 );
   const [ selectedTimeSpent, setTimeSpent ] = useState( "0 h 0 m" );
+  const { accessToken } = useAuth(); // Get access token from context
+  const [email, setEmail] = useState("catlover@gmail.com");
+  const [courses, setCourses] = useState(["All Courses"]);
+  const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
+
+    const [ tasks, setTasks ] = useState( [] );
+    const [ checkedMap, setCheckedMap ] = useState( {} ); // key = task index, value = boolean
+    const [ selectedCourse, setSelectedCourse ] = useState( "All Courses" );
+    const [ selectedGrade, setSelectedGrade ] = useState( 0.00 );
+    const [ selectedTimeSpent, setTimeSpent ] = useState( "0 h 0 m" );
 
   const [ showEditTask, setShowEditTask ] = useState( false );
   // const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
@@ -88,7 +99,13 @@ function TaskPage() {
         }
       });
 
-    // console.log( tasks );
+  // Toggle task checked state
+  const toggleChecked = (index) => {
+    setCheckedMap((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
     return (
         <div className="task-page">
@@ -133,7 +150,7 @@ function TaskPage() {
                 ) }
             </div>
             <div className="task-page-edit-cont">
-                <div className="task-page-edit-button" onClick={ () => setShowEditTask( !showEditTask ) }>
+                <div className="task-page-edit-button">
                     Edit Tasks
                 </div>
                 <div className="task-page-edit-button">
@@ -185,14 +202,6 @@ function TaskPage() {
                     ) ) }
                 </div>
             </div>
-            { showEditTask &&  (
-                <>
-                    <div className="opacity" onClick={ () => setShowEditTask( !showEditTask ) }>
-                        <EditTask />
-                    </div>
-                    {/* <div className="opacity-spacer"> </div> */}
-                </>
-            ) }
         </div>
         <div className="task-page-task-flex-cont">
           {availableTasks.map((task, i) => (
@@ -216,5 +225,7 @@ function TaskPage() {
         </div>
   );
 }
+
+export default TaskPage;
 
 export default TaskPage;

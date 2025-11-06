@@ -1,53 +1,55 @@
 import "./index.css";
-
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-// import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { LoginPage } from "./login/LoginPage.tsx";
 import TaskPage from "./TaskPage/TaskPage.tsx";
 import HomePage from "./HomePage/HomePage.tsx";
 import NavBar from "./components/NavBar/NavBar.tsx";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute"; 
 
 function Layout() {
-    return (
-        <div className="page">
-            <NavBar />
-            <Outlet />
-        </div>
-    );
+  return (
+    <div className="page">
+      <NavBar />
+      <Outlet />
+    </div>
+  );
 }
+
 const appRouter = createBrowserRouter([
-    {
-        element: <Layout />,
-        children: [
-            {
-                path: "/",
-                element: (
-                    <ProtectedRoute>
-                        <HomePage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: "/tasks",
-                element: (
-                    <ProtectedRoute>
-                        <TaskPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: "/auth",
-                element: <LoginPage />,
-            },
-        ],
-    },
+  {
+    element: <Layout />,
+    children: [
+      {
+        path: "/auth",
+        element: <LoginPage />,
+      },
+      {
+        path: "/",
+        element: (
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/tasks",
+        element: (
+          <ProtectedRoute>
+            <TaskPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
 ]);
 
 function App() {
-    return <RouterProvider router={appRouter} />;
-    // return <FrontEndHomePage />;
-    // return <TaskPage />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={appRouter} />
+    </AuthProvider>
+  );
 }
 
 export default App;
