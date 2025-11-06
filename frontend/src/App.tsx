@@ -22,11 +22,19 @@ const appRouter = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <HomePage />,
+                element: (
+                    <ProtectedRoute>
+                        <HomePage />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/tasks",
-                element: <TaskPage />,
+                element: (
+                    <ProtectedRoute>
+                        <TaskPage />
+                    </ProtectedRoute>
+                ),
             },
             {
                 path: "/auth",

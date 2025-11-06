@@ -11,6 +11,23 @@
     display: none;
 }
 
+.opacity {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    padding: 50px 0;
+
+    background-color: #FFFFFF40;
+    z-index: 10;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-y: auto;
+}
+
 /* all courses info */
 .task-page-profile-cont {
     width: 100%;
@@ -34,6 +51,7 @@
     padding-left: 50px;
 
     font-size: 48px;
+    font-weight: bold;
 
     display: flex;
     align-items: center;
@@ -51,6 +69,7 @@
     padding-left: 50px;
 
     font-size: 48px;
+    font-weight: bold;
 }
 .task-page-course-details-cont {
     width: 100%;
@@ -61,15 +80,16 @@
     gap: 50px;
 }
 .task-page-course-detail {
-    padding: 0 30px;
+    padding: 0 40px;
     height: 150px;
 
-    font-size: 36px;
+    font-size: 28px;
 
     display: flex;
     flex-flow: column wrap;
     justify-content: center;
     align-items: center;
+    gap: 15px;
 
     border-radius: 10px;
     border: 3px solid #FFFFFF30;
@@ -87,13 +107,18 @@
     gap: 30px;
 }
 .task-page-edit-button {
-    padding: 7px 15px;
+    padding: 8px 20px;
+
+    font-size: 18px;
 
     border-radius: 10px;
     background-color: #2F4872;
 }
+.task-page-edit-button:hover {
+    cursor: pointer;
+}
 
-/* table */
+/* courses */
 .task-page-course-cont {
     height: 80px;
     width: 100%;
@@ -110,7 +135,7 @@
 .task-page-course {
     padding: 10px 30px;
 
-    font-size: 24px;
+    font-size: 22px;
 
     white-space: nowrap;
     overflow: hidden;
@@ -126,6 +151,7 @@
     background-color: #2F4872;
 }
 
+/* task table */
 .task-page-task-cont {
     width: 100%;
     margin-top: 30px;
@@ -138,7 +164,7 @@
     margin: 0 30px;
     margin-bottom: 15px;
 
-    font-size: 24px;
+    font-size: 22px;
 
     display: flex;
     flex-direction: row;
