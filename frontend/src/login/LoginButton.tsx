@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { signInWithGoogle, LoginError } from "./Login";
+import "./SignIn.css";
 
 export const LoginButton = ({ className: string, onClick, buttonText }) => {
   const { setUid, setAccessToken } = useAuth();
@@ -25,5 +26,9 @@ export const LoginButton = ({ className: string, onClick, buttonText }) => {
     }
   };
 
-  return <button onClick={onClick}>{buttonText}</button>;
+  return (
+    <div className="signin-page-button" onClick={handleGoogleLogin}>
+      Sign in with Google
+    </div>
+  );
 };

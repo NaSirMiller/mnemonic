@@ -1,14 +1,9 @@
 import { useState, useEffect } from "react";
-
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 import TaskCard from "./TaskCard";
 import EditTask from "./EditTask/EditTask";
+import EditCourse from "./EditCourse/EditCourse";
 import "./TaskPage.css";
-import { useAuth } from "../context/AuthContext"; // adjust path if needed
-// import NavBar from "../components/NavBar/NavBar";
-import type { Task } from "../../../shared/models/task";
-import type { Course } from "../../../shared/models/course";
-import { getTasks } from "../services/tasksService";
-import { getCourses } from "../services/coursesService";
 
 function TaskPage() {
   const [user, setUser] = useState(null);
@@ -31,31 +26,15 @@ function TaskPage() {
     const [ selectedGrade, setSelectedGrade ] = useState( 0.00 );
     const [ selectedTimeSpent, setTimeSpent ] = useState( "0 h 0 m" );
 
-  const [ showEditTask, setShowEditTask ] = useState( false );
-  // const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
+    const [ showEditTask, setShowEditTask ] = useState( false );
+    const [ showEditCourse, setShowEditCourse ] = useState( false );
 
-  const fetchTasks = async () => {
-    try {
-      const tasks = await getTasks(user!.userId, selectedTask);
-      setAvailableTasks(tasks);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const fetchCourses = async () => {
-    try {
-        const courses = await getCourses("", null);
-        setAvailableCourses(courses);
-    }
-    catch (err) {console.error(err)}
-  }
-
-    useEffect(() => {
-        document.body.style.overflow = showEditTask ? "hidden" : "auto";
+    useEffect( () => {
+        document.body.style.overflow = showEditTask || showEditCourse ? "hidden" : "auto";
         return () => {
             document.body.style.overflow = "auto";
         };
-    }, [showEditTask]);
+    }, [ showEditTask, showEditCourse ] );
 
     useEffect(() => {
         fetchCourses();
@@ -150,10 +129,10 @@ function TaskPage() {
                 ) }
             </div>
             <div className="task-page-edit-cont">
-                <div className="task-page-edit-button">
+                <div className="task-page-edit-button" onClick={ () => setShowEditTask( !showEditTask ) }>
                     Edit Tasks
                 </div>
-                <div className="task-page-edit-button">
+                <div className="task-page-edit-button" onClick={ () => setShowEditCourse( !showEditCourse ) }>
                     Edit Courses
                 </div>
             </div>
@@ -202,6 +181,16 @@ function TaskPage() {
                     ) ) }
                 </div>
             </div>
+            { showEditTask &&  (
+                <div className="opacity" onClick={ () => setShowEditTask( !showEditTask ) }>
+                    <EditTask />
+                </div>
+            ) }
+            { showEditCourse &&  (
+                <div className="opacity" onClick={ () => setShowEditCourse( !showEditCourse ) }>
+                    <EditCourse />
+                </div>
+            ) }
         </div>
         <div className="task-page-task-flex-cont">
           {availableTasks.map((task, i) => (

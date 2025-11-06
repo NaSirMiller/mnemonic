@@ -6,6 +6,11 @@ import { useAuth } from "../context/AuthContext";
 
 // Helper: fetch fresh access token from backend
 async function fetchFreshAccessToken(userId: string): Promise<string | null> {
+  // DEV BYPASS: return fake token if skip-auth enabled
+  if (import.meta.env.VITE_SKIP_AUTH === "true") {
+    return "dev-access-token";
+  }
+
   try {
     console.log("Fetching fresh access token");
     const res = await fetch("http://localhost:5000/api/auth/refresh-token", {
@@ -31,8 +36,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { uid, setUid, accessToken, setAccessToken } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-  // On mount: listen to Firebase auth state
   useEffect(() => {
+    // DEV BYPASS: skip Firebase + backend auth
+    if (import.meta.env.VITE_SKIP_AUTH === "true") {
+      const devUid = "dev-123";
+      const devToken = "dev-access-token";
+      setUid(devUid);
+      setAccessToken(devToken);
+      setIsAuthorized(true);
+      console.log("DEV: bypassing auth (VITE_SKIP_AUTH=true)");
+      return; // stop the normal auth flow
+    }
+
+    // Normal Firebase auth listener
     const unsubscribe = onIdTokenChanged(firebaseAuth, async (user) => {
       if (user) {
         try {
@@ -74,8 +90,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return () => clearInterval(interval);
   }, [uid, setAccessToken]);
 
-  // Block rendering until authorized AND token exists
-  if (isAuthorized === null || !accessToken) return <div>Loading...</div>;
+  // Render logic
+  if (isAuthorized === null) return <div>Loading...</div>;
+  if (!isAuthorized || !accessToken) return <Navigate to="/auth" replace />;
 
-  return isAuthorized ? <>{children}</> : <Navigate to="/auth" replace />;
+  return <>{children}</>;
 }
