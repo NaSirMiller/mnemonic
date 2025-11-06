@@ -1,7 +1,7 @@
 import "./index.css";
 
 import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-router-dom";
-import { LoginPage } from "./pages/LoginPage";
+import { LoginPage } from "./login/LoginPage.tsx";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import TaskPage from "./TaskPage/TaskPage.tsx";
 import HomePage from "./HomePage/HomePage.tsx";

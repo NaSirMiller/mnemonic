@@ -1,17 +1,17 @@
-import "../style.css";
-import { LoginButton } from "../login/LoginButton"; // import the login button component
+import { LoginButton } from "./LoginButton"; 
+import "./SignIn.css";
 
 export function LoginPage() {
-  return (
-    <div className="login-page">
-      <h2>Login Page</h2>
-      <h3>Welcome to Mnemonic!</h3>
-      <p>
-        Mnemonic is a student-focused application, intending to help students succeed.
-      </p>
-      <div className="google-login-wrapper">
-        <LoginButton /> {/* Render the button */}
-      </div>
-    </div>
-  );
+
+    return (
+        <div className="signin-page">
+            <div className="signin-page-title">
+                Welcome to Mnemonic!
+            </div>
+            <div className="signin-page-description">
+                Our app connects to your Google Calendar and uses AI to prioritize your tasks and assignments. No more juggling deadlines: just open Mnemonic and see exactly what to tackle next.
+            </div>
+            <LoginButton />
+        </div>
+    );
 }

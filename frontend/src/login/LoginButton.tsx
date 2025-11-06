@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { signInWithGoogle, LoginError } from "./Login";
+import "./SignIn.css";
 
 export const LoginButton = () => {
   const { setUid, setAccessToken } = useAuth();
-  const [,setIsAuthorized] = useState<boolean | null>(null);
+  const [, setIsAuthorized] = useState<boolean | null>(null);
+
   const handleGoogleLogin = async () => {
     try {
       const { user, googleAccessToken } = await signInWithGoogle();
@@ -25,5 +27,9 @@ export const LoginButton = () => {
     }
   };
 
-  return <button onClick={handleGoogleLogin}>Sign in with Google</button>;
+  return (
+    <div className="signin-page-button" onClick={handleGoogleLogin}>
+      Sign in with Google
+    </div>
+  );
 };
