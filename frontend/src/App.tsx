@@ -5,7 +5,7 @@ import TaskPage from "./TaskPage/TaskPage.tsx";
 import HomePage from "./HomePage/HomePage.tsx";
 import NavBar from "./components/NavBar/NavBar.tsx";
 import { AuthProvider } from "./context/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute"; // ✅ fixed path
+import { ProtectedRoute } from "./components/ProtectedRoute"; 
 
 function Layout() {
   return (
@@ -21,11 +21,11 @@ const appRouter = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "/auth", // 👈 public route
+        path: "/auth",
         element: <LoginPage />,
       },
       {
-        path: "/", // 👇 protected route
+        path: "/",
         element: (
           <ProtectedRoute>
             <HomePage />
@@ -33,7 +33,7 @@ const appRouter = createBrowserRouter([
         ),
       },
       {
-        path: "/tasks", // 👇 protected route
+        path: "/tasks",
         element: (
           <ProtectedRoute>
             <TaskPage />
