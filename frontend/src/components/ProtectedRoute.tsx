@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 // Helper: fetch fresh access token from backend
 async function fetchFreshAccessToken(userId: string): Promise<string | null> {
   try {
-    console.log("Fetching fresh access token for uid:", userId);
+    console.log("Fetching fresh access token");
     const res = await fetch("http://localhost:5000/api/auth/refresh-token", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

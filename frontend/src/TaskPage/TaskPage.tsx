@@ -82,35 +82,6 @@ function TaskPage() {
     }));
   };
 
-  // Fetch Google Calendar events
-  //DDEELETE ME!
-  useEffect(() => {
-    if (!accessToken) return;
-
-    const fetchCalendarEvents = async () => {
-      try {
-        const response = await fetch(
-          "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        const data = await response.json();
-        if (data.items) {
-          console.log("Google Calendar events:", data.items);
-        } else {
-          console.log("No events found or invalid response:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching calendar events:", error);
-      }
-    };
-
-    fetchCalendarEvents();
-  }, [accessToken]);
-
     return (
         <div className="task-page">
             <div className="task-page-profile-cont">
