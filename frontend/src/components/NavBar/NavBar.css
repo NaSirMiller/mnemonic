@@ -33,12 +33,12 @@
 .navbar-button-cont {
     height: 80%;
     margin-top: 0;
-    padding: 5px 40px 0 40px;
+    padding: 5px 30px 0 30px;
 
     /* border: 2px solid transparent; */
     border-radius: 10px 10px 0px 0px;
 
-    font-size: 30px;
+    font-size: 24px;
 
     display: flex;
     flex-direction: column;
@@ -46,6 +46,7 @@
 
     position: relative;
 
+    color: #FFFFFF90;
     background-color: #343434;
 }
 .navbar-button-cont:hover {
@@ -55,7 +56,8 @@
 .navbar-button-cont.focused {
     /* border: 2px solid #FFFFFF20; */
     /* border-bottom: 2px solid transparent; */
-    color: #A1B5D8;
+    /* color: #A1B5D8; */
+    color: #FFFFFF;
     background-color: #2A2A2A;
 }
 
@@ -106,7 +108,7 @@
 
 .navbar-sign-in {
     height: fit-content;
-    padding: 8px 30px;
+    padding: 7px 30px;
 
     font-size: 24px;
 

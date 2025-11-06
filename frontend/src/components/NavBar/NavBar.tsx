@@ -5,13 +5,22 @@ import "./NavBar.css";
 
 function NavBar() {
     const [ menuOpen, setMenuOpen ] = useState( false ); // controls mobile nav bar
-    const [ clickedButton, setClickedButton ] = useState<string>( "Home" ); // controls focused tab
     const buttonTexts = [ "Home", "Tasks" ]; // array of buttons
 
     const navigate = useNavigate();
 
+    const focusedButton = ( () => {
+        switch (location.pathname) {
+            case "/":
+                return "Home";
+            case "/tasks":
+                return "Tasks";
+            default:
+                return "";
+        }
+    } ) ();
+
     const handleClick = ( text: string ) => {
-        setClickedButton( text );
         if ( text === "Home" )
             navigate( "/" );
         if ( text === "Tasks" )
@@ -41,7 +50,7 @@ function NavBar() {
                     <NavBarButton
                         key={ text + i }
                         text={ text }
-                        focused={ clickedButton === text }
+                        focused={ focusedButton === text }
                         onClick={ () => handleClick( text ) }
                     />
                 ))}
