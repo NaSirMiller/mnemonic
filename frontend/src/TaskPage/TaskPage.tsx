@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import TaskCard from "./TaskCard";
 import EditTask from "./EditTask/EditTask";
+import EditCourse from "./EditCourse/EditCourse";
 import "./TaskPage.css";
 
 function TaskPage() {
     const [ email, setEmail ] = useState( "catlover@gmail.com" );
     const [ courses, setCourses ] = useState( [ "All Courses" ] );
-    const filters = [ "Name", "Course", "% of Grade", "Time Spent", "Due Date" ];
 
     const [ tasks, setTasks ] = useState( [] );
     const [ checkedMap, setCheckedMap ] = useState( {} ); // key = task index, value = boolean
@@ -15,13 +15,14 @@ function TaskPage() {
     const [ selectedTimeSpent, setTimeSpent ] = useState( "0 h 0 m" );
 
     const [ showEditTask, setShowEditTask ] = useState( false );
+    const [ showEditCourse, setShowEditCourse ] = useState( false );
 
-    useEffect(() => {
-        document.body.style.overflow = showEditTask ? "hidden" : "auto";
+    useEffect( () => {
+        document.body.style.overflow = showEditTask || showEditCourse ? "hidden" : "auto";
         return () => {
             document.body.style.overflow = "auto";
         };
-    }, [showEditTask]);
+    }, [ showEditTask, showEditCourse ] );
 
     useEffect( () => {
         fetch( "/courses.json" )
@@ -125,7 +126,7 @@ function TaskPage() {
                 <div className="task-page-edit-button" onClick={ () => setShowEditTask( !showEditTask ) }>
                     Edit Tasks
                 </div>
-                <div className="task-page-edit-button">
+                <div className="task-page-edit-button" onClick={ () => setShowEditCourse( !showEditCourse ) }>
                     Edit Courses
                 </div>
             </div>
@@ -175,12 +176,14 @@ function TaskPage() {
                 </div>
             </div>
             { showEditTask &&  (
-                <>
-                    <div className="opacity" onClick={ () => setShowEditTask( !showEditTask ) }>
-                        <EditTask />
-                    </div>
-                    {/* <div className="opacity-spacer"> </div> */}
-                </>
+                <div className="opacity" onClick={ () => setShowEditTask( !showEditTask ) }>
+                    <EditTask />
+                </div>
+            ) }
+            { showEditCourse &&  (
+                <div className="opacity" onClick={ () => setShowEditCourse( !showEditCourse ) }>
+                    <EditCourse />
+                </div>
             ) }
         </div>
     );

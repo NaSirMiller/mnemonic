@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { firebaseAuth, googleProvider } from "../firebase_utils";
 import NavBar from "../components/NavBar/NavBar";
-import "../style.css";
+import "./SignIn.css";
 
 class LoginError extends Error {
   code: string;
@@ -81,18 +81,18 @@ export function LoginPage() {
     }
   }
   const navigate = useNavigate();
-  return (
-    <div className="login-page">
-      <NavBar />
-      <h2>Login Page</h2>
-      <h3>Welcome to Mnemonic!</h3>
-      <p>
-        Mnemonic is a student focused application, intending on helping students
-        succeed.
-      </p>
-      <div className="google-login-wrapper">
-        <button onClick={getSignUpResponse}>Sign in with Google</button>
-      </div>
-    </div>
-  );
+
+    return (
+        <div className="signin-page">
+            <div className="signin-page-title">
+                Welcome to Mnemonic!
+            </div>
+            <div className="signin-page-description">
+                Our app connects to your Google Calendar and uses AI to prioritize your tasks and assignments. No more juggling deadlines: just open Mnemonic and see exactly what to tackle next.
+            </div>
+            <div className="signin-page-button" onClick={getSignUpResponse}>
+                Sign in with Google
+            </div>
+        </div>
+    );
 }

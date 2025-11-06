@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet, useLocation } from "react-router-dom";
 // import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -9,9 +9,12 @@ import HomePage from "./HomePage/HomePage.tsx";
 import NavBar from "./components/NavBar/NavBar.tsx";
 
 function Layout() {
+    const location = useLocation();
+    const hideNav = location.pathname === "/auth";
+
     return (
         <div className="page">
-            <NavBar />
+            { !hideNav && <NavBar /> }
             <Outlet />
         </div>
     );
