@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { firebaseRepo } from "../repositories/firebaseRepository";
+import { authRepo } from "../repositories/authRepository";
 
 export async function verifyUserLogin(request: Request, response: Response) {
   const { idToken } = request.body;
@@ -8,7 +8,7 @@ export async function verifyUserLogin(request: Request, response: Response) {
     return response.status(400).json({ error: "ID token missing" });
   }
   try {
-    const isValidToken = await firebaseRepo.isValidIdToken(idToken);
+    const isValidToken = await authRepo.isValidIdToken(idToken);
 
     if (isValidToken) {
       return response.json({ validUser: true });

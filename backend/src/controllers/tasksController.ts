@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
-import { firebaseRepo } from "../repositories/firebaseRepository";
+import { taskRepo } from "../repositories/taskRepository";
 import { Task } from "../../../shared/models/task";
 
 export async function createUserTask(request: Request, response: Response) {
   const taskPayload = request.body;
   try {
-    const createdTask: Task = await firebaseRepo.createTask(
-      taskPayload as Task
-    );
+    const createdTask: Task = await taskRepo.createTask(taskPayload as Task);
     return response.status(200).json({
       message: "Successfully created a task.",
       task: createdTask,
@@ -32,9 +30,9 @@ export async function getUserTasks(request: Request, response: Response) {
   try {
     let tasksRetrieved: Task[];
     if (taskId === undefined) {
-      tasksRetrieved = await firebaseRepo.getAllUserTasks(userId);
+      tasksRetrieved = await taskRepo.getAllUserTasks(userId);
     } else {
-      const task: Task = await firebaseRepo.getSingleUserTask(userId, taskId);
+      const task: Task = await taskRepo.getSingleUserTask(userId, taskId);
       tasksRetrieved = [task];
     }
     return response.status(200).json({
@@ -63,7 +61,7 @@ export async function getUserTasks(request: Request, response: Response) {
 export async function updateUserTask(request: Request, response: Response) {
   const { userId, taskId, taskPayload } = request.body;
   try {
-    await firebaseRepo.updateTask(userId, taskId, taskPayload as Task);
+    await taskRepo.updateTask(userId, taskId, taskPayload as Task);
     return response.status(200).json({
       message: `Successfully updated task ${taskId}.`,
     });
@@ -83,7 +81,7 @@ export async function updateUserTask(request: Request, response: Response) {
 export async function deleteUserTask(request: Request, response: Response) {
   const { userId, taskId } = request.params;
   try {
-    await firebaseRepo.deleteTask(userId, taskId);
+    await taskRepo.deleteTask(userId, taskId);
     return response.status(200).json({
       message: `Successfully deleted task ${taskId}`,
     });
