@@ -7,8 +7,15 @@ export async function createTask(taskPayload: Task) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ taskPayload }),
   });
+
   if (!res.ok) {
-    throw new Error(`Network error: ${res.status}`);
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch {
+      throw new Error(`An error occurred: ${res.status}`);
+    }
+    throw new Error(errorData.error || `An error occurred: ${res.status}`);
   }
 
   const data = await res.json();
@@ -19,12 +26,19 @@ export async function getTasks(userId: string, taskId: string | null = null) {
   const url = `${BASE_URL}/api/tasks/${userId}${
     taskId ? `?taskId=${taskId}` : ""
   }`;
-  const res = await fetch(`${url}`, {
+  const res = await fetch(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
+
   if (!res.ok) {
-    throw new Error(`Network error: ${res.status}`);
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch {
+      throw new Error(`An error occurred: ${res.status}`);
+    }
+    throw new Error(errorData.error || `An error occurred: ${res.status}`);
   }
 
   const data = await res.json();
@@ -37,13 +51,20 @@ export async function updateTask(
   taskPayload: Task
 ) {
   const url = `${BASE_URL}/api/tasks/${userId}/${taskId}`;
-  const res = await fetch(`${url}`, {
+  const res = await fetch(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(taskPayload),
   });
+
   if (!res.ok) {
-    throw new Error(`Network error: ${res.status}`);
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch {
+      throw new Error(`An error occurred: ${res.status}`);
+    }
+    throw new Error(errorData.error || `An error occurred: ${res.status}`);
   }
 
   const data = await res.json();
@@ -52,12 +73,19 @@ export async function updateTask(
 
 export async function deleteTask(userId: string, taskId: string) {
   const url = `${BASE_URL}/api/tasks/${userId}/${taskId}`;
-  const res = await fetch(`${url}`, {
+  const res = await fetch(url, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   });
+
   if (!res.ok) {
-    throw new Error(`Network error: ${res.status}`);
+    let errorData;
+    try {
+      errorData = await res.json();
+    } catch {
+      throw new Error(`An error occurred: ${res.status}`);
+    }
+    throw new Error(errorData.error || `An error occurred: ${res.status}`);
   }
 
   const data = await res.json();

@@ -23,13 +23,11 @@ export async function isValidIdToken(idToken: string): Promise<boolean> {
     if (error instanceof Error) {
       console.error("Id token verification failed:", error.message);
 
-      // Wrap API layer errors in LoginError to provide consistent error handling
       throw new IdTokenVerificationError(
         `Error signing in user: ${error.message}`,
         "api-error"
       );
     } else {
-      // Catch-all for any unknown errors
       console.error("Unknown login error", error);
       throw new IdTokenVerificationError(
         "Unknown error during login",

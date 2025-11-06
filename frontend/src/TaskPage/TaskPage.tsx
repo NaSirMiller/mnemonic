@@ -1,18 +1,30 @@
 import { useState, useEffect } from "react";
+
 import TaskCard from "./TaskCard";
 import "./TaskPage.css";
-import NavBar from "../components/NavBar/NavBar";
+// import NavBar from "../components/NavBar/NavBar";
+import type { Task } from "../../../shared/models/task";
+import { getTasks } from "../services/tasksService";
 
 function TaskPage() {
   const [email, setEmail] = useState("catlover@gmail.com");
   const [courses, setCourses] = useState(["All Courses"]);
-  const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
+  // const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
 
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [checkedMap, setCheckedMap] = useState({}); // key = task index, value = boolean
   const [selectedCourse, setSelectedCourse] = useState("All Courses");
   const [selectedGrade, setSelectedGrade] = useState(0.0);
   const [selectedTimeSpent, setTimeSpent] = useState("0 hr 0 min");
+
+  const fetchTasks = async () => {
+    try {
+      const tasks = await getTasks("", null);
+      setTasks(tasks);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     fetch("/courses.json")
@@ -37,9 +49,7 @@ function TaskPage() {
 
   useEffect(() => {
     if (selectedCourse === "All Courses") {
-      fetch("/tasks.json")
-        .then((res) => res.json())
-        .then((data) => setTasks(data.tasks));
+      fetchTasks();
     } else {
       fetch("/courses_with_tasks.json")
         .then((res) => res.json())
@@ -49,7 +59,7 @@ function TaskPage() {
           setSelectedGrade(course.currentGrade);
 
           let totalMinutes = 0;
-          course.tasks.forEach((task) => {
+          course.tasks.forEach((task: Task) => {
             const match = task.timeSpent.completed.match(/(\d+)h\s*(\d+)?m?/);
             const hours = parseInt(match[1]) || 0;
             const minutes = parseInt(match[2]) || 0;
