@@ -1,4 +1,5 @@
-import { signInWithPopup, GoogleAuthProvider, type User } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import type { User } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
 import { firebaseAuth, googleProvider } from "../firebase_utils";
 
@@ -22,14 +23,17 @@ export async function signInWithGoogle(): Promise<{
     googleProvider.addScope("https://www.googleapis.com/auth/calendar");
     googleProvider.addScope("email");
     googleProvider.addScope("profile");
-    googleProvider.setCustomParameters({ prompt: "consent" }); 
+    googleProvider.setCustomParameters({ prompt: "consent" });
 
     // Sign in via popup
     const userCredentials = await signInWithPopup(firebaseAuth, googleProvider);
     const user: User = userCredentials.user;
-
     if (!user) {
-      throw new LoginError("User not found upon Google sign-in!", "auth/user-not-found");
+      console.log("User was not found upon sign in with Google!");
+      throw new LoginError(
+        "User was not found upon sign in with Google!",
+        "auth/user-not-found"
+      );
     }
 
     // Firebase ID token
@@ -52,20 +56,29 @@ export async function signInWithGoogle(): Promise<{
 
     const verificationResult = await verificationResponse.json();
     if (!verificationResult.validUser) {
-      throw new LoginError("User could not be verified by backend", "auth/verification-failed");
+      throw new LoginError(
+        "User could not be verified by backend",
+        "auth/verification-failed"
+      );
     }
 
-    // redirect to backend endpoint to exchange for refresh token 
+    // redirect to backend endpoint to exchange for refresh token
     window.location.href = `http://localhost:5000/api/auth/google/connect?userId=${user.uid}`;
 
     return { user, idToken, googleAccessToken, googleIdToken };
   } catch (error: unknown) {
     if (error instanceof FirebaseError) {
       console.error("Google Sign-In Error:", error.code, error.message);
-      throw new LoginError(`Error signing in user: ${error.message}`, error.code);
+      throw new LoginError(
+        `Error signing in user: ${error.message}`,
+        error.code
+      );
     } else if (error instanceof Error) {
       console.error("Login failed:", error.message);
-      throw new LoginError(`Error signing in user: ${error.message}`, "unknown");
+      throw new LoginError(
+        `Error signing in user: ${error.message}`,
+        "unknown"
+      );
     } else {
       console.error("Unknown login error", error);
       throw new LoginError("Unknown error during login", "unknown");
