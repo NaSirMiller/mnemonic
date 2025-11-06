@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 import TaskCard from "./TaskCard";
 import EditTask from "./EditTask/EditTask";
 import EditCourse from "./EditCourse/EditCourse";
 import "./TaskPage.css";
 
 function TaskPage() {
-    const [ email, setEmail ] = useState( "catlover@gmail.com" );
-    const [ courses, setCourses ] = useState( [ "All Courses" ] );
+  const { accessToken } = useAuth(); // Get access token from context
+  const [email, setEmail] = useState("catlover@gmail.com");
+  const [courses, setCourses] = useState(["All Courses"]);
+  const filters = ["Name", "Course", "% of Grade", "Time Spent", "Due Date"];
 
     const [ tasks, setTasks ] = useState( [] );
     const [ checkedMap, setCheckedMap ] = useState( {} ); // key = task index, value = boolean
@@ -36,49 +39,50 @@ function TaskPage() {
         // console.log( tasks );
     }, [] );
 
-    useEffect( () => {
-        const initialMap = {};
-        tasks.forEach( ( _, i ) => {
-            initialMap[ i ] = false;
-        } );
-        setCheckedMap( initialMap );
-    }, [ tasks ] );
+  // Initialize checkedMap
+  useEffect(() => {
+    const initialMap = {};
+    tasks.forEach((_, i) => {
+      initialMap[i] = false;
+    });
+    setCheckedMap(initialMap);
+  }, [tasks]);
 
-    useEffect( () => {
-        if ( selectedCourse === "All Courses" ) {
-            fetch( "/tasks.json" )
-                .then( ( res ) => res.json() )
-                .then( ( data ) => setTasks( data.tasks ) );
-        } else {
-            fetch( "/courses_with_tasks.json" )
-                .then( res => res.json() )
-                .then( data => {
-                    const course = data.courses.find( c => c.name === selectedCourse );
-                    setTasks( course.tasks );
-                    setSelectedGrade( course.currentGrade );
+  // Load tasks per selected course
+  useEffect(() => {
+    if (selectedCourse === "All Courses") {
+      fetch("/tasks.json")
+        .then((res) => res.json())
+        .then((data) => setTasks(data.tasks));
+    } else {
+      fetch("/courses_with_tasks.json")
+        .then((res) => res.json())
+        .then((data) => {
+          const course = data.courses.find((c) => c.name === selectedCourse);
+          setTasks(course.tasks);
+          setSelectedGrade(course.currentGrade);
 
-                    let totalMinutes = 0;
-                    course.tasks.forEach( task => {
-                        const match = task.timeSpent.completed.match( /(\d+)h\s*(\d+)?m?/ );
-                        const hours = parseInt( match[ 1 ] ) || 0;
-                        const minutes = parseInt( match[ 2 ] ) || 0;
-                        totalMinutes += hours * 60 + minutes;
-                    } );
-                    const totalHours = Math.floor( totalMinutes / 60 );
-                    const remainingMinutes = totalMinutes % 60;
-                    const totalTimeString = `${totalHours}hr ${remainingMinutes}min`;
-                    setTimeSpent( totalTimeString );
-                } );
-        }
-    }, [ selectedCourse ]);
+          let totalMinutes = 0;
+          course.tasks.forEach((task) => {
+            const match = task.timeSpent.completed.match(/(\d+)h\s*(\d+)?m?/);
+            const hours = parseInt(match?.[1] ?? "0");
+            const minutes = parseInt(match?.[2] ?? "0");
+            totalMinutes += hours * 60 + minutes;
+          });
+          const totalHours = Math.floor(totalMinutes / 60);
+          const remainingMinutes = totalMinutes % 60;
+          setTimeSpent(`${totalHours}hr ${remainingMinutes}min`);
+        });
+    }
+  }, [selectedCourse]);
 
-    const toggleChecked = ( index ) => {
-        setCheckedMap( prev => ( {
-            ...prev,
-            [ index ]: !prev[ index ],
-        } ) );
-        // console.log( checkedMap[ index ] );
-    };
+  // Toggle task checked state
+  const toggleChecked = (index) => {
+    setCheckedMap((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
     return (
         <div className="task-page">
@@ -189,4 +193,4 @@ function TaskPage() {
     );
 }
 
-export default TaskPage; 
+export default TaskPage;

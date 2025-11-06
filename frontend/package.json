@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@react-oauth/google": "^0.12.2",
-    "firebase": "^12.3.0",
+    "googleapis": "^164.1.0",
+    "firebase": "^12.4.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3"
