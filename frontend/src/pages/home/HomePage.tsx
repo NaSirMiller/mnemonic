@@ -154,10 +154,12 @@ function HomePage() {
             <div key={"task-" + i} className="home-page-task">
               <div className="home-page-task-name">{task.title}</div>
               <div className="home-page-task-date">
-                {task.dueDate.toLocaleDateString("en-US", {
-                  month: "short", // Ex: "Nov"
-                  day: "numeric", // Ex: 19
-                })}
+                {task.dueDate
+                  ? task.dueDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "No due date"}
               </div>
             </div>
           ))}

@@ -65,6 +65,36 @@ export async function createTask(taskPayload: Task): Promise<void> {
   }
 }
 
+/**
+ * Convert a value to a Date object if possible
+ */
+function parseDate(value: unknown): Date | null | undefined {
+  if (!value) return undefined;
+
+  // Narrow to object first
+  if (typeof value === "object" && value !== null) {
+    const obj = value as { _seconds?: number; _nanoseconds?: number };
+
+    if (
+      typeof obj._seconds === "number" &&
+      typeof obj._nanoseconds === "number"
+    ) {
+      return new Date(obj._seconds * 1000 + obj._nanoseconds / 1000000);
+    }
+  }
+
+  // Already a JS Date
+  if (value instanceof Date) return value;
+
+  // String or number
+  if (typeof value === "string" || typeof value === "number") {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? undefined : d;
+  }
+
+  return undefined;
+}
+
 export async function getTasks(
   userId: string,
   taskId: string | null = null
@@ -72,8 +102,17 @@ export async function getTasks(
   try {
     const tasksResponse = await getTasksApi(userId, taskId);
     const tasks: Task[] = tasksResponse.tasks;
-    console.log(`Retrieved ${tasks.length} task.`);
-    return tasks;
+
+    // Normalize dates for each task
+    const normalizedTasks = tasks.map((task) => ({
+      ...task,
+      dueDate: task.dueDate ? parseDate(task.dueDate) : undefined,
+      createdAt: parseDate(task.createdAt),
+      lastUpdatedAt: parseDate(task.lastUpdatedAt),
+    }));
+
+    console.log(`Retrieved ${normalizedTasks.length} task(s).`);
+    return normalizedTasks;
   } catch (error) {
     if (error instanceof Error) {
       console.error(
