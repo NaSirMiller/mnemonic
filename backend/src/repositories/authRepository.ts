@@ -55,9 +55,8 @@ export class AuthRepository {
     if (!doc.exists) {
       throw new Error("User not found");
     }
-
-    const minimalUserData = doc.data() as User;
-    const userRecord = await this.authDb.getUser(minimalUserData.userId);
+    const userRecord = await this.authDb.getUser(userId);
+    const minimalUserData = doc.data() as { refreshToken?: string | null }; // Get refresh token, if there is one
 
     return toFullUser(userRecord, minimalUserData.refreshToken ?? null);
   }

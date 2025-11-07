@@ -1,7 +1,9 @@
+import type { FullUser } from "../../../shared/models/user";
 import {
   verifyIdToken as verifyIdTokenApi,
   getAccessToGoogleCalendar as getAccessToGoogleCalendarApi,
   refreshAccessToken as refreshAccessTokenApi,
+  getUser as getUserApi,
 } from "../api";
 
 export class IdTokenVerificationError extends Error {
@@ -19,6 +21,15 @@ export class GoogleAuthError extends Error {
     super(message);
     this.code = code;
     Object.setPrototypeOf(this, GoogleAuthError.prototype);
+  }
+}
+
+export class GetUserError extends Error {
+  code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+    Object.setPrototypeOf(this, GetUserError.prototype);
   }
 }
 
@@ -87,5 +98,24 @@ export async function getRefreshedGoogleAccessToken(
       "Unknown error refreshing access token",
       "unknown"
     );
+  }
+}
+
+export async function getUser(userId: string): Promise<FullUser> {
+  console.log(`User id in getUser (service): ${userId}`);
+  try {
+    const user = await getUserApi(userId);
+    console.log("Successfully fetched user:", user.userId);
+    return user;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Failed to fetch user:", error.message);
+      throw new GetUserError(
+        `Could not get user: ${error.message}`,
+        "api-error"
+      );
+    }
+    console.error("Unknown error fetching user:", error);
+    throw new GetUserError("Unknown error fetching user", "unknown");
   }
 }

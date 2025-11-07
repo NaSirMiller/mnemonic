@@ -1,32 +1,22 @@
 import { useState, useEffect } from "react";
+
 import { useAuth } from "../../hooks/useAuth";
+
+import type { Course } from "../../../../shared/models/course";
+import type { Task } from "../../../../shared/models/task";
+import type { FullUser } from "../../../../shared/models/user";
+import { getUser } from "../../services/authService";
+
 import TaskCard from "../../components/tasks/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 import "./TaskPage.css";
 
-// Optional: define placeholder interfaces if not imported elsewhere
-interface Course {
-  courseName: string;
-  currentGrade: number;
-  tasks: Task[];
-}
-
-interface Task {
-  taskName: string;
-  courseName: string;
-  grade: number;
-  dueDate: string;
-  timeSpent: {
-    completed: string;
-    estimated: string;
-  };
-}
-
 function TaskPage() {
-  const { accessToken, uid } = useAuth();
-
-  const [email, setEmail] = useState("catlover@gmail.com");
+  const { uid } = useAuth();
+  console.log(`uid is ${uid}`);
+  const [user, setUser] = useState<FullUser>();
+  // /const [email] = useState("catlover@gmail.com");
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
@@ -36,6 +26,22 @@ function TaskPage() {
 
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
+
+  // Load user data
+  useEffect(() => {
+    if (!uid || uid.length > 128) return;
+
+    async function loadUser() {
+      try {
+        const fullUser = await getUser(uid!);
+        setUser(fullUser);
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    }
+
+    loadUser();
+  }, [uid]);
 
   // Prevent background scrolling when edit modals are open
   useEffect(() => {
@@ -126,12 +132,14 @@ function TaskPage() {
       {/* Profile Section */}
       <div className="task-page-profile-cont">
         <img
-          src="/images/profile.png"
-          alt={`${email}'s profile picture`}
+          src={user?.photoUrl ?? "/images/profile.png"}
+          alt={`${user?.email ?? "user"}'s profile picture`}
           className="task-page-profile-pic"
         />
         {selectedCourseTab === "All Courses" ? (
-          <div className="task-page-profile-name">{email}</div>
+          <div className="task-page-profile-name">
+            {user?.email ?? "catlover@gmail.com"}
+          </div>
         ) : (
           <div className="task-page-course-info">
             <div className="task-page-course-name">{selectedCourseTab}</div>

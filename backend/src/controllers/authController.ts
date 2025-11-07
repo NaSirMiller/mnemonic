@@ -97,3 +97,25 @@ export async function refreshAccessToken(request: Request, response: Response) {
     response.status(400).json({ message: message });
   }
 }
+
+export async function getUser(req: Request, res: Response) {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: "userId is required" });
+  }
+
+  try {
+    const user = await authRepo.getUser(userId);
+    return res.status(200).json(user);
+  } catch (error: unknown) {
+    console.error("Error getting user:", error);
+
+    if (error instanceof Error) {
+      console.log("Entered error block at controller");
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Unknown error occurred" });
+  }
+}

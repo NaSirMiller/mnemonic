@@ -29,8 +29,6 @@ export function getAccessToGoogleCalendar(userId: string) {
 export async function refreshAccessToken(userId: string) {
   if (!userId) throw new Error("userId is required");
 
-  console.log(`User id: ${userId}`);
-
   const res = await fetch(`${BASE_URL}/api/auth/refreshAccessToken`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -44,4 +42,23 @@ export async function refreshAccessToken(userId: string) {
 
   const data = await res.json();
   return data.accessToken as string;
+}
+
+export async function getUser(userId: string) {
+  if (!userId) throw new Error("userId is required");
+
+  const res = await fetch(`${BASE_URL}/api/auth/users/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || `Failed to fetch user: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data; // FullUser object
 }
