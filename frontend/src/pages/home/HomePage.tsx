@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../components/context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 
 import { getTasks } from "../../services/tasksService";
 import "./HomePage.css";
@@ -17,36 +17,6 @@ function HomePage() {
       console.error("Error fetching tasks:", err);
     }
   };
-
-  // Local hardcoded tasks
-  // const tasks = [
-  //   { name: "Homework 1", date: "Nov 1" },
-  //   { name: "Homework 2", date: "Nov 2" },
-  //   { name: "Homework 3", date: "Nov 3" },
-  //   { name: "Homework 4", date: "Nov 4" },
-  //   { name: "Homework 5", date: "Nov 5" },
-  //   { name: "Homework 6", date: "Nov 6" },
-  //   { name: "Homework 7", date: "Nov 7" },
-  //   { name: "Homework 8", date: "Nov 8" },
-  //   { name: "Homework 9", date: "Nov 9" },
-  //   { name: "Homework 10", date: "Nov 10" },
-  //   { name: "Homework 11", date: "Nov 11" },
-  //   { name: "Homework 12", date: "Nov 12" },
-  //   { name: "Homework 13", date: "Nov 13" },
-  //   { name: "Homework 14", date: "Nov 14" },
-  //   { name: "Homework 15", date: "Nov 15" },
-  //   { name: "Homework 16", date: "Nov 16" },
-  //   { name: "Homework 17", date: "Nov 17" },
-  //   { name: "Homework 18", date: "Nov 18" },
-  //   { name: "Homework 19", date: "Nov 19" },
-  //   { name: "Homework 20", date: "Nov 19" },
-  //   { name: "Homework 21", date: "Nov 19" },
-  //   { name: "Homework 22", date: "Nov 19" },
-  //   { name: "Homework 23", date: "Nov 19" },
-  //   { name: "Homework 24", date: "Nov 19" },
-  //   { name: "Homework 25", date: "Nov 19" },
-  //   { name: "Homework Mnemonic Data Structures 99999999", date: "Nov 11" },
-  // ];
 
   useEffect(() => {
     if (!uid) {

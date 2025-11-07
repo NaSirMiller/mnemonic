@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../components/context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import TaskCard from "../../components/tasks/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
@@ -24,7 +24,7 @@ interface Task {
 }
 
 function TaskPage() {
-  const { accessToken } = useAuth();
+  const { accessToken, uid } = useAuth();
 
   const [email, setEmail] = useState("catlover@gmail.com");
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);

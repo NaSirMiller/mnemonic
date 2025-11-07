@@ -1,18 +1,24 @@
 import admin from "../firebase_admin";
-import { User, UserModel, UserUpdate } from "../../../shared/models/user";
+import {
+  User,
+  FullUser,
+  MinimalUserModel,
+  UserUpdate,
+} from "../../../shared/models/user";
+import { toFullUser } from "../utils/user_utils";
 import { google } from "googleapis";
 
 export class AuthRepository {
   private db = admin.firestore();
+  private authDb = admin.auth();
 
   /**
-   *
    * @param idToken Provided id token based on user's Google auth request
-   * @returns true iff the token could be verified by firebase
+   * @returns true iff the token could be verified by Firebase
    */
   async isValidIdToken(idToken: string): Promise<boolean> {
     try {
-      await admin.auth().verifyIdToken(idToken, true);
+      await this.authDb.verifyIdToken(idToken, true);
       return true;
     } catch (error) {
       console.error(error);
@@ -21,9 +27,9 @@ export class AuthRepository {
   }
 
   async createUser(user: User): Promise<User> {
-    let validatedUser: UserModel;
+    let validatedUser: MinimalUserModel;
     try {
-      validatedUser = new UserModel(user);
+      validatedUser = new MinimalUserModel(user);
     } catch (err) {
       console.error(err);
       throw err;
@@ -35,22 +41,25 @@ export class AuthRepository {
     const newDoc = await docRef.get();
     const firestoreDocData = newDoc.data() as User;
 
-    const newUser = UserModel.fromJson({
-      ...firestoreDocData,
+    // Ensure all required fields are present for MinimalUserModel
+    const newUser = MinimalUserModel.fromJson({
       userId: newDoc.id,
+      refreshToken: firestoreDocData?.refreshToken ?? null,
     });
 
     return newUser.toJson();
   }
 
-  async getUser(userId: string): Promise<User> {
+  async getUser(userId: string): Promise<FullUser> {
     const doc = await this.db.collection("users").doc(userId).get();
     if (!doc.exists) {
       throw new Error("User not found");
     }
 
-    const data = doc.data() as User;
-    return UserModel.fromJson(data).toJson();
+    const minimalUserData = doc.data() as User;
+    const userRecord = await this.authDb.getUser(minimalUserData.userId);
+
+    return toFullUser(userRecord, minimalUserData.refreshToken ?? null);
   }
 
   async updateUser(userId: string, data: UserUpdate): Promise<void> {
@@ -58,7 +67,7 @@ export class AuthRepository {
     const doc = await userRef.get();
 
     if (!doc.exists) {
-      // If user doesn't exist, create it with the given data
+      // Create new user if not exists
       await userRef.set(data);
       return;
     }
@@ -76,17 +85,17 @@ export class AuthRepository {
 
     await userRef.delete();
   }
+
   async refreshAccessToken(userId: string): Promise<string> {
     const userDoc = await this.db.collection("users").doc(userId).get();
     if (!userDoc.exists) throw new Error("User not found");
 
-    const data = userDoc.data();
-    if (!data) throw new Error("No user data found in Firestore document");
+    const data = userDoc.data() ?? {};
 
-    // Include the document ID explicitly
-    const userData = UserModel.fromJson({
-      ...data,
+    // Explicitly set userId and provide default null for refreshToken
+    const userData = MinimalUserModel.fromJson({
       userId: userDoc.id,
+      refreshToken: data.refreshToken ?? null,
     });
 
     const previousRefreshToken = userData.refreshToken;

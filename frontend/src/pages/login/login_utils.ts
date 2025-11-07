@@ -5,7 +5,7 @@ import { FirebaseError } from "firebase/app";
 import { firebaseAuth, googleProvider } from "../../firebase_utils";
 import {
   isValidIdToken,
-  getGoogleCalendarAccessUrl,
+  // getGoogleCalendarAccessUrl,
 } from "../../services/authService";
 
 export class LoginError extends Error {
@@ -63,8 +63,7 @@ export async function signInWithGoogle(): Promise<{
     // redirect to backend endpoint to exchange for refresh token
     // window.location.href = getGoogleCalendarAccessUrl(user.uid);
 
-    // window.location.href = `http://localhost:5000/api/auth/google/connect?userId=${user.uid}`;
-    window.location.href = getGoogleCalendarAccessUrl(user.uid);
+    window.location.href = `http://localhost:5000/api/auth/google/connect?userId=${user.uid}`;
 
     return { user, idToken, googleAccessToken, googleIdToken };
   } catch (error: unknown) {
