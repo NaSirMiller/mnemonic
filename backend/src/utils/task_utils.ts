@@ -1,4 +1,8 @@
-import { Task } from "../../../shared/models/task";
+import {
+  NumericFieldValidationResult,
+  Task,
+  ValidationResult,
+} from "../../../shared/models/task";
 
 /** Field validation*/
 type ExpectedType =
@@ -56,13 +60,17 @@ export function validateTaskTypes(task: Task): string[] {
   return errors;
 }
 
-export function isTaskTypeValid(task: Task): boolean {
+export function isTaskTypeValid(task: Task): ValidationResult {
   const errors = validateTaskTypes(task);
-  if (errors.length > 0) {
-    console.error("Task validation errors:", errors);
-    return false;
+  for (let i = 0; i < errors.length; i++) {
+    console.error("Error occurred while validating tasks object:", errors[i]);
+    return { isValid: false, firstError: errors[i] };
   }
-  return true;
+  return { isValid: true, firstError: null };
+}
+
+export function attemptsToUpdateImmutable(task: Task): boolean {
+  return !!(task.taskId || task.userId);
 }
 
 export function hasRequiredFields(task: Task): boolean {
@@ -89,4 +97,84 @@ export function setTaskDefaults(task: Task): Task {
     createdAt: task.createdAt ?? now,
     lastUpdatedAt: task.lastUpdatedAt ?? now,
   };
+}
+
+/**
+ * Validates the values of specific fields in a Task object.
+ * Rules:
+ *  - weight: 0–1 or -1
+ *  - priority: -1 to n
+ *  - grade: 0–1 or null
+ */
+export function validateNumericTakFieldValues(
+  task: Task
+): NumericFieldValidationResult {
+  // Validate weight
+  if (task.weight !== undefined) {
+    if (!(task.weight >= 0 && task.weight <= 1) && task.weight !== -1) {
+      return {
+        isValid: false,
+        firstError: `Invalid weight: ${task.weight}. Must be 0–1 or -1.`,
+      };
+    }
+  }
+
+  // Validate priority
+  if (task.priority !== undefined) {
+    if (!(task.priority >= -1)) {
+      return {
+        isValid: false,
+        firstError: `Invalid priority: ${task.priority}. Must be -1 or greater.`,
+      };
+    }
+  }
+
+  // Validate grade
+  if (task.grade !== undefined && task.grade !== null) {
+    if (!(task.grade >= 0 && task.grade <= 1)) {
+      return {
+        isValid: false,
+        firstError: `Invalid grade: ${task.grade}. Must be 0–1 or null.`,
+      };
+    }
+  }
+
+  return { isValid: true };
+}
+
+export function normalizeTaskDates(task: Task): Task {
+  const normalizedTask: Task = { ...task };
+
+  if (task.dueDate instanceof Date) {
+    normalizedTask.dueDate = task.dueDate;
+  } else if (
+    typeof task.dueDate === "string" ||
+    typeof task.dueDate === "number"
+  ) {
+    const d = new Date(task.dueDate);
+    normalizedTask.dueDate = isNaN(d.getTime()) ? undefined : d;
+  }
+
+  // Handle createdAt (nullable)
+  if (task.createdAt instanceof Date) {
+    normalizedTask.createdAt = task.createdAt;
+  } else if (
+    typeof task.createdAt === "string" ||
+    typeof task.createdAt === "number"
+  ) {
+    const d = new Date(task.createdAt);
+    normalizedTask.createdAt = isNaN(d.getTime()) ? null : d;
+  }
+  // Handle lastUpdatedAt (nullable)
+  if (task.lastUpdatedAt instanceof Date) {
+    normalizedTask.lastUpdatedAt = task.lastUpdatedAt;
+  } else if (
+    typeof task.lastUpdatedAt === "string" ||
+    typeof task.lastUpdatedAt === "number"
+  ) {
+    const d = new Date(task.lastUpdatedAt);
+    normalizedTask.lastUpdatedAt = isNaN(d.getTime()) ? null : d;
+  }
+
+  return normalizedTask;
 }
