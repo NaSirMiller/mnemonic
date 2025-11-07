@@ -1,22 +1,14 @@
-# --- env setup ---
-# use official node 20 image (includes node.js + npm)
-from node:20
+FROM node:20
 
-# set working directory inside the container
-workdir /app
+WORKDIR /app
 
-# --- application setup ---
-# copy dependency files first for layer caching
-copy package*.json ./
+COPY package*.json ./
 
-# install dependencies inside the container
-run npm install
+RUN npm install
 
-# copy the rest of the frontend files
-copy . .
+COPY . .
 
-# expose port for vite (default 5173)
-expose 5173
+ENV PORT=${FRONTEND_PORT}
 
-# start the development server
-cmd ["npm", "run", "dev"]
+# Start Vite with configurable port
+CMD ["sh", "-c", "npm run dev -- --port $PORT"]

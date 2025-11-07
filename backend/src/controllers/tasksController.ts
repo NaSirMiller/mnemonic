@@ -1,19 +1,56 @@
 import { Request, Response } from "express";
-import { firebaseRepo } from "../repositories/firebaseRepository";
-import { Task } from "../models/task";
+
+import { taskRepo } from "../repositories/taskRepository";
+import type { Task } from "../../../shared/models/task";
+import type {
+  NumericFieldValidationResult,
+  ValidationResult,
+} from "../../../shared/models/validation";
+import {
+  attemptsToUpdateImmutable,
+  setTaskDefaults,
+  hasRequiredFields,
+  isTaskTypeValid,
+  normalizeTaskDates,
+  validateNumericTakFieldValues,
+} from "../utils/taskUtils";
 
 export async function createUserTask(request: Request, response: Response) {
   const taskPayload = request.body;
+  let errorMessage: string;
   try {
-    const createdTask: Task = await firebaseRepo.createTask(
-      taskPayload as Task
-    );
+    if (taskPayload.taskId !== undefined && taskPayload.taskId !== null)
+      // Override task id in the payload with firebase created id (later)
+      taskPayload.taskId = null;
+    const normalizedDates: Task = normalizeTaskDates(taskPayload); //Update date fields to date objects -- iff they are not date objects already
+    if (!hasRequiredFields(normalizedDates)) {
+      errorMessage =
+        "Provided payload is missing one of userId, title, or courseId";
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    const taskValidationResult: ValidationResult =
+      isTaskTypeValid(normalizedDates);
+    if (!taskValidationResult.isValid) {
+      errorMessage = taskValidationResult.firstError!;
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    const fieldValidationResult: NumericFieldValidationResult =
+      validateNumericTakFieldValues(normalizedDates);
+    if (!fieldValidationResult.isValid) {
+      errorMessage = fieldValidationResult.firstError!;
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    const validatedTask: Task = setTaskDefaults(normalizedDates); // Set fields not provided to default values, rather than nulls
+    const createdTask: Task = await taskRepo.createTask(validatedTask as Task);
+
     return response.status(200).json({
       message: "Successfully created a task.",
-      task: createdTask,
+      task: createdTask, // Includes created task id.
     });
   } catch (err) {
-    let errorMessage: string;
     if (err instanceof Error) {
       errorMessage = err.message;
       console.error(err);
@@ -27,14 +64,15 @@ export async function createUserTask(request: Request, response: Response) {
 
 export async function getUserTasks(request: Request, response: Response) {
   const { userId } = request.params;
-  const taskId: string | undefined = request.query.taskId as string | undefined;
+  const taskId = (request.query.taskId as string | undefined) ?? null;
+  const courseId = (request.query.courseId as string | undefined) ?? null;
 
   try {
     let tasksRetrieved: Task[];
-    if (taskId === undefined) {
-      tasksRetrieved = await firebaseRepo.getAllUserTasks(userId);
+    if (taskId === null) {
+      tasksRetrieved = await taskRepo.getAllUserTasks(userId, courseId);
     } else {
-      const task: Task = await firebaseRepo.getSingleUserTask(userId, taskId);
+      const task: Task = await taskRepo.getSingleUserTask(userId, taskId);
       tasksRetrieved = [task];
     }
     return response.status(200).json({
@@ -62,8 +100,30 @@ export async function getUserTasks(request: Request, response: Response) {
 
 export async function updateUserTask(request: Request, response: Response) {
   const { userId, taskId, taskPayload } = request.body;
+  let errorMessage: string;
   try {
-    await firebaseRepo.updateTask(userId, taskId, taskPayload as Task);
+    const normalizedTask: Task = normalizeTaskDates(taskPayload);
+
+    if (attemptsToUpdateImmutable(normalizedTask)) {
+      errorMessage = "You cannot update the task id or user id of a task.";
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    const taskValidationResult: ValidationResult =
+      isTaskTypeValid(normalizedTask);
+    if (!taskValidationResult.isValid) {
+      errorMessage = taskValidationResult.firstError!;
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    const fieldValidationResult: NumericFieldValidationResult =
+      validateNumericTakFieldValues(normalizedTask);
+    if (!fieldValidationResult.isValid) {
+      errorMessage = fieldValidationResult.firstError!;
+      return response.status(400).json({ message: errorMessage });
+    }
+
+    await taskRepo.updateTask(userId, taskId, normalizedTask);
     return response.status(200).json({
       message: `Successfully updated task ${taskId}.`,
     });
@@ -83,7 +143,7 @@ export async function updateUserTask(request: Request, response: Response) {
 export async function deleteUserTask(request: Request, response: Response) {
   const { userId, taskId } = request.params;
   try {
-    await firebaseRepo.deleteTask(userId, taskId);
+    await taskRepo.deleteTask(userId, taskId);
     return response.status(200).json({
       message: `Successfully deleted task ${taskId}`,
     });

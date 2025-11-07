@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { signInWithGoogle, LoginError } from "./Login";
-import "./SignIn.css";
+import { useAuth } from "../hooks/useAuth";
+import { signInWithGoogle, LoginError } from "../pages/login/login_utils";
 
-export const LoginButton = () => {
+type LoginButtonProps = {
+  className?: string;
+  onError?: (messag: string) => void;
+};
+
+export function LoginButton({ className, onError }: LoginButtonProps) {
   const { setUid, setAccessToken } = useAuth();
   const [, setIsAuthorized] = useState<boolean | null>(null);
-
   const handleGoogleLogin = async () => {
     try {
       const { user, googleAccessToken } = await signInWithGoogle();
@@ -17,19 +20,19 @@ export const LoginButton = () => {
       setIsAuthorized(true);
       console.log("Login successful", user.uid, googleAccessToken);
     } catch (error) {
-      if (error instanceof LoginError) {
-        alert(`Login error: ${error.message}`);
-      } else if (error instanceof Error) {
-        alert(`Unexpected error: ${error.message}`);
-      } else {
-        alert("Unknown error during login");
-      }
+      const message =
+        error instanceof LoginError || error instanceof Error
+          ? error.message
+          : "Unknown error during login";
+
+      if (onError) onError(message);
+      else alert(message);
     }
   };
 
   return (
-    <div className="signin-page-button" onClick={handleGoogleLogin}>
+    <div className={className} onClick={handleGoogleLogin}>
       Sign in with Google
     </div>
   );
-};
+}

@@ -1,22 +1,15 @@
-# --- env setup ---
-# use official node 20 image (includes node.js + npm)
-from node:20
+FROM node:20
 
-# set working directory inside the container
-workdir /app
+WORKDIR /app
 
-# --- application setup ---
-# copy dependency files first for layer caching
-copy package*.json ./
+COPY package*.json ./
 
-# install dependencies inside the container
-run npm install
+RUN npm install
 
-# copy the rest of the frontend files
-copy . .
+COPY . .
 
-# expose port for vite (default 5173)
-expose 5000
+# Use ENV for port configuration
+ENV PORT=${BACKEND_PORT}
 
-# start the development server
-cmd ["npm", "run", "start:dev"]
+# Use CMD with port from environment
+CMD ["sh", "-c", "npm run start:dev -- -p $PORT"]
