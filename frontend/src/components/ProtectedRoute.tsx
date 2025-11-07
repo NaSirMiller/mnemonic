@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { onIdTokenChanged } from "firebase/auth";
 import { firebaseAuth } from "../firebase_utils";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 // Helper: fetch fresh access token from backend
 async function fetchFreshAccessToken(userId: string): Promise<string | null> {

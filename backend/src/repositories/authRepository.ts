@@ -89,14 +89,15 @@ export class AuthRepository {
       userId: userDoc.id,
     });
 
-    const refreshToken = userData.refreshToken;
-    if (!refreshToken) throw new Error("No refresh token stored for user");
+    const previousRefreshToken = userData.refreshToken;
+    if (!previousRefreshToken)
+      throw new Error("No refresh token stored for user");
 
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET
     );
-    oauth2Client.setCredentials({ refresh_token: refreshToken });
+    oauth2Client.setCredentials({ refresh_token: previousRefreshToken });
 
     const { credentials } = await oauth2Client.refreshAccessToken();
     if (!credentials.access_token)

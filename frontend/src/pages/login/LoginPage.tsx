@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { firebaseAuth, googleProvider } from "../firebase_utils";
+import { firebaseAuth, googleProvider } from "../../firebase_utils";
 import {
   isValidIdToken,
   IdTokenVerificationError,
-} from "../services/authService";
-import NavBar from "../components/NavBar/NavBar";
+} from "../../services/authService";
+import NavBar from "../../components/navbar/NavBar";
 import "../style.css";
 import { useState } from "react";
 

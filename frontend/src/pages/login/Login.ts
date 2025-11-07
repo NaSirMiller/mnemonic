@@ -1,7 +1,7 @@
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-import { firebaseAuth, googleProvider } from "../firebase_utils";
+import { firebaseAuth, googleProvider } from "../../firebase_utils";
 
 export class LoginError extends Error {
   code: string;

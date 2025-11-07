@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { signInWithGoogle, LoginError } from "./Login";
+import { useAuth } from "./context/AuthContext";
+import { signInWithGoogle, LoginError } from "../pages/login/Login";
 import "./SignIn.css";
 
 export const LoginButton = () => {
