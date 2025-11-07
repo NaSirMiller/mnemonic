@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import courseData from "../../../mock_data/courses.json";
+import courseTaskData from "../../../mock_data/courses_with_tasks.json"
 import "./EditTask.css";
 
 type Task = {
@@ -13,9 +15,7 @@ type Task = {
     gradeType: string;
 };
 
-function EditTask() {
-    const sectionList = [ "Selct Task", "Task Name", "Task Grade", "Task Grade Weighting", "Time Spent", "Due Date" ];
-    
+function EditTask() {    
     // form data
     const [ taskName, setTaskName ] = useState<string>( "" );
     const [ taskGradeWeight, setTaskGradeWeight ] = useState<string>( "" );
@@ -31,31 +31,49 @@ function EditTask() {
     const [ selectedGradeWeight, setSelectedGradeWeight ] = useState<string>( "" );
 
     useEffect( () => {
-        fetch( "/courses.json" )
-            .then( res => res.json() )
-            .then( data => {
-                if ( data.courses ) {
-                    const names = data.courses.map( course => course.name );
-                    setCourses( [ ...names ] );
-                    setSelectedCourse( names[ 0 ] );
-                }
-        } );
+        // fetch( "/courses.json" )
+        //     .then( res => res.json() )
+        //     .then( data => {
+        //         if ( data.courses ) {
+        //             const names = data.courses.map( course => course.name );
+        //             setCourses( [ ...names ] );
+        //             setSelectedCourse( names[ 0 ] );
+        //         }
+        // } );
+        if (courseData.courses) {
+            const names = courseData.courses.map(course => course.name);
+            setCourses([...names]);
+            setSelectedCourse(names[0]);
+        }
     }, [ ] );
 
     useEffect( () => {
-        fetch( "/courses_with_tasks.json" )
-            .then( res => res.json() )
-            .then( data => {
-                const course = data.courses.find( c => c.name === selectedCourse );
+        // fetch( "/courses_with_tasks.json" )
+        //     .then( res => res.json() )
+        //     .then( data => {
+        //         const course = data.courses.find( c => c.name === selectedCourse );
+        //         setTasks( course.tasks );
+        //         setSelectedTask( course.tasks[ 0 ] );
+        //     } );
+        // fetch( "/courses.json" )
+        //     .then( res => res.json() )
+        //     .then( data => {
+        //         const course = data.courses.find( c => c.name === selectedCourse );
+        //         setGradeWeights( Object.keys( course.gradeTypes ) );
+        //     } );
+
+        if (courseTaskData.courses) {
+            const course = courseTaskData.courses.find( c => c.name === selectedCourse );
+            if (course) {
                 setTasks( course.tasks );
                 setSelectedTask( course.tasks[ 0 ] );
-            } );
-        fetch( "/courses.json" )
-            .then( res => res.json() )
-            .then( data => {
-                const course = data.courses.find( c => c.name === selectedCourse );
+            }
+        }
+        if (courseData.courses) {
+            const course = courseData.courses.find( c => c.name === selectedCourse );
+            if (course)
                 setGradeWeights( Object.keys( course.gradeTypes ) );
-            } );
+        }
     }, [ selectedCourse ] );
 
     useEffect( () => {
@@ -89,24 +107,29 @@ function EditTask() {
         setSelectedTask( newTask );
     }
 
-    const changeTask = async () => {
+    const changeTask = () => {
         let newTimeSpent = null;
         if ( timeSpent ) {
+            const [completedStr, estimatedStr] = timeSpent.split(" / ");
             newTimeSpent = {
-                completed: selectedTask.timeSpent.completed, 
-                estimated: selectedTask.timeSpent.estimated
+                completed: completedStr.trim(), 
+                estimated: estimatedStr.trim()
             };
         }
+
+        console.log( taskGradeWeight )
 
         // Create updated task
         const updatedTask: Task = {
             ...selectedTask,
-            taskName,
+            taskName: taskName,
+            courseName: selectedCourse,
             gradeType: taskGradeWeight,
             grade: taskGrade ? Number(taskGrade) : null,
             dueDate,
             timeSpent: newTimeSpent,
         };
+        console.log( updatedTask );
 
         // Update tasks array
         const updatedTasks = tasks.map( t =>
@@ -115,16 +138,23 @@ function EditTask() {
 
         setTasks( updatedTasks );
         setSelectedTask( updatedTask );
-
-        // chatgpt wrote this
-        // await fetch("/update-task", {
-        //     method: "PUT",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({
-        //         courseName: selectedCourse,
-        //         task: updatedTask,
-        //     }),
-        // });
+  
+        //----------------//
+        // back end stuff //
+        //----------------//
+        // back end that doesnt work because this should be in express
+        // const filePath = path.resolve(__dirname, '../../../mock_data/courses_with_tasks.json');
+        // alert( 1 )
+        // const backendCourseData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+        // alert( 2 )
+        // const updatedCourses = backendCourseData.courses.map(course =>
+        //     course.name === selectedCourse
+        //         ? { ...course, tasks: updatedTasks }
+        //         : course
+        // );
+        // alert( 3 )
+        // fs.writeFileSync(filePath, JSON.stringify({ courses: updatedCourses }, null, 2));
+        // alert( 4 )
     }
 
     return (
@@ -176,7 +206,7 @@ function EditTask() {
                             <div className="edit-task-task-card-grade">
                                 { task.grade }
                             </div>
-                            <div className="edit-task-task-card-time-spent">
+                            <div className="edit-task-task-card-time-spent">gradeType
                                 { task.timeSpent ? task.timeSpent.completed + " / " + task.timeSpent.estimated : "" }
                             </div>
                             <div className="edit-task-task-card-due-date">
@@ -208,9 +238,9 @@ function EditTask() {
                     <div 
                         key={ "edit-task-" + gradeWeight + "-" + i} 
                         className={ `edit-task-grade-weight ${ selectedGradeWeight === gradeWeight ? "selected" : "" }` }
-                        onClick={ () => { 
-                            setSelectedGradeWeight( gradeWeight );
+                        onClick={ () => {
                             setTaskGradeWeight( gradeWeight );
+                            setSelectedGradeWeight( gradeWeight );
                             changeTask();
                         } }
                     >
@@ -233,7 +263,7 @@ function EditTask() {
                 Time Spent
             </div>
             <input 
-                type="time"
+                // type="time"
                 name="timeSpent"
                 className="edit-task-text-input"
                 value={ timeSpent }
