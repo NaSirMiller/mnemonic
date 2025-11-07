@@ -1,7 +1,12 @@
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
+
 import { firebaseAuth, googleProvider } from "../../firebase_utils";
+import {
+  isValidIdToken,
+  getGoogleCalendarAccessUrl,
+} from "../../services/authService";
 
 export class LoginError extends Error {
   code: string;
@@ -39,31 +44,25 @@ export async function signInWithGoogle(): Promise<{
     // Firebase ID token
     const idToken = await user.getIdToken();
 
-    // Google OAuth credentials from Firebase (access token only)
-    const credential = GoogleAuthProvider.credentialFromResult(userCredentials);
-    const googleAccessToken = credential?.accessToken ?? null;
-    const googleIdToken = credential?.idToken ?? null;
-
     // Verify ID token with backend
-    const verificationResponse = await fetch(
-      "http://localhost:5000/api/auth/verifyIdToken",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      }
-    );
+    const validToken: boolean = await isValidIdToken(idToken);
 
-    const verificationResult = await verificationResponse.json();
-    if (!verificationResult.validUser) {
+    if (!validToken) {
+      // The id token produced by Google or the use, is not valid
+      console.log("Could not verify your login. Please try again.");
       throw new LoginError(
         "User could not be verified by backend",
         "auth/verification-failed"
       );
     }
 
+    // Google OAuth credentials from Firebase (access token only)
+    const credential = GoogleAuthProvider.credentialFromResult(userCredentials);
+    const googleAccessToken = credential?.accessToken ?? null;
+    const googleIdToken = credential?.idToken ?? null;
+
     // redirect to backend endpoint to exchange for refresh token
-    window.location.href = `http://localhost:5000/api/auth/google/connect?userId=${user.uid}`;
+    window.location.href = getGoogleCalendarAccessUrl(user.uid);
 
     return { user, idToken, googleAccessToken, googleIdToken };
   } catch (error: unknown) {
