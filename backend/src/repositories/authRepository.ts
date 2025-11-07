@@ -5,7 +5,7 @@ import {
   MinimalUserModel,
   UserUpdate,
 } from "../../../shared/models/user";
-import { toFullUser } from "../utils/user_utils";
+import { toFullUser } from "../utils/userUtils";
 import { google } from "googleapis";
 
 export class AuthRepository {

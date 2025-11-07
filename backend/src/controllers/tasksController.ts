@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 
 import { taskRepo } from "../repositories/taskRepository";
+import type { Task } from "../../../shared/models/task";
 import type {
   NumericFieldValidationResult,
-  Task,
   ValidationResult,
-} from "../../../shared/models/task";
+} from "../../../shared/models/validation";
 import {
   attemptsToUpdateImmutable,
   setTaskDefaults,
@@ -13,7 +13,7 @@ import {
   isTaskTypeValid,
   normalizeTaskDates,
   validateNumericTakFieldValues,
-} from "../utils/task_utils";
+} from "../utils/taskUtils";
 
 export async function createUserTask(request: Request, response: Response) {
   const taskPayload = request.body;
@@ -22,28 +22,28 @@ export async function createUserTask(request: Request, response: Response) {
     if (taskPayload.taskId !== undefined && taskPayload.taskId !== null)
       // Override task id in the payload with firebase created id (later)
       taskPayload.taskId = null;
-    if (!hasRequiredFields(taskPayload)) {
+    const normalizedDates: Task = normalizeTaskDates(taskPayload); //Update date fields to date objects -- iff they are not date objects already
+    if (!hasRequiredFields(normalizedDates)) {
       errorMessage =
         "Provided payload is missing one of userId, title, or courseId";
       return response.status(400).json({ message: errorMessage });
     }
 
-    const taskValidationResult: ValidationResult = isTaskTypeValid(taskPayload);
+    const taskValidationResult: ValidationResult =
+      isTaskTypeValid(normalizedDates);
     if (!taskValidationResult.isValid) {
       errorMessage = taskValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
     }
 
     const fieldValidationResult: NumericFieldValidationResult =
-      validateNumericTakFieldValues(taskPayload);
+      validateNumericTakFieldValues(normalizedDates);
     if (!fieldValidationResult.isValid) {
       errorMessage = fieldValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
     }
 
-    const taskWithDates: Task = normalizeTaskDates(taskPayload); //Update date fields to date objects -- iff they are not date objects already
-    const validatedTask: Task = setTaskDefaults(taskWithDates); // Set fields not provided to default values, rather than nulls
-
+    const validatedTask: Task = setTaskDefaults(normalizedDates); // Set fields not provided to default values, rather than nulls
     const createdTask: Task = await taskRepo.createTask(validatedTask as Task);
 
     return response.status(200).json({
@@ -102,25 +102,28 @@ export async function updateUserTask(request: Request, response: Response) {
   const { userId, taskId, taskPayload } = request.body;
   let errorMessage: string;
   try {
-    if (attemptsToUpdateImmutable(taskPayload)) {
+    const normalizedTask: Task = normalizeTaskDates(taskPayload);
+
+    if (attemptsToUpdateImmutable(normalizedTask)) {
       errorMessage = "You cannot update the task id or user id of a task.";
       return response.status(400).json({ message: errorMessage });
     }
 
-    const taskValidationResult: ValidationResult = isTaskTypeValid(taskPayload);
+    const taskValidationResult: ValidationResult =
+      isTaskTypeValid(normalizedTask);
     if (!taskValidationResult.isValid) {
       errorMessage = taskValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
     }
 
     const fieldValidationResult: NumericFieldValidationResult =
-      validateNumericTakFieldValues(taskPayload);
+      validateNumericTakFieldValues(normalizedTask);
     if (!fieldValidationResult.isValid) {
       errorMessage = fieldValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
     }
 
-    await taskRepo.updateTask(userId, taskId, taskPayload as Task);
+    await taskRepo.updateTask(userId, taskId, normalizedTask);
     return response.status(200).json({
       message: `Successfully updated task ${taskId}.`,
     });

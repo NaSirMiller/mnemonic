@@ -1,8 +1,8 @@
+import { Task } from "../../../shared/models/task";
 import {
   NumericFieldValidationResult,
-  Task,
   ValidationResult,
-} from "../../../shared/models/task";
+} from "../../../shared/models/validation";
 
 /** Field validation*/
 type ExpectedType =
@@ -18,6 +18,8 @@ const TaskFieldTypes: Record<keyof Task, ExpectedType | ExpectedType[]> = {
   title: ["string", "undefined"],
   courseId: ["string", "undefined"],
   taskId: ["string", "undefined"],
+  expectedTime: ["number", "undefined"],
+  currentTime: ["number", "undefined"],
   weight: ["number", "undefined"],
   dueDate: ["date", "undefined", "null"],
   description: ["string", "undefined"],
@@ -89,6 +91,8 @@ export function setTaskDefaults(task: Task): Task {
     userId: task.userId!,
     title: task.title!,
     courseId: task.courseId!,
+    currentTime: 0,
+    expectedTime: 0,
     weight: task.weight ?? -1, // No weight specified
     dueDate: task.dueDate ?? null,
     description: task.description ?? "",

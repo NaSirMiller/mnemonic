@@ -1,9 +1,5 @@
 import admin from "../firebase_admin";
-import {
-  Course,
-  CourseModel,
-  CourseUpdate,
-} from "../../../shared/models/course";
+import { Course } from "../../../shared/models/course";
 
 export class CourseRepository {
   private db = admin.firestore();
@@ -13,15 +9,14 @@ export class CourseRepository {
       .collection("courses")
       .where("userId", "==", userId)
       .get();
-    if (snapshot.size < 1) {
-      console.log(snapshot.size);
+
+    if (snapshot.empty) {
       throw new Error("Courses not found");
     }
-    let docAsCourse: Course;
+
     return snapshot.docs.map((doc) => {
-      docAsCourse = doc.data() as Course;
-      const course = CourseModel.fromJson({ ...docAsCourse });
-      return course.toJson();
+      const data = doc.data() as Course;
+      return { ...data, courseId: doc.id };
     });
   }
 
@@ -32,43 +27,20 @@ export class CourseRepository {
     }
 
     const data = doc.data() as Course;
-    if (data?.userId !== userId) {
+    if (data.userId !== userId) {
       throw new Error("Unauthorized: user does not own this course");
     }
-    let docAsCourse: Course = data as Course;
-    const course = CourseModel.fromJson({ ...docAsCourse });
-    return course.toJson();
+
+    return { ...data, courseId: doc.id };
   }
 
   async createCourse(course: Course): Promise<Course> {
-    let validatedCourse;
-    try {
-      validatedCourse = new CourseModel(course);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-
-    const exists = await this.db
-      .collection("courses")
-      .doc(course.courseId)
-      .get();
-    if (exists.exists) {
-      throw new Error("Course already exists");
-    }
-    const docRef = await this.db
-      .collection("courses")
-      .add(validatedCourse.toJson());
-
+    // Firestore auto-generates ID
+    const docRef = await this.db.collection("courses").add(course);
     const newDoc = await docRef.get();
     const firestoreDocData = newDoc.data() as Course;
 
-    const newCourse = CourseModel.fromJson({
-      ...firestoreDocData,
-      courseId: newDoc.id,
-    });
-
-    return newCourse.toJson();
+    return { ...firestoreDocData, courseId: newDoc.id };
   }
 
   async deleteCourse(userId: string, courseId: string): Promise<void> {
@@ -79,8 +51,8 @@ export class CourseRepository {
       throw new Error("Course not found");
     }
 
-    const data = doc.data();
-    if (data?.userId !== userId) {
+    const data = doc.data() as Course;
+    if (data.userId !== userId) {
       throw new Error("Unauthorized: user does not own this course");
     }
 
@@ -90,9 +62,8 @@ export class CourseRepository {
   async updateCourse(
     userId: string,
     courseId: string,
-    data: CourseUpdate
+    data: Partial<Course>
   ): Promise<void> {
-    console.log(courseId);
     const courseRef = this.db.collection("courses").doc(courseId);
     const doc = await courseRef.get();
 
@@ -100,16 +71,10 @@ export class CourseRepository {
       throw new Error("Course not found");
     }
 
-    const docData = doc.data() as Course | undefined;
-    if (!docData || docData.userId !== userId) {
+    const docData = doc.data() as Course;
+    if (docData.userId !== userId) {
       throw new Error("Unauthorized: user does not own this course");
     }
-
-    // Validate the update using CourseModel
-    CourseModel.fromJson({
-      ...docData,
-      ...data,
-    }).toJson();
 
     await courseRef.update(data);
   }

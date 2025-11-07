@@ -17,11 +17,13 @@ import "./TaskPage.css";
 function TaskPage() {
   const { uid } = useAuth();
   const [user, setUser] = useState<FullUser>();
-  // /const [email] = useState("catlover@gmail.com");
+
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
-  const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
+  // const [setCourseNames] = useState<string[]>([]);
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
-  const [courseTasks, setCourseTasks] = useState<Task[]>([]);
+  // const [courseTasks, setCourseTasks] = useState<Task[]>([]);
+
+  const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
   const [checkedMap, setCheckedMap] = useState<{ [key: number]: boolean }>({});
   const [selectedGrade, setSelectedGrade] = useState(0.0);
   const [selectedTimeSpent, setSelectedTimeSpent] = useState("0 h 0 m");
@@ -29,7 +31,7 @@ function TaskPage() {
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
 
-  // Load user data
+  // Load user data for profile information
   useEffect(() => {
     if (!uid || uid.length > 128) return;
 
@@ -45,32 +47,48 @@ function TaskPage() {
     loadUser();
   }, [uid]);
 
-  // Fetch tasks when course tab changes
+  // Get all course data for a user, and get all course names for the tab bar
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const courses = await getCourses(uid!, null);
+        setAvailableCourses(courses);
+        // const cNames = [
+        //   "All Courses",
+        //   ...courses.map((c: Course) => c.courseName),
+        // ];
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      }
+    }
+    fetchCourses();
+  }, [uid]);
+
+  // Get tasks data for the selected tab
   useEffect(() => {
     async function fetchTasks() {
       try {
         if (selectedCourseTab === "All Courses") {
-          const res = await fetch("/tasks.json");
-          const data = await res.json();
-          setAvailableTasks(data.tasks || []);
+          const allCourseTasks = await getTasks(uid!, null, null);
+          setAvailableTasks(allCourseTasks);
         } else {
-          const res = await fetch("/courses_with_tasks.json");
-          const data = await res.json();
-          const course = data.courses.find(
-            (c: any) => c.name === selectedCourseTab
+          const selectedCourse: Course = availableCourses.find(
+            (course) => course.courseName === selectedCourseTab
+          )!;
+          const selectedCourseTasks = await getTasks(
+            uid!,
+            null,
+            selectedCourse.courseId // Currently selected course
           );
-          if (!course) return;
-
-          setAvailableTasks(course.tasks);
-          setSelectedGrade(course.currentGrade);
+          // setSelectedCourseId(selectedCourse.courseId);
+          setAvailableTasks(selectedCourseTasks);
+          setSelectedGrade(selectedCourse.currentGrade!);
 
           // Calculate total time spent
           let totalMinutes = 0;
-          course.tasks.forEach((task: any) => {
-            const match = task.timeSpent.completed.match(/(\d+)h\s*(\d+)?m?/);
-            const hours = parseInt(match?.[1] || "0", 10);
-            const minutes = parseInt(match?.[2] || "0", 10);
-            totalMinutes += hours * 60 + minutes;
+          selectedCourseTasks.forEach((task: Task) => {
+            const completedTime = task.currentTime ?? 0;
+            totalMinutes += completedTime;
           });
           const totalHours = Math.floor(totalMinutes / 60);
           const remainingMinutes = totalMinutes % 60;
@@ -82,26 +100,7 @@ function TaskPage() {
     }
 
     fetchTasks();
-  }, [selectedCourseTab]);
-
-  // Example: fetch courses once
-  useEffect(() => {
-    async function fetchCourses() {
-      try {
-        const res = await fetch("/courses_with_tasks.json");
-        const data = await res.json();
-        if (data.courses) {
-          setAvailableCourses([
-            "All Courses",
-            ...data.courses.map((c: any) => c.name),
-          ]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch courses:", err);
-      }
-    }
-    fetchCourses();
-  }, []);
+  }, [selectedCourseTab, availableCourses, uid]);
 
   // Prevent background scrolling when edit modals are open
   useEffect(() => {
@@ -152,7 +151,9 @@ function TaskPage() {
               </div>
               <div className="task-page-course-detail">
                 <div>Current Grade</div>
-                <div className="color-blue">{selectedGrade}</div>
+                <div className="color-blue">
+                  {(selectedGrade * 100).toFixed(2)}
+                </div>
               </div>
               <div className="task-page-course-detail">
                 <div>Total Time Spent</div>
@@ -181,17 +182,19 @@ function TaskPage() {
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {availableCourses.map((course, i) => (
-          <div
-            key={`task-page-${course}-${i}`}
-            className={`task-page-course ${
-              selectedCourseTab === course ? "selected" : ""
-            }`}
-            onClick={() => setSelectedCourseTab(course)}
-          >
-            {course}
-          </div>
-        ))}
+        {["All Courses", ...availableCourses.map((c) => c.courseName!)].map(
+          (courseName, i) => (
+            <div
+              key={`task-page-${courseName}-${i}`}
+              className={`task-page-course ${
+                selectedCourseTab === courseName ? "selected" : ""
+              }`}
+              onClick={() => setSelectedCourseTab(courseName)}
+            >
+              {courseName}
+            </div>
+          )
+        )}
       </div>
 
       {/* Task List */}
@@ -208,15 +211,23 @@ function TaskPage() {
           {availableTasks.map((task, i) => (
             <TaskCard
               key={`task-card-${i}`}
-              name={task.taskName}
+              name={task.title}
               course={
                 selectedCourseTab === "All Courses"
-                  ? task.courseName
+                  ? task.title
                   : selectedCourseTab
               }
-              grade={task.grade}
-              dueDate={task.dueDate}
-              timeSpent={`${task.timeSpent.completed} / ${task.timeSpent.estimated}`}
+              grade={task.grade! * 100}
+              dueDate={
+                task.dueDate
+                  ? new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(task.dueDate)
+                  : "No due date"
+              }
+              timeSpent={`${task.currentTime} / ${task.expectedTime}`}
               checked={checkedMap[i]}
               onClick={() => toggleChecked(i)}
             />
