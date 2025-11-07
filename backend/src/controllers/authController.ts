@@ -69,9 +69,6 @@ export async function handleGoogleCallback(
       console.warn("No refresh token returned (was consent prompt shown?)");
     }
 
-    console.log("Tokens received:", tokens);
-    console.log("Refresh token stored:", tokens.refresh_token);
-
     // Store refresh token in Firestore.
     if (tokens.refresh_token) {
       await authRepo.updateUser(userId as string, {

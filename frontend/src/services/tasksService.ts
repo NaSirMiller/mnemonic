@@ -67,12 +67,12 @@ export async function createTask(taskPayload: Task): Promise<void> {
 
 export async function getTasks(
   userId: string,
-  taskId: string | null
+  taskId: string | null = null
 ): Promise<Task[]> {
   try {
     const tasksResponse = await getTasksApi(userId, taskId);
     const tasks: Task[] = tasksResponse.tasks;
-    console.log(`Retrieved ${tasks.length} taks.`);
+    console.log(`Retrieved ${tasks.length} task.`);
     return tasks;
   } catch (error) {
     if (error instanceof Error) {
