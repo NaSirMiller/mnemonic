@@ -1,4 +1,8 @@
-import { verifyIdToken as verifyIdTokenApi } from "../api";
+import {
+  verifyIdToken as verifyIdTokenApi,
+  getAccessToGoogleCalendar as getAccessToGoogleCalendarApi,
+  refreshAccessToken as refreshAccessTokenApi,
+} from "../api";
 
 export class IdTokenVerificationError extends Error {
   code: string;
@@ -6,6 +10,15 @@ export class IdTokenVerificationError extends Error {
     super(message);
     this.code = code;
     Object.setPrototypeOf(this, IdTokenVerificationError.prototype);
+  }
+}
+
+export class GoogleAuthError extends Error {
+  code: string;
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+    Object.setPrototypeOf(this, GoogleAuthError.prototype);
   }
 }
 
@@ -34,5 +47,45 @@ export async function isValidIdToken(idToken: string): Promise<boolean> {
         "unknown"
       );
     }
+  }
+}
+
+export function getGoogleCalendarAccessUrl(userId: string): string {
+  try {
+    return getAccessToGoogleCalendarApi(userId);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Failed to get Google Calendar access URL:", error.message);
+      throw new GoogleAuthError(
+        `Failed to get Google Calendar URL: ${error.message}`,
+        "invalid-userid"
+      );
+    }
+    throw new GoogleAuthError(
+      "Unknown error getting Google Calendar URL",
+      "unknown"
+    );
+  }
+}
+
+export async function getRefreshedGoogleAccessToken(
+  userId: string
+): Promise<string> {
+  try {
+    const accessToken = await refreshAccessTokenApi(userId);
+    console.log("Successfully refreshed Google access token");
+    return accessToken;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Failed to refresh Google access token:", error.message);
+      throw new GoogleAuthError(
+        `Failed to refresh access token: ${error.message}`,
+        "refresh-failed"
+      );
+    }
+    throw new GoogleAuthError(
+      "Unknown error refreshing access token",
+      "unknown"
+    );
   }
 }

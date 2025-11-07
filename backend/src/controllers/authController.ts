@@ -38,7 +38,7 @@ export async function verifyIdToken(
   }
 }
 
-export function connectGoogle(req: Request, res: Response): void {
+export function getAccessToGoogleCalendar(req: Request, res: Response): void {
   const { userId } = req.query;
   if (!userId) {
     res.status(400).send("Missing userId");

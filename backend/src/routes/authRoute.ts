@@ -2,13 +2,13 @@
 import { Router } from "express";
 import {
   verifyIdToken,
-  connectGoogle,
+  getAccessToGoogleCalendar,
   handleGoogleCallback,
   refreshAccessToken,
 } from "../controllers/authController";
 export const authRouter = Router();
 
 authRouter.post("/verifyIdToken", verifyIdToken);
-authRouter.get("/google/connect", connectGoogle);
+authRouter.get("/google/connect", getAccessToGoogleCalendar);
 authRouter.get("/google/callback", handleGoogleCallback);
 authRouter.post("refreshAccessToken", refreshAccessToken);
