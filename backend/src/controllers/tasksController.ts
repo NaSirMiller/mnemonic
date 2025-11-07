@@ -64,12 +64,13 @@ export async function createUserTask(request: Request, response: Response) {
 
 export async function getUserTasks(request: Request, response: Response) {
   const { userId } = request.params;
-  const taskId: string | undefined = request.query.taskId as string | undefined;
+  const taskId = (request.query.taskId as string | undefined) ?? null;
+  const courseId = (request.query.courseId as string | undefined) ?? null;
 
   try {
     let tasksRetrieved: Task[];
-    if (taskId === undefined) {
-      tasksRetrieved = await taskRepo.getAllUserTasks(userId);
+    if (taskId === null) {
+      tasksRetrieved = await taskRepo.getAllUserTasks(userId, courseId);
     } else {
       const task: Task = await taskRepo.getSingleUserTask(userId, taskId);
       tasksRetrieved = [task];

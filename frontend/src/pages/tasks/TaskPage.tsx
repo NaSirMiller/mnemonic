@@ -6,6 +6,8 @@ import type { Course } from "../../../../shared/models/course";
 import type { Task } from "../../../../shared/models/task";
 import type { FullUser } from "../../../../shared/models/user";
 import { getUser } from "../../services/authService";
+import { getCourses } from "../../services/coursesService";
+import { getTasks } from "../../services/tasksService";
 
 import TaskCard from "../../components/tasks/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
@@ -14,12 +16,12 @@ import "./TaskPage.css";
 
 function TaskPage() {
   const { uid } = useAuth();
-  console.log(`uid is ${uid}`);
   const [user, setUser] = useState<FullUser>();
   // /const [email] = useState("catlover@gmail.com");
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
+  const [courseTasks, setCourseTasks] = useState<Task[]>([]);
   const [checkedMap, setCheckedMap] = useState<{ [key: number]: boolean }>({});
   const [selectedGrade, setSelectedGrade] = useState(0.0);
   const [selectedTimeSpent, setSelectedTimeSpent] = useState("0 h 0 m");
@@ -42,43 +44,6 @@ function TaskPage() {
 
     loadUser();
   }, [uid]);
-
-  // Prevent background scrolling when edit modals are open
-  useEffect(() => {
-    document.body.style.overflow =
-      showEditTask || showEditCourse ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [showEditTask, showEditCourse]);
-
-  // Example: fetch courses once
-  useEffect(() => {
-    async function fetchCourses() {
-      try {
-        const res = await fetch("/courses_with_tasks.json");
-        const data = await res.json();
-        if (data.courses) {
-          setAvailableCourses([
-            "All Courses",
-            ...data.courses.map((c: any) => c.name),
-          ]);
-        }
-      } catch (err) {
-        console.error("Failed to fetch courses:", err);
-      }
-    }
-    fetchCourses();
-  }, []);
-
-  // Reset checked map when available tasks change
-  useEffect(() => {
-    const initialMap: { [key: number]: boolean } = {};
-    availableTasks.forEach((_, i) => {
-      initialMap[i] = false;
-    });
-    setCheckedMap(initialMap);
-  }, [availableTasks]);
 
   // Fetch tasks when course tab changes
   useEffect(() => {
@@ -118,6 +83,43 @@ function TaskPage() {
 
     fetchTasks();
   }, [selectedCourseTab]);
+
+  // Example: fetch courses once
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const res = await fetch("/courses_with_tasks.json");
+        const data = await res.json();
+        if (data.courses) {
+          setAvailableCourses([
+            "All Courses",
+            ...data.courses.map((c: any) => c.name),
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+      }
+    }
+    fetchCourses();
+  }, []);
+
+  // Prevent background scrolling when edit modals are open
+  useEffect(() => {
+    document.body.style.overflow =
+      showEditTask || showEditCourse ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showEditTask, showEditCourse]);
+
+  // Reset checked map when available tasks change
+  useEffect(() => {
+    const initialMap: { [key: number]: boolean } = {};
+    availableTasks.forEach((_, i) => {
+      initialMap[i] = false;
+    });
+    setCheckedMap(initialMap);
+  }, [availableTasks]);
 
   // Toggle task checked state
   const toggleChecked = (index: number) => {

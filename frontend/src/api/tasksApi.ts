@@ -22,9 +22,17 @@ export async function createTask(taskPayload: Task) {
   return data; // Response format: {message: string, task: Task}
 }
 
-export async function getTasks(userId: string, taskId: string | null = null) {
+export async function getTasks(
+  userId: string,
+  taskId: string | null,
+  courseId: string | null
+) {
+  const params = new URLSearchParams();
+  if (taskId) params.append("taskId", taskId);
+  if (courseId) params.append("courseId", courseId);
+
   const url = `${BASE_URL}/api/tasks/${userId}${
-    taskId ? `?taskId=${taskId}` : ""
+    params.toString() ? `?${params.toString()}` : ""
   }`;
   const res = await fetch(url, {
     method: "GET",

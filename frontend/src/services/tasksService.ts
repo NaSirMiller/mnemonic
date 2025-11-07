@@ -97,10 +97,11 @@ function parseDate(value: unknown): Date | null | undefined {
 
 export async function getTasks(
   userId: string,
-  taskId: string | null = null
+  taskId: string | null = null,
+  courseId: string | null = null
 ): Promise<Task[]> {
   try {
-    const tasksResponse = await getTasksApi(userId, taskId);
+    const tasksResponse = await getTasksApi(userId, taskId, courseId);
     const tasks: Task[] = tasksResponse.tasks;
 
     // Normalize dates for each task

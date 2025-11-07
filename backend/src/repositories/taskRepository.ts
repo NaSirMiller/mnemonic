@@ -4,11 +4,15 @@ import { Task } from "../../../shared/models/task";
 export class TaskRepository {
   private db = admin.firestore();
 
-  async getAllUserTasks(userId: string): Promise<Task[]> {
-    const snapshot = await this.db
-      .collection("tasks")
-      .where("userId", "==", userId)
-      .get();
+  async getAllUserTasks(
+    userId: string,
+    courseId: string | null
+  ): Promise<Task[]> {
+    let query = this.db.collection("tasks").where("userId", "==", userId);
+    if (courseId) {
+      query = query.where("courseId", "==", courseId);
+    }
+    const snapshot = await query.get();
 
     return snapshot.docs.map((doc) => {
       const docData = doc.data() as Task;
