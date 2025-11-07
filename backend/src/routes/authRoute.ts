@@ -11,4 +11,4 @@ export const authRouter = Router();
 authRouter.post("/verifyIdToken", verifyIdToken);
 authRouter.get("/google/connect", getAccessToGoogleCalendar);
 authRouter.get("/google/callback", handleGoogleCallback);
-authRouter.post("refreshAccessToken", refreshAccessToken);
+authRouter.post("/refreshAccessToken", refreshAccessToken);

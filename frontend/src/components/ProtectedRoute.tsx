@@ -1,6 +1,8 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { onIdTokenChanged } from "firebase/auth";
+
+import { getRefreshedGoogleAccessToken } from "../services/authService";
 import { firebaseAuth } from "../firebase_utils";
 import { useAuth } from "./context/AuthContext";
 
@@ -13,15 +15,9 @@ async function fetchFreshAccessToken(userId: string): Promise<string | null> {
 
   try {
     console.log("Fetching fresh access token");
-    const res = await fetch("http://localhost:5000/api/auth/refresh-token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    });
-    if (!res.ok) throw new Error("Failed to refresh token");
-    const data = await res.json();
+    const accessToken = await getRefreshedGoogleAccessToken(userId);
     console.log("Backend returned access token.");
-    return data.accessToken ?? null;
+    return accessToken ?? null;
   } catch (err) {
     console.error("Error fetching access token:", err);
     return null;

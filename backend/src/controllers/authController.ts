@@ -3,12 +3,11 @@ import { google } from "googleapis";
 
 import { authRepo } from "../repositories/authRepository";
 
-const BASE_URL: string = "http://localhost:5000/api/auth";
 const FRONTEND_URL: string = "http://localhost:5173";
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  `${BASE_URL}/auth/google/callback`
+  "http://localhost:5000/api/auth/google/callback"
 );
 
 export async function verifyIdToken(
@@ -70,10 +69,15 @@ export async function handleGoogleCallback(
       console.warn("No refresh token returned (was consent prompt shown?)");
     }
 
+    console.log("Tokens received:", tokens);
+    console.log("Refresh token stored:", tokens.refresh_token);
+
     // Store refresh token in Firestore.
-    await authRepo.updateUser(userId as string, {
-      refreshToken: tokens.refresh_token ?? null,
-    });
+    if (tokens.refresh_token) {
+      await authRepo.updateUser(userId as string, {
+        refreshToken: tokens.refresh_token,
+      });
+    }
 
     res.redirect(FRONTEND_URL); // Redirect back to frontend
   } catch (err) {
