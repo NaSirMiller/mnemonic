@@ -94,7 +94,9 @@ export async function getCourse(request: Request, response: Response) {
 }
 
 export async function updateCourse(request: Request, response: Response) {
-  const { userId, courseId, coursePayload } = request.body;
+  const { userId, courseId } = request.params;
+  const coursePayload = request.body;
+
   let errorMessage: string;
 
   try {

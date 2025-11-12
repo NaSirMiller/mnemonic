@@ -11,5 +11,5 @@ export const courseRouter = Router();
 
 courseRouter.post("/", createCourse);
 courseRouter.get("/:userId", getCourse);
-courseRouter.put("/:userId", updateCourse);
+courseRouter.put("/:userId/:courseId", updateCourse);
 courseRouter.delete("/:userId/:courseId", deleteCourse);

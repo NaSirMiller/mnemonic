@@ -3,4 +3,5 @@ export interface Course {
   courseId?: string;
   courseName?: string;
   currentGrade?: number; // 0 to 1
+  gradeTypes: Record<string, number>;
 }

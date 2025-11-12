@@ -43,10 +43,11 @@ export class DeleteCourseError extends Error {
   }
 }
 
-export async function createCourse(coursePayload: Course): Promise<void> {
+export async function createCourse(coursePayload: Course): Promise<Course> {
   try {
-    await createCourseApi(coursePayload);
+    const createdCourse = await createCourseApi(coursePayload); 
     console.log("Course created.");
+    return createdCourse; 
   } catch (error) {
     if (error instanceof Error) {
       console.error("Course could not be created: ", error.message);
@@ -63,6 +64,7 @@ export async function createCourse(coursePayload: Course): Promise<void> {
     }
   }
 }
+
 
 export async function getCourses(
   userId: string,

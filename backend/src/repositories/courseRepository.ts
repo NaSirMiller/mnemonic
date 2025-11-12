@@ -35,12 +35,11 @@ export class CourseRepository {
   }
 
   async createCourse(course: Course): Promise<Course> {
-    // Firestore auto-generates ID
-    const docRef = await this.db.collection("courses").add(course);
-    const newDoc = await docRef.get();
-    const firestoreDocData = newDoc.data() as Course;
+    const docRef = this.db.collection("courses").doc(); // create doc reference manually
+    const courseWithId: Course = { ...course, courseId: docRef.id };
 
-    return { ...firestoreDocData, courseId: newDoc.id };
+    await docRef.set(courseWithId); // explicitly write the course with the ID included
+    return courseWithId;
   }
 
   async deleteCourse(userId: string, courseId: string): Promise<void> {
