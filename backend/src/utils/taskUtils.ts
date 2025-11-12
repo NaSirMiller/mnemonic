@@ -40,27 +40,23 @@ export function validateTaskTypes(task: Task): string[] {
     const field = key as keyof Task;
     const expected = TaskFieldTypes[field];
 
-    if (!expected)
-      errors.push(
-        `Provided field ${expected} is not a valid field for the type Task.`
-      ); // Unknown field provided
+    if (!expected) {
+      errors.push(`Provided field "${key}" is not a valid field for the type Task.`);
+      continue; // skip further checks
+    }
 
-    const expectedTypes: string[] = Array.isArray(expected)
-      ? expected
-      : [expected];
+    const expectedTypes: string[] = Array.isArray(expected) ? expected : [expected];
     const actualType = getType(value);
 
     if (!expectedTypes.includes(actualType)) {
-      // Type provided for field is invalid.
       errors.push(
-        `Invalid type for "${field}": expected ${expectedTypes.join(
-          " | "
-        )}, got ${actualType}`
+        `Invalid type for "${field}": expected ${expectedTypes.join(" | ")}, got ${actualType}`
       );
     }
   }
   return errors;
 }
+
 
 export function isTaskTypeValid(task: Task): ValidationResult {
   const errors = validateTaskTypes(task);
