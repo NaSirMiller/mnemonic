@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createCalendarEvent, deleteCalendarEvent } from "../utils/googleCalendar";
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "../utils/googleCalendar";
 import { taskRepo } from "../repositories/taskRepository";
 import type { Task } from "../../../shared/models/task";
 import type {
@@ -137,8 +137,16 @@ export async function updateUserTask(request: Request, response: Response) {
       errorMessage = fieldValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
     }
+    // Get previous task before updating
+    const previousTask: Task = await taskRepo.getSingleUserTask(userId, taskId);
 
     await taskRepo.updateTask(userId, taskId, normalizedTask);
+    const storedTask = await taskRepo.getSingleUserTask(userId, taskId);
+
+
+    // Update calendar event if needed
+    await updateCalendarEvent(userId, storedTask, previousTask);
+
     return response.status(200).json({
       message: `Successfully updated task ${taskId}.`,
     });

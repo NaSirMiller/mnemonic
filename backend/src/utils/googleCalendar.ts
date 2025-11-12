@@ -1,6 +1,7 @@
 import { google, calendar_v3 } from "googleapis";
 import { authRepo } from "../repositories/authRepository";
 import { Task } from "../../../shared/models/task";
+import { DateTime } from "luxon";
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -12,14 +13,9 @@ const oauth2Client = new google.auth.OAuth2(
  */
 function toValidDate(value: any): Date | null {
   if (!value) return null;
-
-  if (value?.toDate && typeof value.toDate === "function") {
-    return value.toDate();
-  }
-
+  if (value?.toDate && typeof value.toDate === "function") return value.toDate();
   if (value instanceof Date) return value;
 
-  // Firestore JSON representation
   if (typeof value === "object") {
     if ("_seconds" in value) return new Date(value._seconds * 1000);
     if ("seconds" in value) return new Date(value.seconds * 1000);
@@ -34,8 +30,7 @@ function toValidDate(value: any): Date | null {
 }
 
 /**
- * Create a Google Calendar event using the taskId as eventId
- * Returns the event object including `id`
+ * Create a Google Calendar event
  */
 export async function createCalendarEvent(
   userId: string,
@@ -47,18 +42,17 @@ export async function createCalendarEvent(
   oauth2Client.setCredentials({ refresh_token: user.refreshToken });
   const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-  const startDate = toValidDate(task.dueDate);
-  console.log("startDate", startDate, "task.dueDate", task.dueDate);
+  const startDateUTC = toValidDate(task.dueDate);
+  if (!startDateUTC) throw new Error("Invalid dueDate for task");
 
-  if (!startDate) throw new Error("Invalid dueDate for task");
+  const startDateNY = DateTime.fromJSDate(startDateUTC, { zone: "UTC" })
+    .setZone("America/New_York");
 
-  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
-
-  const event: Omit<calendar_v3.Schema$Event, "id"> = { // don’t provide `id`
+  const event: Omit<calendar_v3.Schema$Event, "id"> = {
     summary: task.title,
     description: task.description ?? "",
-    start: { dateTime: startDate.toISOString(), timeZone: "America/New_York" },
-    end: { dateTime: endDate.toISOString(), timeZone: "America/New_York" },
+    start: { dateTime: startDateNY.toISO(), timeZone: "America/New_York" },
+    end: { dateTime: startDateNY.toISO(), timeZone: "America/New_York" },
     reminders: { useDefault: true },
   };
 
@@ -67,12 +61,71 @@ export async function createCalendarEvent(
     requestBody: event,
   });
 
-  return response.data; // includes Google-generated event.id
+  return response.data;
 }
 
+/**
+ * Update an existing Google Calendar event if title, description, or dueDate changed
+ */
+export async function updateCalendarEvent(
+  userId: string,
+  task: Task,
+  previousTask: Task
+) {
+  // Use previousTask.googleEventId because the incoming task payload doesn't include it
+  const googleEventId = previousTask.googleEventId;
+  if (!googleEventId) {
+    console.log("No Google Calendar event to update");
+    return; // nothing to update
+  }
+
+  console.log("updateCalendarEvent called", {
+    userId,
+    taskId: task.taskId,
+    googleEventId,
+  });
+
+  const prevDueDate = toValidDate(previousTask.dueDate);
+  const currDueDate = toValidDate(task.dueDate);
+  const dueDateChanged =
+    !prevDueDate || !currDueDate || prevDueDate.getTime() !== currDueDate.getTime();
+
+  if (
+    task.title === previousTask.title &&
+    task.description === previousTask.description &&
+    !dueDateChanged
+  ) {
+    console.log("No changes detected, skipping calendar update");
+    return; // nothing changed
+  }
+
+  const user = await authRepo.getUser(userId);
+  if (!user?.refreshToken) throw new Error("No refresh token found for user");
+
+  oauth2Client.setCredentials({ refresh_token: user.refreshToken });
+  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+  const startDateNY = DateTime.fromJSDate(currDueDate!, { zone: "UTC" })
+    .setZone("America/New_York");
+
+  const event: Partial<calendar_v3.Schema$Event> = {
+    summary: task.title,
+    description: task.description ?? "",
+    start: { dateTime: startDateNY.toISO(), timeZone: "America/New_York" },
+    end: { dateTime: startDateNY.toISO(), timeZone: "America/New_York" },
+  };
+
+  await calendar.events.update({
+    calendarId: "primary",
+    eventId: googleEventId,
+    requestBody: event,
+  });
+
+  console.log("Google Calendar event updated successfully");
+}
 
 /**
- * Delete a Google Calendar event using the taskId as eventId
+ * Delete a Google Calendar event
  */
 export async function deleteCalendarEvent(userId: string, eventId: string) {
   const user = await authRepo.getUser(userId);
@@ -81,8 +134,5 @@ export async function deleteCalendarEvent(userId: string, eventId: string) {
   oauth2Client.setCredentials({ refresh_token: user.refreshToken });
   const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-  await calendar.events.delete({
-    calendarId: "primary",
-    eventId, // use taskId / eventId
-  });
+  await calendar.events.delete({ calendarId: "primary", eventId });
 }
