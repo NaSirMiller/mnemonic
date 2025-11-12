@@ -1,4 +1,3 @@
-// src/utils/googleCalendar.ts
 import { google, calendar_v3 } from "googleapis";
 import { authRepo } from "../repositories/authRepository";
 import { Task } from "../../../shared/models/task";
@@ -17,40 +16,24 @@ function toValidDate(value: string | Date | undefined | null): Date | null {
   return isNaN(date.getTime()) ? null : date;
 }
 
-
 /**
- * Create a Google Calendar event for a task
- * @param userId - User ID stored in your system
- * @param task - Task object to convert into a calendar event
- * @returns The Google Calendar event created
+ * Create a Google Calendar event using the taskId as eventId
+ * Returns the event object including `id`
  */
 export async function createCalendarEvent(
   userId: string,
   task: Task
 ): Promise<calendar_v3.Schema$Event> {
-  // 1. Get refresh token for the user
   const user = await authRepo.getUser(userId);
-  if (!user?.refreshToken) {
-    throw new Error("No refresh token found for user");
-  }
+  if (!user?.refreshToken) throw new Error("No refresh token found for user");
 
-  // 2. Set credentials with refresh token
   oauth2Client.setCredentials({ refresh_token: user.refreshToken });
-
-  // 3. Get a fresh access token
-  const accessTokenResponse = await oauth2Client.getAccessToken();
-  const accessToken = accessTokenResponse?.token;
-  if (!accessToken) throw new Error("Failed to retrieve access token");
-
-  // 4. Initialize Calendar API
   const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-  // 5. Convert dueDate to valid Date
   const startDate = toValidDate(task.dueDate) || new Date();
   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
 
-  // 6. Prepare event
-  const event: calendar_v3.Schema$Event = {
+  const event: Omit<calendar_v3.Schema$Event, "id"> = { // don’t provide `id`
     summary: task.title,
     description: task.description ?? "",
     start: { dateTime: startDate.toISOString() },
@@ -58,11 +41,27 @@ export async function createCalendarEvent(
     reminders: { useDefault: true },
   };
 
-  // 7. Insert event
   const response = await calendar.events.insert({
     calendarId: "primary",
     requestBody: event,
   });
 
-  return response.data;
+  return response.data; // includes Google-generated event.id
+}
+
+
+/**
+ * Delete a Google Calendar event using the taskId as eventId
+ */
+export async function deleteCalendarEvent(userId: string, eventId: string) {
+  const user = await authRepo.getUser(userId);
+  if (!user?.refreshToken) throw new Error("No refresh token found for user");
+
+  oauth2Client.setCredentials({ refresh_token: user.refreshToken });
+  const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+  await calendar.events.delete({
+    calendarId: "primary",
+    eventId, // use taskId / eventId
+  });
 }
