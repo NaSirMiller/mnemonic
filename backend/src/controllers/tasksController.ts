@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-
+import { createCalendarEvent } from "../utils/googleCalendar";
 import { taskRepo } from "../repositories/taskRepository";
 import type { Task } from "../../../shared/models/task";
 import type {
@@ -45,6 +45,17 @@ export async function createUserTask(request: Request, response: Response) {
 
     const validatedTask: Task = setTaskDefaults(normalizedDates); // Set fields not provided to default values, rather than nulls
     const createdTask: Task = await taskRepo.createTask(validatedTask as Task);
+
+    if (createdTask.userId) {
+      try {
+        await createCalendarEvent(createdTask.userId!, createdTask);
+      } catch (calendarError) {
+        console.error("Error creating Google Calendar event:", calendarError);
+        // Optionally: you could decide to fail the request or just log it
+      }
+    } else {
+      console.warn("Cannot create Google Calendar event: userId is missing");
+    } 
 
     return response.status(200).json({
       message: "Successfully created a task.",
