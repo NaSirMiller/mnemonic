@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import NavBarButton from "./NavBarButton.tsx";
 import "./NavBar.css";
 
@@ -8,6 +9,8 @@ function NavBar() {
     const buttonTexts = [ "Home", "Tasks" ]; // array of buttons
 
     const navigate = useNavigate();
+    const { logout } = useAuth();
+
 
     const focusedButton = ( () => {
         switch (location.pathname) {
@@ -26,6 +29,11 @@ function NavBar() {
         if ( text === "Tasks" )
             navigate( "/tasks" );
     };
+    const handleLogout = async () => {
+        await logout();        
+        navigate("/auth");     
+    };
+
 
     return (
         <div className="navbar-cont">
@@ -60,7 +68,7 @@ function NavBar() {
             {/* <div className="navbar-sign-in">
                 Sign In
             </div> */}
-            <div className="navbar-sign-in">
+            <div className="navbar-sign-in" onClick={handleLogout}>
                 Log Out
             </div>
         </div>
