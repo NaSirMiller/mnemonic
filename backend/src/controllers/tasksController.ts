@@ -47,18 +47,21 @@ export async function createUserTask(request: Request, response: Response) {
     const createdTask: Task = await taskRepo.createTask(validatedTask as Task);
 
     // Create Google Calendar event using taskId as eventId
-  if (createdTask.userId) {
-    try {
-      const calendarEvent = await createCalendarEvent(createdTask.userId, createdTask);
-      // store Google event ID in Firestore
-      await taskRepo.updateTask(createdTask.userId, createdTask.taskId!, { 
-        googleEventId: calendarEvent.id 
-      });
-      createdTask.googleEventId = calendarEvent.id; // keep it in the response
-    } catch (calendarError) {
-      console.error("Error creating Google Calendar event:", calendarError);
+    // after creating the task in Firestore
+    const storedTask = await taskRepo.getSingleUserTask(createdTask.userId!, createdTask.taskId!);
+
+    if (storedTask.userId) {
+      try {
+        const calendarEvent = await createCalendarEvent(storedTask.userId, storedTask);
+        await taskRepo.updateTask(storedTask.userId, storedTask.taskId!, { 
+          googleEventId: calendarEvent.id 
+        });
+        storedTask.googleEventId = calendarEvent.id;
+      } catch (calendarError) {
+        console.error("Error creating Google Calendar event:", calendarError);
+      }
     }
-  }
+
 
 
     return response.status(200).json({
