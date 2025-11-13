@@ -81,7 +81,7 @@ function EditTask() {
             setTaskName( selectedTask.taskName );
             setTaskGradeWeight( selectedTask.gradeType );
             if ( selectedTask.dueDate )
-                setDueDate( new Date( selectedTask.dueDate ).toISOString().slice( 0, 16 ) );
+                setDueDate( selectedTask.dueDate );
             else
                 setDueDate( "" );
             setTimeSpent( selectedTask.timeSpent ? selectedTask.timeSpent.completed + " / " + selectedTask.timeSpent.estimated : "" );
@@ -107,7 +107,15 @@ function EditTask() {
         setSelectedTask( newTask );
     }
 
-    const changeTask = () => {
+    // useEffect( () => {
+
+
+    // } );
+
+    const submitForm = () => {
+        // backend code goes here
+        if ( !selectedTask )
+            return;
         let newTimeSpent = null;
         if ( timeSpent ) {
             const [completedStr, estimatedStr] = timeSpent.split(" / ");
@@ -117,44 +125,24 @@ function EditTask() {
             };
         }
 
-        console.log( taskGradeWeight )
-
         // Create updated task
         const updatedTask: Task = {
             ...selectedTask,
             taskName: taskName,
             courseName: selectedCourse,
             gradeType: taskGradeWeight,
-            grade: taskGrade ? Number(taskGrade) : null,
+            grade: taskGrade ? Number( taskGrade ) : null,
             dueDate,
             timeSpent: newTimeSpent,
         };
-        console.log( updatedTask );
 
-        // Update tasks array
-        const updatedTasks = tasks.map( t =>
-            t === selectedTask ? updatedTask : t
+        
+        setTasks( prevTasks =>
+            prevTasks.map( t =>
+                t === selectedTask ? updatedTask : t
+            )
         );
-
-        setTasks( updatedTasks );
         setSelectedTask( updatedTask );
-  
-        //----------------//
-        // back end stuff //
-        //----------------//
-        // back end that doesnt work because this should be in express
-        // const filePath = path.resolve(__dirname, '../../../mock_data/courses_with_tasks.json');
-        // alert( 1 )
-        // const backendCourseData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-        // alert( 2 )
-        // const updatedCourses = backendCourseData.courses.map(course =>
-        //     course.name === selectedCourse
-        //         ? { ...course, tasks: updatedTasks }
-        //         : course
-        // );
-        // alert( 3 )
-        // fs.writeFileSync(filePath, JSON.stringify({ courses: updatedCourses }, null, 2));
-        // alert( 4 )
     }
 
     return (
@@ -206,7 +194,7 @@ function EditTask() {
                             <div className="edit-task-task-card-grade">
                                 { task.grade }
                             </div>
-                            <div className="edit-task-task-card-time-spent">gradeType
+                            <div className="edit-task-task-card-time-spent">
                                 { task.timeSpent ? task.timeSpent.completed + " / " + task.timeSpent.estimated : "" }
                             </div>
                             <div className="edit-task-task-card-due-date">
@@ -214,12 +202,28 @@ function EditTask() {
                             </div>
                         </div>
                     ) ) }
+                    <div 
+                        className={ "edit-task-task-card" }
+                        onClick={ () => handleNewTask() }
+                    >
+                        <div className="edit-task-task-card-name">
+                            Add a New Task
+                        </div>
+                        <div className="edit-task-task-card-grade">
+                            { 0 }
+                        </div>
+                        <div className="edit-task-task-card-time-spent">
+                            { "0 h 0 m / 0 h 0 m" }
+                        </div>
+                        <div className="edit-task-task-card-due-date">
+                            { new Date().toLocaleString( "en-US", { month: "short", day: "numeric" } ) }
+                        </div>
+                        <div className="edit-task-dark-card"></div>
+                    </div>
                 </div>
             </div>
             {/* <div className="edit-task-button-cont"> */}
-            <div className="edit-task-add-task" onClick={ () => handleNewTask() }>
-                Add Task
-            </div>
+            
             <div className="edit-task-section-title">
                 Task Name*
             </div>
@@ -228,24 +232,31 @@ function EditTask() {
                 className="edit-task-text-input"
                 value={ taskName }
                 onChange={ ( e ) => setTaskName( e.target.value ) }
-                onBlur={ () => changeTask() }
+                // onBlur={ () => changeTask() }
             />
             <div className="edit-task-section-title">
                 Task Grade Weight*
             </div>
             <div className="edit-task-grade-weight-cont">
-                { gradeWeights.map( ( gradeWeight, i ) => ( 
-                    <div 
-                        key={ "edit-task-" + gradeWeight + "-" + i} 
-                        className={ `edit-task-grade-weight ${ selectedGradeWeight === gradeWeight ? "selected" : "" }` }
-                        onClick={ () => {
-                            setTaskGradeWeight( gradeWeight );
-                            setSelectedGradeWeight( gradeWeight );
-                            changeTask();
-                        } }
+                { gradeWeights.map( ( gradeWeight, i ) => (
+                    <label
+                        key={ `edit-task-grade-weight-${i}` }
+                        className={ `edit-task-grade-weight ${ selectedGradeWeight === gradeWeight ? "selected" : "" } ` }
                     >
                         { gradeWeight }
-                    </div>
+                        <input 
+                            key={ "edit-task-" + gradeWeight + "-" + i}
+                            className="hidden"
+                            type="radio"
+                            name="gradeWeight"
+                            value={ gradeWeight }
+                            checked={ selectedGradeWeight === gradeWeight }
+                            onChange={ () => {
+                                setTaskGradeWeight( gradeWeight );
+                                setSelectedGradeWeight( gradeWeight );
+                            } }
+                        />
+                    </label>
                 ) ) }
             </div>
             <div className="edit-task-section-title">
@@ -256,7 +267,7 @@ function EditTask() {
                 name="dueDate"
                 className="edit-task-text-input"
                 value={ dueDate }
-                onChange={ ( e ) => { setDueDate( e.target.value ); changeTask(); } }
+                onChange={ ( e ) => { setDueDate( e.target.value ); } }
             />
             
             <div className="edit-task-section-title">
@@ -268,7 +279,7 @@ function EditTask() {
                 className="edit-task-text-input"
                 value={ timeSpent }
                 onChange={ ( e ) => setTimeSpent( e.target.value ) }
-                onBlur={ () => changeTask() }
+                // onBlur={ () => changeTask() }
             />
             <div className="edit-task-section-title">
                 Task Grade
@@ -281,11 +292,14 @@ function EditTask() {
                     className="edit-task-text-input"
                     value={ taskGrade }
                     onChange={ ( e ) => setTaskGrade( e.target.value ) }
-                    onBlur={ () => changeTask() }
+                    // onBlur={ () => changeTask() }
                 />
                 <div className="edit-task-right-icon">
                     %
                 </div>
+            </div>
+            <div className="edit-task-submit-task" onClick={ () => submitForm() }>
+                Submit Task
             </div>
             <div className="edit-task-delete-task">
                 Delete Task

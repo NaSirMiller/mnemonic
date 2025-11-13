@@ -15,3 +15,7 @@
 .color-blue {
     color: #A1B5D8;
 }
+
+.hidden {
+    display: none;
+}
