@@ -14,4 +14,5 @@ export interface Task {
   priority?: number; // -1 or 0 to n
   createdAt?: Date | null;
   lastUpdatedAt?: Date | null;
+  googleEventId?: string | null;
 }

@@ -28,6 +28,7 @@ const TaskFieldTypes: Record<keyof Task, ExpectedType | ExpectedType[]> = {
   priority: ["number", "null", "undefined"],
   createdAt: ["date", "null", "undefined"],
   lastUpdatedAt: ["date", "null", "undefined"],
+  googleEventId: ["string", "null", "undefined"],
 };
 function getType(value: any): ExpectedType {
   if (value === null) return "null";
