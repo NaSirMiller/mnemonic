@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { LoginButton } from "../../components/LoginButton";
+import { LoginButton } from "../../components/login/LoginButton";
 
 import "../../style.css";
 import "./SignIn.css";

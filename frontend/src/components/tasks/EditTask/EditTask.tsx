@@ -27,6 +27,13 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedGradeWeight, setSelectedGradeWeight] = useState<string>("");
 
+  // --- Helper to convert Date to local datetime-local string ---
+  const formatDateForInput = (date: Date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
+    const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+    return localISOTime;
+  };
+
   // --- Load courses ---
   useEffect(() => {
     if (!userId) return;
@@ -51,7 +58,8 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       try {
         const fetchedTasks = await getTasks(userId, null, selectedCourse.courseId);
         setTasks(fetchedTasks);
-        if (fetchedTasks.length > 0) setSelectedTask(fetchedTasks[0]);
+        // select first task or null if no tasks
+        setSelectedTask(fetchedTasks.length > 0 ? fetchedTasks[0] : null);
         setGradeWeights(Object.keys(selectedCourse.gradeTypes || {}));
       } catch (err) {
         console.error("Error fetching tasks:", err);
@@ -61,14 +69,22 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
 
   // --- Populate form when a task is selected ---
   useEffect(() => {
-    if (!selectedTask) return;
+    if (!selectedTask) {
+      // Clear form if no task selected
+      setTaskName("");
+      setTaskGradeWeight("");
+      setSelectedGradeWeight("");
+      setDueDate("");
+      setTimeSpent("");
+      setTaskGrade("");
+      return;
+    }
+
     setTaskName(selectedTask.title ?? "");
     setTaskGradeWeight(selectedTask.gradeType ?? "");
     setSelectedGradeWeight(selectedTask.gradeType ?? "");
     setDueDate(
-      selectedTask.dueDate
-        ? new Date(selectedTask.dueDate).toISOString().slice(0, 16)
-        : ""
+      selectedTask.dueDate ? formatDateForInput(new Date(selectedTask.dueDate)) : ""
     );
     const completed = selectedTask.currentTime ?? 0;
     const estimated = selectedTask.expectedTime ?? 0;
@@ -76,59 +92,11 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
   }, [selectedTask]);
 
-  // --- Add new task ---
-  const handleNewTask = async () => {
-    if (!selectedCourse || !userId) return;
-
-    try {
-      const baseName = "New Task";
-      const existingNames = tasks.map(t => t.title);
-
-      let newTaskName: string;
-      if (!existingNames.includes(baseName)) {
-        newTaskName = baseName; // First task
-      } else {
-        let nextNumber = 1;
-        while (existingNames.includes(`${baseName} ${nextNumber}`)) {
-          nextNumber++;
-        }
-        newTaskName = `${baseName} ${nextNumber}`;
-      }
-
-      const newTask: Task = {
-        userId,
-        courseId: selectedCourse.courseId,
-        title: newTaskName,
-        grade: 0,
-        gradeType: "",
-        weight: 0,
-        dueDate: new Date(),
-        currentTime: 0,
-        expectedTime: 0,
-        createdAt: new Date(),
-        lastUpdatedAt: new Date(),
-      };
-
-      const created = await createTask(newTask);
-      const refreshed = await getTasks(userId, null, selectedCourse.courseId);
-      setTasks(refreshed);
-
-      const newlyCreated =
-        refreshed.find(t => t.taskId === created.taskId) ?? refreshed.at(-1) ?? null;
-      setSelectedTask(newlyCreated);
-
-      // 🔄 Refresh parent page
-      onTasksChanged?.();
-    } catch (err) {
-      console.error("Error creating new task:", err);
-    }
-  };
-
   // --- Submit form (create or update) ---
   const submitForm = async () => {
     if (!selectedCourse || !userId) return;
     try {
-      const [completedStr, estimatedStr] = timeSpent.split("/").map(s => s.trim());
+      const [completedStr, estimatedStr] = timeSpent.split("/").map((s) => s.trim());
       const weight =
         selectedCourse.gradeTypes && taskGradeWeight
           ? selectedCourse.gradeTypes[taskGradeWeight]
@@ -152,15 +120,69 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await createTask({ ...payload, userId, createdAt: new Date() });
       }
 
+      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
-      const updated = refreshed.find(t => t.title === taskName) ?? null;
+
+      // Find task by title within current course
+      const updated =
+        refreshed.find(
+          (t) => t.title === taskName && t.courseId === selectedCourse.courseId
+        ) ?? null;
       setSelectedTask(updated);
 
-      // 🔄 Refresh parent page
       onTasksChanged?.();
     } catch (err) {
       console.error("Error saving task:", err);
+    }
+  };
+
+  // --- Add new task ---
+  const handleNewTask = async () => {
+    if (!selectedCourse || !userId) return;
+
+    try {
+      const baseName = "New Task";
+      const existingNames = tasks.map((t) => t.title);
+
+      let newTaskName: string;
+      if (!existingNames.includes(baseName)) {
+        newTaskName = baseName;
+      } else {
+        let nextNumber = 1;
+        while (existingNames.includes(`${baseName} ${nextNumber}`)) {
+          nextNumber++;
+        }
+        newTaskName = `${baseName} ${nextNumber}`;
+      }
+
+      const newTask: Task = {
+        userId,
+        courseId: selectedCourse.courseId,
+        title: newTaskName,
+        grade: 0,
+        gradeType: "",
+        weight: 0,
+        dueDate: new Date(),
+        currentTime: 0,
+        expectedTime: 0,
+        createdAt: new Date(),
+        lastUpdatedAt: new Date(),
+      };
+
+      const created = await createTask(newTask);
+
+      // Refresh tasks for current course only
+      const refreshed = await getTasks(userId, null, selectedCourse.courseId);
+      setTasks(refreshed);
+
+      const newlyCreated =
+        refreshed.find((t) => t.taskId === created.taskId) ?? refreshed.at(-1) ?? null;
+      setSelectedTask(newlyCreated);
+
+      onTasksChanged?.();
+    } catch (err) {
+      console.error("Error creating new task:", err);
     }
   };
 
@@ -171,9 +193,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       await deleteTask(userId, selectedTask.taskId);
       const refreshed = await getTasks(userId, null, selectedCourse?.courseId ?? null);
       setTasks(refreshed);
+      // Clear selection if no tasks remain
       setSelectedTask(refreshed[0] ?? null);
 
-      // 🔄 Refresh parent page
       onTasksChanged?.();
     } catch (err) {
       console.error("Error deleting task:", err);
@@ -189,7 +211,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         {courses.map((course, i) => (
           <div
             key={`edit-task-${course.courseName}-${i}`}
-            className={`edit-task-course ${selectedCourse?.courseName === course.courseName ? "selected" : ""}`}
+            className={`edit-task-course ${
+              selectedCourse?.courseName === course.courseName ? "selected" : ""
+            }`}
             onClick={() => setSelectedCourse(course)}
           >
             {course.courseName}
@@ -210,7 +234,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
           {tasks.map((task, i) => (
             <div
               key={`edit-task-task-card-${i}`}
-              className={`edit-task-task-card ${selectedTask?.taskId === task.taskId ? "selected" : ""}`}
+              className={`edit-task-task-card ${
+                selectedTask?.taskId === task.taskId ? "selected" : ""
+              }`}
               onClick={() => setSelectedTask(task)}
             >
               <div className="edit-task-task-card-name">{task.title}</div>
@@ -219,7 +245,12 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
                 {`${task.currentTime ?? 0} / ${task.expectedTime ?? 0}`}
               </div>
               <div className="edit-task-task-card-due-date">
-                {task.dueDate ? new Date(task.dueDate).toLocaleString("en-US", { month: "short", day: "numeric" }) : ""}
+                {task.dueDate
+                  ? new Date(task.dueDate).toLocaleString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : ""}
               </div>
             </div>
           ))}
@@ -249,7 +280,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         {gradeWeights.map((gradeWeight, i) => (
           <label
             key={`edit-task-grade-weight-${i}`}
-            className={`edit-task-grade-weight ${selectedGradeWeight === gradeWeight ? "selected" : ""}`}
+            className={`edit-task-grade-weight ${
+              selectedGradeWeight === gradeWeight ? "selected" : ""
+            }`}
           >
             {gradeWeight}
             <input
