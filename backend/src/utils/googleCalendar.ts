@@ -79,12 +79,6 @@ export async function updateCalendarEvent(
     return; // nothing to update
   }
 
-  console.log("updateCalendarEvent called", {
-    userId,
-    taskId: task.taskId,
-    googleEventId,
-  });
-
   const prevDueDate = toValidDate(previousTask.dueDate);
   const currDueDate = toValidDate(task.dueDate);
   const dueDateChanged =
