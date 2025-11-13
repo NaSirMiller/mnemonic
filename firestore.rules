@@ -14,6 +14,7 @@ service cloud.firestore {
                    data.title is string &&
                    data.courseId is string &&
                    (data.weight is number && (data.weight >=0 && data.weight <= 1.00)) &&
+                   gradeType is string &&
                    data.dueDate is timestamp &&
                    data.get("description", "") is string &&
                    (data.grade is number || data.grade == null) && // Grade can be added later by user

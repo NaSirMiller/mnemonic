@@ -21,6 +21,7 @@ const TaskFieldTypes: Record<keyof Task, ExpectedType | ExpectedType[]> = {
   expectedTime: ["number", "undefined"],
   currentTime: ["number", "undefined"],
   weight: ["number", "undefined"],
+  gradeType: ["string", "undefined"],
   dueDate: ["date", "undefined", "null"],
   description: ["string", "undefined"],
   grade: ["number", "null", "undefined"],
@@ -89,11 +90,12 @@ export function setTaskDefaults(task: Task): Task {
     courseId: task.courseId!,
     currentTime: 0,
     expectedTime: 0,
-    weight: task.weight ?? -1, // No weight specified
+    weight: task.weight ?? -1,
+    gradeType: task.gradeType!,    
     dueDate: task.dueDate ?? null,
     description: task.description ?? "",
     grade: task.grade ?? 0,
-    priority: task.priority ?? -1, // No priority set
+    priority: task.priority ?? -1,
     createdAt: task.createdAt ?? now,
     lastUpdatedAt: task.lastUpdatedAt ?? now,
   };

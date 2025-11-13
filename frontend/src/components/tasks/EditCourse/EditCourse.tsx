@@ -100,15 +100,20 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     };
 
     try {
-      const created = await createCourse(newCourse);
+      await createCourse(newCourse);
       const refreshedCourses = await getCourses(userId, null);
       setCourses(refreshedCourses);
-      selectCourse(created);
+
+      // Automatically select the newly created course
+      const newlyCreated = refreshedCourses.find(c => c.courseName === newName);
+      if (newlyCreated) selectCourse(newlyCreated);
+
       if (onCoursesChanged) onCoursesChanged();
     } catch (err) {
       console.error("Failed to create new course:", err);
     }
   };
+
 
   const handleNewGradeWeight = () => {
     const baseName = "New Grade";

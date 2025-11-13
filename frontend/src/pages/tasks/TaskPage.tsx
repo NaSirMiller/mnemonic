@@ -9,7 +9,7 @@ import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
 import { getTasks } from "../../services/tasksService";
 
-import TaskCard from "../../components/tasks/TaskCard";
+import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 import "./TaskPage.css";
@@ -159,6 +159,36 @@ function TaskPage() {
       console.error("Failed to refresh courses/tasks:", err);
     }
   };
+  const refreshTasks = async () => {
+    if (!uid) return;
+
+    try {
+      if (selectedCourseTab === "All Courses") {
+        const allCourseTasks = await getTasks(uid, null, null);
+        setAvailableTasks(allCourseTasks);
+      } else {
+        const selectedCourse: Course = availableCourses.find(
+          (course) => course.courseName === selectedCourseTab
+        )!;
+        const selectedCourseTasks = await getTasks(uid, null, selectedCourse.courseId);
+        setAvailableTasks(selectedCourseTasks);
+
+        // Calculate total time spent
+        let totalMinutes = 0;
+        selectedCourseTasks.forEach((task: Task) => {
+          const completedTime = task.currentTime ?? 0;
+          totalMinutes += completedTime;
+        });
+        const totalHours = Math.floor(totalMinutes / 60);
+        const remainingMinutes = totalMinutes % 60;
+        setSelectedTimeSpent(`${totalHours}hr ${remainingMinutes}min`);
+        setSelectedGrade(selectedCourse.currentGrade ?? 0);
+      }
+    } catch (err) {
+      console.error("Failed to refresh tasks:", err);
+    }
+  };
+
 
 
 
@@ -269,12 +299,12 @@ function TaskPage() {
         </div>
       </div>
 
-      {/* Edit Modals */}
-      {showEditTask && (
-        <div className="opacity" onClick={() => setShowEditTask(false)}>
-          <EditTask />
-        </div>
-      )}
+    {/* Edit Modals */}
+    {showEditTask && (
+      <div className="opacity" onClick={() => setShowEditTask(false)}>
+        <EditTask onTasksChanged={refreshTasks} />
+      </div>
+    )}
     {showEditCourse && (
       <div className="opacity" onClick={() => setShowEditCourse(false)}>
         <EditCourse onCoursesChanged={refreshCourses} />

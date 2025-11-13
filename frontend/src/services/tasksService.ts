@@ -43,14 +43,22 @@ export class DeleteTaskError extends Error {
   }
 }
 
-export async function createTask(taskPayload: Task): Promise<void> {
+export async function createTask(taskPayload: Task): Promise<Task> {
   try {
-    await createTaskApi(taskPayload);
-    console.log("Task created.");
+    const response = await createTaskApi(taskPayload);
+
+    // If your backend returns { task: { ... } }
+    if (response?.task) {
+      console.log("Task created:", response.task);
+      return response.task;
+    }
+
+    // Fallback: assume backend doesn’t return the created task
+    console.warn("Backend did not return created task, returning payload instead.");
+    return taskPayload;
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Task could not be created: ", error.message);
-
+      console.error("Task could not be created:", error.message);
       throw new CreateTaskError(
         `Error creating given task: ${error.message}`,
         "api-error"
