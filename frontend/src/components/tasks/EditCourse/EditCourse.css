@@ -245,3 +245,8 @@
 .edit-course-submit-course:hover {
     cursor: pointer;
 }
+.edit-course-error {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}

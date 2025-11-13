@@ -69,9 +69,10 @@ export function isCourseTypeValid(course: Course): ValidationResult {
 /**
  * Check if immutable fields are being updated (e.g. userId or courseId).
  */
-export function attemptsToUpdateImmutable(course: Course): boolean {
-  return !!(course.userId || course.courseId);
+export function attemptsToUpdateImmutable(coursePayload: any) {
+  return coursePayload.courseId != null; // only block if courseId is being changed
 }
+
 
 /**
  * Check that required fields are present.

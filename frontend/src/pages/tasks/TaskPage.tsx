@@ -19,9 +19,7 @@ function TaskPage() {
   const [user, setUser] = useState<FullUser>();
 
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
-  // const [setCourseNames] = useState<string[]>([]);
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
-  // const [courseTasks, setCourseTasks] = useState<Task[]>([]);
 
   const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
   const [checkedMap, setCheckedMap] = useState<{ [key: number]: boolean }>({});
@@ -53,10 +51,6 @@ function TaskPage() {
       try {
         const courses = await getCourses(uid!, null);
         setAvailableCourses(courses);
-        // const cNames = [
-        //   "All Courses",
-        //   ...courses.map((c: Course) => c.courseName),
-        // ];
       } catch (err) {
         console.error("Failed to fetch courses:", err);
       }
@@ -78,9 +72,8 @@ function TaskPage() {
           const selectedCourseTasks = await getTasks(
             uid!,
             null,
-            selectedCourse.courseId // Currently selected course
+            selectedCourse.courseId
           );
-          // setSelectedCourseId(selectedCourse.courseId);
           setAvailableTasks(selectedCourseTasks);
           setSelectedGrade(selectedCourse.currentGrade!);
 
@@ -127,6 +120,47 @@ function TaskPage() {
       [index]: !prev[index],
     }));
   };
+
+  const refreshCourses = async () => {
+    if (!uid) return;
+    try {
+      const courses = await getCourses(uid, null);
+      setAvailableCourses(courses);
+
+      // If selected course no longer exists, reset to "All Courses"
+      if (selectedCourseTab !== "All Courses") {
+        const selectedCourse = courses.find(c => c.courseName === selectedCourseTab);
+        if (!selectedCourse) {
+          setSelectedCourseTab("All Courses"); // <-- force refresh
+        }
+      }
+
+      // Refresh tasks
+      if (selectedCourseTab === "All Courses" || courses.length === 0) {
+        const tasks = await getTasks(uid, null, null);
+        setAvailableTasks(tasks);
+        setSelectedGrade(0);
+        setSelectedTimeSpent("0hr 0min");
+      } else {
+        const selectedCourse = courses.find(c => c.courseName === selectedCourseTab);
+        if (selectedCourse) {
+          const tasks = await getTasks(uid, null, selectedCourse.courseId);
+          setAvailableTasks(tasks);
+          setSelectedGrade(selectedCourse.currentGrade ?? 0);
+
+          let totalMinutes = 0;
+          tasks.forEach(t => totalMinutes += t.currentTime ?? 0);
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+          setSelectedTimeSpent(`${hours}hr ${minutes}min`);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to refresh courses/tasks:", err);
+    }
+  };
+
+
 
   return (
     <div className="task-page">
@@ -241,11 +275,11 @@ function TaskPage() {
           <EditTask />
         </div>
       )}
-      {showEditCourse && (
-        <div className="opacity" onClick={() => setShowEditCourse(false)}>
-          <EditCourse />
-        </div>
-      )}
+    {showEditCourse && (
+      <div className="opacity" onClick={() => setShowEditCourse(false)}>
+        <EditCourse onCoursesChanged={refreshCourses} />
+      </div>
+    )}
     </div>
   );
 }
