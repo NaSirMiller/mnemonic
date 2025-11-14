@@ -29,6 +29,7 @@ const TaskFieldTypes: Record<keyof Task, ExpectedType | ExpectedType[]> = {
   createdAt: ["date", "null", "undefined"],
   lastUpdatedAt: ["date", "null", "undefined"],
   googleEventId: ["string", "null", "undefined"],
+  isComplete: ["boolean", "undefined"],
 };
 function getType(value: any): ExpectedType {
   if (value === null) return "null";
@@ -99,6 +100,7 @@ export function setTaskDefaults(task: Task): Task {
     priority: task.priority ?? -1,
     createdAt: task.createdAt ?? now,
     lastUpdatedAt: task.lastUpdatedAt ?? now,
+    isComplete: task.isComplete ?? false,
   };
 }
 

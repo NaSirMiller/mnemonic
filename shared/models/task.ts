@@ -15,4 +15,5 @@ export interface Task {
   createdAt?: Date | null;
   lastUpdatedAt?: Date | null;
   googleEventId?: string | null;
+  isComplete?: boolean;
 }
