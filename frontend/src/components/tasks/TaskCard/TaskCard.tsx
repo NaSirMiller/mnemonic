@@ -1,14 +1,25 @@
 import "./TaskCard.css";
 
+// Define prop types
+interface TaskCardProps {
+  name: string;
+  course: string;
+  grade?: number;
+  dueDate?: string;
+  timeSpent?: string;
+  checked?: boolean;
+  onClick?: () => void;
+}
+
 function TaskCard({
   name,
   course,
   grade,
   dueDate,
   timeSpent,
-  checked,
+  checked = false,
   onClick,
-}) {
+}: TaskCardProps) {
   return (
     <div className="task-card" onClick={onClick}>
       <div className="task-card-check-box">
