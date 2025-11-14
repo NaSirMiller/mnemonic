@@ -1,5 +1,5 @@
 import { LLMClient } from "../llm/llmClient";
-import { LLMInstance } from "../llm/LLMInstance";
+import { LLMInstance } from "../llm/llmInstance";
 import { LLMInstanceConfig } from "../../../shared/models/llm";
 
 const DEFAULT_MODEL_NAME = "deepseek/deepseek-r1-distill-llama-70b:free";
