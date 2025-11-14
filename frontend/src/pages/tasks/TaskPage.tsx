@@ -30,6 +30,16 @@ function TaskPage() {
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
 
+  // --- SORTING FUNCTION ---
+  const sortTasksByDueDate = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1; // a goes later
+      if (!b.dueDate) return -1; // b goes later
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    });
+  };
+
   // Load user profile
   useEffect(() => {
     if (!uid || uid.length > 128) return;
@@ -61,22 +71,24 @@ function TaskPage() {
   // Fetch tasks
   useEffect(() => {
     if (!uid) return;
+
     async function fetchTasks() {
       try {
+        let tasks: Task[] = [];
+
         if (selectedCourseTab === "All Courses") {
-          const allTasks = await getTasks(uid!, null, null);
-          setAvailableTasks(allTasks);
+          tasks = await getTasks(uid!, null, null);
         } else {
           const selectedCourse = availableCourses.find(
             (c) => c.courseName === selectedCourseTab
           );
           if (!selectedCourse) return;
 
-          const courseTasks = await getTasks(uid!, null, selectedCourse.courseId);
-          setAvailableTasks(courseTasks);
+          tasks = await getTasks(uid!, null, selectedCourse.courseId);
+
           setSelectedGrade(selectedCourse.currentGrade ?? 0);
 
-          const totalMinutes = courseTasks.reduce(
+          const totalMinutes = tasks.reduce(
             (sum, t) => sum + (t.currentTime ?? 0),
             0
           );
@@ -84,10 +96,16 @@ function TaskPage() {
           const minutes = totalMinutes % 60;
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
+
+        // APPLY SORT HERE
+        const sorted = sortTasksByDueDate(tasks);
+        setAvailableTasks(sorted);
+
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
     }
+
     fetchTasks();
   }, [selectedCourseTab, availableCourses, uid]);
 
@@ -115,11 +133,9 @@ function TaskPage() {
     });
 
     try {
-      // Only send allowed fields (isComplete)
       await updateTask(uid, task.taskId, { isComplete: updatedIsComplete });
     } catch (err) {
       console.error("Failed to update task completion:", err);
-      // Revert if failed
       setAvailableTasks((prev) => {
         const copy = [...prev];
         copy[index] = { ...copy[index], isComplete: task.isComplete ?? false };
@@ -134,10 +150,14 @@ function TaskPage() {
     try {
       const courses = await getCourses(uid, null);
       setAvailableCourses(courses);
+
       if (selectedCourseTab !== "All Courses") {
-        const selectedCourse = courses.find(c => c.courseName === selectedCourseTab);
+        const selectedCourse = courses.find(
+          (c) => c.courseName === selectedCourseTab
+        );
         if (!selectedCourse) setSelectedCourseTab("All Courses");
       }
+
       await refreshTasks();
     } catch (err) {
       console.error("Failed to refresh courses:", err);
@@ -147,27 +167,23 @@ function TaskPage() {
   const refreshTasks = async () => {
     if (!uid) return;
     try {
+      let tasks: Task[] = [];
+
       if (selectedCourseTab === "All Courses") {
-        const allTasks = await getTasks(uid, null, null);
-        setAvailableTasks(allTasks);
+        tasks = await getTasks(uid, null, null);
       } else {
         const selectedCourse = availableCourses.find(
           (c) => c.courseName === selectedCourseTab
         );
         if (!selectedCourse) return;
 
-        const courseTasks = await getTasks(uid, null, selectedCourse.courseId);
-        setAvailableTasks(courseTasks);
-
-        const totalMinutes = courseTasks.reduce(
-          (sum, t) => sum + (t.currentTime ?? 0),
-          0
-        );
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        setSelectedTimeSpent(`${hours}hr ${minutes}min`);
-        setSelectedGrade(selectedCourse.currentGrade ?? 0);
+        tasks = await getTasks(uid, null, selectedCourse.courseId);
       }
+
+      // Apply sorting again
+      const sorted = sortTasksByDueDate(tasks);
+      setAvailableTasks(sorted);
+
     } catch (err) {
       console.error("Failed to refresh tasks:", err);
     }
@@ -227,7 +243,7 @@ function TaskPage() {
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {["All Courses", ...availableCourses.map(c => c.courseName ?? "")].map(
+        {["All Courses", ...availableCourses.map((c) => c.courseName ?? "")].map(
           (courseName, i) => (
             <div
               key={`task-page-${courseName}-${i}`}
@@ -272,7 +288,9 @@ function TaskPage() {
                     }).format(task.dueDate)
                   : "No due date"
               }
-              timeSpent={`${task.currentTime ?? 0} / ${task.expectedTime ?? 0}`}
+              timeSpent={`${task.currentTime ?? 0} / ${
+                task.expectedTime ?? 0
+              }`}
               checked={task.isComplete ?? false}
               onClick={() => toggleChecked(i)}
             />

@@ -110,6 +110,23 @@ function HomePage() {
     }
   });
 
+
+  /** 
+   * Function to order tasks — filters out completed tasks and sorts by due date. 
+   * Can be updated in the future to use different ordering logic.
+   */
+  const orderTasks = (tasks: Task[]): Task[] => {
+    return tasks
+      .filter((task) => !task.isComplete)
+      .sort((a, b) => {
+        if (!a.dueDate) return 1; // Tasks without due date go last
+        if (!b.dueDate) return -1;
+        return a.dueDate.getTime() - b.dueDate.getTime(); // Soonest due date first
+      });
+  };
+
+  const orderedTasks = orderTasks(tasks);
+
   return (
     <div className="home-page">
       {/* LEFT SIDE — TASK LIST */}
@@ -120,7 +137,7 @@ function HomePage() {
           <div className="home-page-task-type">Date</div>
         </div>
         <div className="home-page-task-cont">
-          {tasks.map((task, i) => (
+          {orderedTasks.map((task, i) => (
             <div key={"task-" + i} className="home-page-task">
               <div className="home-page-task-name">{task.title}</div>
               <div className="home-page-task-date">
