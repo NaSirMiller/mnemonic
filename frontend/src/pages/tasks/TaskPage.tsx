@@ -1,3 +1,4 @@
+// frontend/src/pages/tasks/TaskPage.tsx
 import { useState, useEffect } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -5,36 +6,43 @@ import { useAuth } from "../../hooks/useAuth";
 import type { Course } from "../../../../shared/models/course";
 import type { Task } from "../../../../shared/models/task";
 import type { FullUser } from "../../../../shared/models/user";
+
 import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
-import { getTasks } from "../../services/tasksService";
+import { getTasks, updateTask } from "../../services/tasksService";
 
-import TaskCard from "../../components/tasks/TaskCard";
+import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
+
 import "./TaskPage.css";
 
 function TaskPage() {
   const { uid } = useAuth();
   const [user, setUser] = useState<FullUser>();
-
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
-  // const [setCourseNames] = useState<string[]>([]);
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
-  // const [courseTasks, setCourseTasks] = useState<Task[]>([]);
 
   const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
-  const [checkedMap, setCheckedMap] = useState<{ [key: number]: boolean }>({});
   const [selectedGrade, setSelectedGrade] = useState(0.0);
   const [selectedTimeSpent, setSelectedTimeSpent] = useState("0 h 0 m");
 
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
 
-  // Load user data for profile information
+  // --- SORTING FUNCTION ---
+  const sortTasksByDueDate = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1; // a goes later
+      if (!b.dueDate) return -1; // b goes later
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    });
+  };
+
+  // Load user profile
   useEffect(() => {
     if (!uid || uid.length > 128) return;
-
     async function loadUser() {
       try {
         const fullUser = await getUser(uid!);
@@ -43,20 +51,16 @@ function TaskPage() {
         console.error("Failed to fetch user:", err);
       }
     }
-
     loadUser();
   }, [uid]);
 
-  // Get all course data for a user, and get all course names for the tab bar
+  // Fetch courses
   useEffect(() => {
+    if (!uid) return;
     async function fetchCourses() {
       try {
         const courses = await getCourses(uid!, null);
         setAvailableCourses(courses);
-        // const cNames = [
-        //   "All Courses",
-        //   ...courses.map((c: Course) => c.courseName),
-        // ];
       } catch (err) {
         console.error("Failed to fetch courses:", err);
       }
@@ -64,36 +68,39 @@ function TaskPage() {
     fetchCourses();
   }, [uid]);
 
-  // Get tasks data for the selected tab
+  // Fetch tasks
   useEffect(() => {
+    if (!uid) return;
+
     async function fetchTasks() {
       try {
-        if (selectedCourseTab === "All Courses") {
-          const allCourseTasks = await getTasks(uid!, null, null);
-          setAvailableTasks(allCourseTasks);
-        } else {
-          const selectedCourse: Course = availableCourses.find(
-            (course) => course.courseName === selectedCourseTab
-          )!;
-          const selectedCourseTasks = await getTasks(
-            uid!,
-            null,
-            selectedCourse.courseId // Currently selected course
-          );
-          // setSelectedCourseId(selectedCourse.courseId);
-          setAvailableTasks(selectedCourseTasks);
-          setSelectedGrade(selectedCourse.currentGrade!);
+        let tasks: Task[] = [];
 
-          // Calculate total time spent
-          let totalMinutes = 0;
-          selectedCourseTasks.forEach((task: Task) => {
-            const completedTime = task.currentTime ?? 0;
-            totalMinutes += completedTime;
-          });
-          const totalHours = Math.floor(totalMinutes / 60);
-          const remainingMinutes = totalMinutes % 60;
-          setSelectedTimeSpent(`${totalHours}hr ${remainingMinutes}min`);
+        if (selectedCourseTab === "All Courses") {
+          tasks = await getTasks(uid!, null, null);
+        } else {
+          const selectedCourse = availableCourses.find(
+            (c) => c.courseName === selectedCourseTab
+          );
+          if (!selectedCourse) return;
+
+          tasks = await getTasks(uid!, null, selectedCourse.courseId);
+
+          setSelectedGrade(selectedCourse.currentGrade ?? 0);
+
+          const totalMinutes = tasks.reduce(
+            (sum, t) => sum + (t.currentTime ?? 0),
+            0
+          );
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+          setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
+
+        // APPLY SORT HERE
+        const sorted = sortTasksByDueDate(tasks);
+        setAvailableTasks(sorted);
+
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
@@ -102,7 +109,7 @@ function TaskPage() {
     fetchTasks();
   }, [selectedCourseTab, availableCourses, uid]);
 
-  // Prevent background scrolling when edit modals are open
+  // Prevent background scroll
   useEffect(() => {
     document.body.style.overflow =
       showEditTask || showEditCourse ? "hidden" : "auto";
@@ -111,21 +118,75 @@ function TaskPage() {
     };
   }, [showEditTask, showEditCourse]);
 
-  // Reset checked map when available tasks change
-  useEffect(() => {
-    const initialMap: { [key: number]: boolean } = {};
-    availableTasks.forEach((_, i) => {
-      initialMap[i] = false;
-    });
-    setCheckedMap(initialMap);
-  }, [availableTasks]);
+  // Toggle task completion
+  const toggleChecked = async (index: number) => {
+    const task = availableTasks[index];
+    if (!task || !uid || !task.taskId) return;
 
-  // Toggle task checked state
-  const toggleChecked = (index: number) => {
-    setCheckedMap((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+    const updatedIsComplete = !task.isComplete;
+
+    // Optimistic UI update
+    setAvailableTasks((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], isComplete: updatedIsComplete };
+      return copy;
+    });
+
+    try {
+      await updateTask(uid, task.taskId, { isComplete: updatedIsComplete });
+    } catch (err) {
+      console.error("Failed to update task completion:", err);
+      setAvailableTasks((prev) => {
+        const copy = [...prev];
+        copy[index] = { ...copy[index], isComplete: task.isComplete ?? false };
+        return copy;
+      });
+    }
+  };
+
+  // Refresh courses/tasks
+  const refreshCourses = async () => {
+    if (!uid) return;
+    try {
+      const courses = await getCourses(uid, null);
+      setAvailableCourses(courses);
+
+      if (selectedCourseTab !== "All Courses") {
+        const selectedCourse = courses.find(
+          (c) => c.courseName === selectedCourseTab
+        );
+        if (!selectedCourse) setSelectedCourseTab("All Courses");
+      }
+
+      await refreshTasks();
+    } catch (err) {
+      console.error("Failed to refresh courses:", err);
+    }
+  };
+
+  const refreshTasks = async () => {
+    if (!uid) return;
+    try {
+      let tasks: Task[] = [];
+
+      if (selectedCourseTab === "All Courses") {
+        tasks = await getTasks(uid, null, null);
+      } else {
+        const selectedCourse = availableCourses.find(
+          (c) => c.courseName === selectedCourseTab
+        );
+        if (!selectedCourse) return;
+
+        tasks = await getTasks(uid, null, selectedCourse.courseId);
+      }
+
+      // Apply sorting again
+      const sorted = sortTasksByDueDate(tasks);
+      setAvailableTasks(sorted);
+
+    } catch (err) {
+      console.error("Failed to refresh tasks:", err);
+    }
   };
 
   return (
@@ -139,7 +200,7 @@ function TaskPage() {
         />
         {selectedCourseTab === "All Courses" ? (
           <div className="task-page-profile-name">
-            {user?.email ?? "catlover@gmail.com"}
+            {user?.email ?? "user@example.com"}
           </div>
         ) : (
           <div className="task-page-course-info">
@@ -182,7 +243,7 @@ function TaskPage() {
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {["All Courses", ...availableCourses.map((c) => c.courseName!)].map(
+        {["All Courses", ...availableCourses.map((c) => c.courseName ?? "")].map(
           (courseName, i) => (
             <div
               key={`task-page-${courseName}-${i}`}
@@ -211,10 +272,10 @@ function TaskPage() {
           {availableTasks.map((task, i) => (
             <TaskCard
               key={`task-card-${i}`}
-              name={task.title}
+              name={task.title ?? ""}
               course={
                 selectedCourseTab === "All Courses"
-                  ? task.title
+                  ? task.courseId ?? ""
                   : selectedCourseTab
               }
               grade={task.grade! * 100}
@@ -227,8 +288,10 @@ function TaskPage() {
                     }).format(task.dueDate)
                   : "No due date"
               }
-              timeSpent={`${task.currentTime} / ${task.expectedTime}`}
-              checked={checkedMap[i]}
+              timeSpent={`${task.currentTime ?? 0} / ${
+                task.expectedTime ?? 0
+              }`}
+              checked={task.isComplete ?? false}
               onClick={() => toggleChecked(i)}
             />
           ))}
@@ -238,12 +301,12 @@ function TaskPage() {
       {/* Edit Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
-          <EditTask />
+          <EditTask onTasksChanged={refreshTasks} />
         </div>
       )}
       {showEditCourse && (
         <div className="opacity" onClick={() => setShowEditCourse(false)}>
-          <EditCourse />
+          <EditCourse onCoursesChanged={refreshCourses} />
         </div>
       )}
     </div>

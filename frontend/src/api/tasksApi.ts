@@ -5,7 +5,7 @@ export async function createTask(taskPayload: Task) {
   const res = await fetch(`${BASE_URL}/api/tasks/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ taskPayload }),
+    body: JSON.stringify(taskPayload),   
   });
 
   if (!res.ok) {
@@ -15,12 +15,12 @@ export async function createTask(taskPayload: Task) {
     } catch {
       throw new Error(`An error occurred: ${res.status}`);
     }
-    throw new Error(errorData.error || `An error occurred: ${res.status}`);
+    throw new Error(errorData.message || `An error occurred: ${res.status}`);
   }
 
-  const data = await res.json();
-  return data; // Response format: {message: string, task: Task}
+  return await res.json(); // { message, task }
 }
+
 
 export async function getTasks(
   userId: string,
@@ -62,7 +62,7 @@ export async function updateTask(
   const res = await fetch(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(taskPayload),
+    body: JSON.stringify({ userId, taskId, taskPayload }), // wrap payload
   });
 
   if (!res.ok) {
@@ -72,12 +72,13 @@ export async function updateTask(
     } catch {
       throw new Error(`An error occurred: ${res.status}`);
     }
-    throw new Error(errorData.error || `An error occurred: ${res.status}`);
+    throw new Error(errorData.message || `An error occurred: ${res.status}`);
   }
 
   const data = await res.json();
-  return data; // Response format: {message: string}
+  return data; // Response format: { message: string }
 }
+
 
 export async function deleteTask(userId: string, taskId: string) {
   const url = `${BASE_URL}/api/tasks/${userId}/${taskId}`;

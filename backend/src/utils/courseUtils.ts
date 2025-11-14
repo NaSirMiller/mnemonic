@@ -1,15 +1,17 @@
 import { Course } from "../../../shared/models/course";
-type ExpectedType = "string" | "number" | "undefined" | "null";
+type ExpectedType = "string" | "number" | "undefined" | "null" | "object";
 
 const CourseFieldTypes: Record<keyof Course, ExpectedType | ExpectedType[]> = {
   userId: ["string", "undefined"],
   courseId: ["string", "undefined"],
   courseName: ["string", "undefined"],
   currentGrade: ["number", "undefined"],
+  gradeTypes: ["object", "undefined"],
 };
 
 function getType(value: any): ExpectedType {
   if (value === null) return "null";
+  if (typeof value === "object" && !Array.isArray(value)) return "object";
   return typeof value as ExpectedType;
 }
 
@@ -43,6 +45,13 @@ export function validateCourseTypes(course: Course): string[] {
         )}, got ${actualType}`
       );
     }
+    if (field === "gradeTypes" && value) {
+        for (const [k, v] of Object.entries(value)) {
+          if (typeof v !== "number") {
+            errors.push(`gradeTypes.${k} must be a number`);
+        }
+      }
+    }
   }
 
   return errors;
@@ -60,9 +69,10 @@ export function isCourseTypeValid(course: Course): ValidationResult {
 /**
  * Check if immutable fields are being updated (e.g. userId or courseId).
  */
-export function attemptsToUpdateImmutable(course: Course): boolean {
-  return !!(course.userId || course.courseId);
+export function attemptsToUpdateImmutable(coursePayload: any) {
+  return coursePayload.courseId != null; // only block if courseId is being changed
 }
+
 
 /**
  * Check that required fields are present.
@@ -81,6 +91,8 @@ export function setCourseDefaults(course: Course): Course {
     userId: course.userId!,
     courseName: course.courseName!,
     currentGrade: course.currentGrade ?? 0,
+    gradeTypes: course.gradeTypes ?? {}, // default empty object
+    courseId: course.courseId,
   };
 }
 
@@ -102,6 +114,16 @@ export function validateNumericCourseFieldValues(
         isValid: false,
         firstError: `Invalid currentGrade: ${course.currentGrade}. Must be 0–1.`,
       };
+    }
+  }
+  if (course.gradeTypes) {
+    for (const [key, value] of Object.entries(course.gradeTypes)) {
+      if (typeof value !== "number" || value < 0 || value > 1) {
+        return {
+          isValid: false,
+          firstError: `Invalid gradeTypes value for "${key}": ${value}. Must be 0–1.`,
+        };
+      }
     }
   }
 

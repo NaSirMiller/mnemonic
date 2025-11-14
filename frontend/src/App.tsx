@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { LoginPage } from "./pages/login/LoginPage.tsx";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedRoute } from "./components/login/ProtectedRoute.tsx";
 import TaskPage from "./pages/tasks/TaskPage.tsx";
 import HomePage from "./pages/home/HomePage.tsx";
 import NavBar from "./components/navbar/NavBar.tsx";

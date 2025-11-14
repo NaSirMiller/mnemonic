@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { signInWithGoogle, LoginError } from "../pages/login/login_utils";
+import { useAuth } from "../../hooks/useAuth";
+import { signInWithGoogle, LoginError } from "../../pages/login/login_utils";
 
 type LoginButtonProps = {
   className?: string;

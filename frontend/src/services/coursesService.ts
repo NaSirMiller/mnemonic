@@ -43,10 +43,11 @@ export class DeleteCourseError extends Error {
   }
 }
 
-export async function createCourse(coursePayload: Course): Promise<void> {
+export async function createCourse(coursePayload: Course): Promise<Course> {
   try {
-    await createCourseApi(coursePayload);
+    const createdCourse = await createCourseApi(coursePayload); 
     console.log("Course created.");
+    return createdCourse; 
   } catch (error) {
     if (error instanceof Error) {
       console.error("Course could not be created: ", error.message);
@@ -64,38 +65,27 @@ export async function createCourse(coursePayload: Course): Promise<void> {
   }
 }
 
+
 export async function getCourses(
   userId: string,
   courseId: string | null
 ): Promise<Course[]> {
   try {
     const coursesResponse = await getCoursesApi(userId, courseId);
-    const courses: Course[] = coursesResponse.courses;
+    const courses: Course[] = coursesResponse.courses ?? [];
     console.log(`Retrieved ${courses.length} courses.`);
     return courses;
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(
-        courseId === null
-          ? "Could not get user courses: "
-          : "Could not get specified course",
-        error.message
-      );
-      throw new GetCoursesError(
-        courseId === null
-          ? `Error retrieving courses: ${error.message}`
-          : `Error retrieving given course: ${error.message}`,
-        "api-error"
-      );
-    } else {
-      console.error("Unknown course retrieval error", error);
-      throw new GetCoursesError(
-        "Unknown error during course retrieval",
-        "unknown"
-      );
-    }
+    console.error(
+      courseId === null ? "Could not get user courses: " : "Could not get specified course",
+      (error as Error).message
+    );
+    // Return empty array instead of throwing
+    return [];
   }
 }
+
+
 
 export async function updateCourse(
   userId: string,

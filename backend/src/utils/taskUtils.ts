@@ -21,12 +21,15 @@ const TaskFieldTypes: Record<keyof Task, ExpectedType | ExpectedType[]> = {
   expectedTime: ["number", "undefined"],
   currentTime: ["number", "undefined"],
   weight: ["number", "undefined"],
+  gradeType: ["string", "undefined"],
   dueDate: ["date", "undefined", "null"],
   description: ["string", "undefined"],
   grade: ["number", "null", "undefined"],
   priority: ["number", "null", "undefined"],
   createdAt: ["date", "null", "undefined"],
   lastUpdatedAt: ["date", "null", "undefined"],
+  googleEventId: ["string", "null", "undefined"],
+  isComplete: ["boolean", "undefined"],
 };
 function getType(value: any): ExpectedType {
   if (value === null) return "null";
@@ -40,27 +43,23 @@ export function validateTaskTypes(task: Task): string[] {
     const field = key as keyof Task;
     const expected = TaskFieldTypes[field];
 
-    if (!expected)
-      errors.push(
-        `Provided field ${expected} is not a valid field for the type Task.`
-      ); // Unknown field provided
+    if (!expected) {
+      errors.push(`Provided field "${key}" is not a valid field for the type Task.`);
+      continue; // skip further checks
+    }
 
-    const expectedTypes: string[] = Array.isArray(expected)
-      ? expected
-      : [expected];
+    const expectedTypes: string[] = Array.isArray(expected) ? expected : [expected];
     const actualType = getType(value);
 
     if (!expectedTypes.includes(actualType)) {
-      // Type provided for field is invalid.
       errors.push(
-        `Invalid type for "${field}": expected ${expectedTypes.join(
-          " | "
-        )}, got ${actualType}`
+        `Invalid type for "${field}": expected ${expectedTypes.join(" | ")}, got ${actualType}`
       );
     }
   }
   return errors;
 }
+
 
 export function isTaskTypeValid(task: Task): ValidationResult {
   const errors = validateTaskTypes(task);
@@ -93,13 +92,15 @@ export function setTaskDefaults(task: Task): Task {
     courseId: task.courseId!,
     currentTime: 0,
     expectedTime: 0,
-    weight: task.weight ?? -1, // No weight specified
+    weight: task.weight ?? -1,
+    gradeType: task.gradeType!,    
     dueDate: task.dueDate ?? null,
     description: task.description ?? "",
     grade: task.grade ?? 0,
-    priority: task.priority ?? -1, // No priority set
+    priority: task.priority ?? -1,
     createdAt: task.createdAt ?? now,
     lastUpdatedAt: task.lastUpdatedAt ?? now,
+    isComplete: task.isComplete ?? false,
   };
 }
 

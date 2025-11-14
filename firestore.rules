@@ -5,7 +5,8 @@ service cloud.firestore {
             return data.userId is string &&
                    data.courseId is string &&
                    data.courseGrade is float &&
-                   data.courseName is string;
+                   data.courseName is string &&
+                   data.gradeTypes is map;
         }
         }
         function isValidTask(data) {
@@ -13,6 +14,7 @@ service cloud.firestore {
                    data.title is string &&
                    data.courseId is string &&
                    (data.weight is number && (data.weight >=0 && data.weight <= 1.00)) &&
+                   gradeType is string &&
                    data.dueDate is timestamp &&
                    data.get("description", "") is string &&
                    (data.grade is number || data.grade == null) && // Grade can be added later by user
@@ -21,7 +23,8 @@ service cloud.firestore {
                    data.isComplete is bool &&
                    (data.priority is number || data.priority == null) // Task priority
                    data.createdAt is timestamp &&
-                   data.lastUpdatedAt is timestamp
+                   data.lastUpdatedAt is timestamp &&
+                   data.googleEventId is string
         }
         function isValidUser(data) {
             return data.userId is string &&
