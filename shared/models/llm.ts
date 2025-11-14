@@ -21,3 +21,9 @@ export interface ChatHistory {
   turns: ChatTurn[];
   createdAt?: Date;
 }
+
+export interface LLMInstanceConfig {
+  name: string;
+  model: string;
+  systemPrompt: string;
+}
