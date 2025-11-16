@@ -40,6 +40,13 @@ function TaskPage() {
     });
   };
 
+  // --- Helper to get course name by id ---
+  const getCourseName = (courseId: string | null | undefined) => {
+    if (!courseId) return "";
+    const match = availableCourses.find((c) => c.courseId === courseId);
+    return match?.courseName ?? courseId; // fallback to id if not found
+  };
+
   // Load user profile
   useEffect(() => {
     if (!uid || uid.length > 128) return;
@@ -88,19 +95,15 @@ function TaskPage() {
 
           setSelectedGrade(selectedCourse.currentGrade ?? 0);
 
-          const totalMinutes = tasks.reduce(
-            (sum, t) => sum + (t.currentTime ?? 0),
-            0
-          );
-          const hours = Math.floor(totalMinutes / 60);
-          const minutes = totalMinutes % 60;
+          const totalHours = tasks.reduce((sum, t) => sum + (t.currentTime ?? 0), 0);
+          const hours = Math.floor(totalHours); // integer part as hours
+          const minutes = Math.round((totalHours - hours) * 60); // fraction converted to minutes
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
 
         // APPLY SORT HERE
         const sorted = sortTasksByDueDate(tasks);
         setAvailableTasks(sorted);
-
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
@@ -183,7 +186,6 @@ function TaskPage() {
       // Apply sorting again
       const sorted = sortTasksByDueDate(tasks);
       setAvailableTasks(sorted);
-
     } catch (err) {
       console.error("Failed to refresh tasks:", err);
     }
@@ -275,7 +277,7 @@ function TaskPage() {
               name={task.title ?? ""}
               course={
                 selectedCourseTab === "All Courses"
-                  ? task.courseId ?? ""
+                  ? getCourseName(task.courseId)
                   : selectedCourseTab
               }
               grade={task.grade! * 100}
@@ -288,9 +290,7 @@ function TaskPage() {
                     }).format(task.dueDate)
                   : "No due date"
               }
-              timeSpent={`${task.currentTime ?? 0} / ${
-                task.expectedTime ?? 0
-              }`}
+              timeSpent={`${task.currentTime ?? 0} / ${task.expectedTime ?? 0}`}
               checked={task.isComplete ?? false}
               onClick={() => toggleChecked(i)}
             />
