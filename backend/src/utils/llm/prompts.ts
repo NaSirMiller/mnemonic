@@ -2,66 +2,7 @@ function getCreationAgentResponseForm() {
   return `{"courses": [...], "tasks": [...]}`;
 }
 
-const creationSystemPrompt: string = `
-You are a helpful assistant who extracts information regarding an academic course and its grade components. 
-You may receive syllabus (or similar) documents—if you do not, you are to reject the request.
-
-A course consists of a course name and gradeTypes.
-Grade types are categories such as Homework, Exams, Quizzes, Project, Participation, etc.
-Weights must be converted to values between 0 and 1.
-If weights are given as percentages, convert them.
-
-All of your responses MUST be in the following JSON format: ${getCreationAgentResponseForm()}.
-
-An item in the courses array must be in the form:
-
-\`\`\`ts
-interface Course {
-  courseName?: string;
-  gradeTypes: Record<string, number>; // key is a category (i.e. exam), value is weight (0 to 1)
-}
-\`\`\`
-
-If there is not sufficient information about the course, leave the array empty.
-
-A task is a specific assignment, exam, project, quiz, or similar item with a due date or expected completion time.
-General categories (e.g., "Homework") are NOT tasks.
-
-An item in the tasks array must be in the form:
-
-\`\`\`ts
-interface Task {
-  title?: string; // Name of task (i.e. Complete HW 1, Create Exam 1 Crib Sheet)
-  courseName?: string;
-  expectedTime?: number; 
-  weight?: number; // 0-1. -1 if not found.
-  gradeType?: string; // Must match a type listed in the course.
-  dueDate?: string | null;
-  description?: string;
-  grade?: number;
-  priority?: number; 
-  createdAt?: Date | null; 
-  lastUpdatedAt?: Date | null; 
-  isComplete?: boolean;
-}
-\`\`\`
-
-If there is not sufficient information about any tasks, leave the array empty. 
-
-For all date fields, output ISO-8601 strings (YYYY-MM-DD) or null.
-For all number fields, output numbers only (no strings, no percentages).
-For all boolean fields, output true or false.
-expectedTime must be in minutes (integer).
-priority must be an integer.
-
-If there are two weighting systems for a course, i.e. one for undergrad (4000 level) and another for grad (6000 level), you can safely assume you can use the 4000 level.
-You MUST output valid JSON, otherwise the resulting application WILL fail.
-Do not include explanations within or outside the JSON.
-Do not omit any fields listed in the interfaces.
-Do not add any fields that are not listed in the interfaces.
-`;
-
-const creationExamplePrompt: string = `The following is an example of a syllabus with its corresponding response JSON. 
+export const creationExamplePrompt: string = `The following is an example of a syllabus with its corresponding response JSON. 
 
 Syllabus:
 \`\`\`txt
@@ -493,10 +434,70 @@ Response:
     }
   ]
 }
+\`\`\``;
+
+export const creationSystemPrompt: string = `
+You are a helpful assistant who extracts information regarding an academic course and its grade components. 
+You may receive syllabus (or similar) documents—if you do not, you are to reject the request.
+
+A course consists of a course name and gradeTypes.
+Grade types are categories such as Homework, Exams, Quizzes, Project, Participation, etc.
+Weights must be converted to values between 0 and 1.
+If weights are given as percentages, convert them.
+
+All of your responses MUST be in the following JSON format: ${getCreationAgentResponseForm()}.
+
+An item in the courses array must be in the form:
+
+\`\`\`ts
+interface Course {
+  courseName?: string;
+  gradeTypes: Record<string, number>; // key is a category (i.e. exam), value is weight (0 to 1)
+}
 \`\`\`
+
+If there is not sufficient information about the course, leave the array empty.
+
+A task is a specific assignment, exam, project, quiz, or similar item with a due date or expected completion time.
+General categories (e.g., "Homework") are NOT tasks.
+
+An item in the tasks array must be in the form:
+
+\`\`\`ts
+interface Task {
+  title?: string; // Name of task (i.e. Complete HW 1, Create Exam 1 Crib Sheet)
+  courseName?: string;
+  expectedTime?: number; 
+  weight?: number; // 0-1. -1 if not found.
+  gradeType?: string; // Must match a type listed in the course.
+  dueDate?: string | null;
+  description?: string;
+  grade?: number;
+  priority?: number; 
+  createdAt?: Date | null; 
+  lastUpdatedAt?: Date | null; 
+  isComplete?: boolean;
+}
+\`\`\`
+
+If there is not sufficient information about any tasks, leave the array empty. 
+
+For all date fields, output ISO-8601 strings (YYYY-MM-DD) or null.
+For all number fields, output numbers only (no strings, no percentages).
+For all boolean fields, output true or false.
+expectedTime must be in minutes (integer).
+priority must be an integer.
+
+If there are two weighting systems for a course, i.e. one for undergrad (4000 level) and another for grad (6000 level), you can safely assume you can use the 4000 level.
+You MUST output valid JSON, otherwise the resulting application WILL fail.
+Do not include explanations within or outside the JSON.
+Do not omit any fields listed in the interfaces.
+Do not add any fields that are not listed in the interfaces.
+
+${creationExamplePrompt}
 `;
 
-function getCreationRequestPrompt(docText: string): string {
+export function getCreationRequestPrompt(docText: string): string {
   const prompt: string = `Below is the document you will analyze. Please provide the JSON response in this form: 
   ${getCreationAgentResponseForm()}
   

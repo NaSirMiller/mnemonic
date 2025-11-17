@@ -1,40 +1,31 @@
-import { LLMClient } from "../llm/llmClient";
-import { LLMInstance } from "../llm/llmInstance";
+import { LLMClient } from "../utils/llm/llmClient";
+import { LLMInstance } from "../utils/llm/llmInstance";
 import { LLMInstanceConfig } from "../../../shared/models/llm";
+import {
+  creationSystemPrompt,
+  creationExamplePrompt,
+  getCreationRequestPrompt,
+} from "../utils/llm/prompts";
+
+import { LLMResponse } from "../../../shared/models/llm";
+import { CourseTasksCreationResponse } from "../../../shared/models/response";
 
 const DEFAULT_MODEL_NAME = "deepseek/deepseek-r1-distill-llama-70b:free";
 const client = new LLMClient();
 
-const taskConfig: LLMInstanceConfig = {
-  name: "Task Generator",
+const courseTasksConfig: LLMInstanceConfig = {
+  name: "Course Task Generator",
   model: DEFAULT_MODEL_NAME,
-  systemPrompt: "",
-};
-const courseConfig: LLMInstanceConfig = {
-  name: "Course Generator",
-  model: DEFAULT_MODEL_NAME,
-  systemPrompt: "",
+  systemPrompt: creationSystemPrompt,
 };
 
-const taskGenerator = new LLMInstance(client, taskConfig);
-const courseGenerator = new LLMInstance(client, courseConfig);
+const courseTaskCreator = new LLMInstance(client, courseTasksConfig);
 
-export class TaskService {
-  constructor(private llm = taskGenerator) {}
-
-  async generateTasks(goal: string) {
-    const prompt = `User goal: ${goal}\n\nGenerate 5 concrete tasks.`;
-    const text = await this.llm.generate(prompt);
-    return text;
-  }
-}
-
-export class CourseService {
-  constructor(private llm = courseGenerator) {}
-
-  async generateCourse(topic: string) {
-    const prompt = `Design a beginner-friendly course on: ${topic}`;
-    const text = await this.llm.generate(prompt);
-    return text;
+export class CourseTaskCreationService {
+  constructor(private llm = courseTaskCreator) {}
+  async getCourseAndTasks(
+    docText: string
+  ): Promise<CourseTasksCreationResponse> {
+    return { tasks: [], courses: [] }; //TODO: Update with result from llm
   }
 }
