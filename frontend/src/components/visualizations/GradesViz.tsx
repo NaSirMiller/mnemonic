@@ -87,7 +87,7 @@ export default function GradesViz({ courseName, isAllCourses }: GradesVizProps) 
 
   return (
     <div className="grades-viz-container">
-      <h3>Average Grade by Grade Type for: {courseName}</h3>
+      <h3>Average Grade by Grade Type for {courseName}</h3>
       {gradeTypeData.length === 0 ? (
         <p>No completed graded tasks yet.</p>
       ) : (

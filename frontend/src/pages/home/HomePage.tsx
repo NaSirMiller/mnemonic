@@ -180,7 +180,7 @@ function HomePage() {
                 </div>
                 {dayEvents.map((event, j) => (
                   <div key={j} className="calendar-event">
-                    {event.summary || "Untitled Event"}
+                    <span className="calendar-event-text">{event.summary || "Untitled Event"}</span>
                   </div>
                 ))}
               </div>
