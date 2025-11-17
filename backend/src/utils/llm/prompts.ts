@@ -495,3 +495,12 @@ Response:
 }
 \`\`\`
 `;
+
+function getCreationRequestPrompt(docText: string): string {
+  const prompt: string = `Below is the document you will analyze. Please provide the JSON response in this form: 
+  ${getCreationAgentResponseForm()}
+  
+  Syllabus:
+  ${docText}`;
+  return prompt;
+}
