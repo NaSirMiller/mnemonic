@@ -1,12 +1,9 @@
 // frontend/src/pages/visualizations/VisualizationsPage.tsx
 import { useState, useEffect } from "react";
-
 import { useAuth } from "../../hooks/useAuth";
-
 import type { Course } from "../../../../shared/models/course";
-
 import { getCourses } from "../../services/coursesService";
-
+import VisualizationRenderer from "./VisualizationRenderer";
 import "./VisualizationsPage.css";
 
 const VISUALIZATION_TABS = ["Grades", "Time", "Grades vs Time"];
@@ -67,13 +64,12 @@ function VisualizationsPage() {
         ))}
       </div>
 
-      {/* Visualization Content Placeholder */}
+      {/* Visualization Content */}
       <div className="visualizations-page-content">
-        <h2>{selectedVisualizationTab}</h2>
-        <p>
-          Visualizations for <b>{selectedCourseTab}</b> will appear here.
-          Charts for course grades, time spent, and grade vs time can be added.
-        </p>
+        <VisualizationRenderer
+          selectedCourse={selectedCourseTab}
+          selectedTab={selectedVisualizationTab}
+        />
       </div>
     </div>
   );
