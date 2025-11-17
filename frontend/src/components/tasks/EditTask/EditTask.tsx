@@ -58,7 +58,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       try {
         const fetchedTasks = await getTasks(userId, null, selectedCourse.courseId);
         setTasks(fetchedTasks);
-        // select first task or null if no tasks
         setSelectedTask(fetchedTasks.length > 0 ? fetchedTasks[0] : null);
         setGradeWeights(Object.keys(selectedCourse.gradeTypes || {}));
       } catch (err) {
@@ -92,6 +91,22 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
   }, [selectedTask]);
 
+  // --- Sort tasks by gradeType then dueDate ---
+  const sortTasksForDisplay = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      const gradeA = a.gradeType ?? "";
+      const gradeB = b.gradeType ?? "";
+      if (gradeA < gradeB) return -1;
+      if (gradeA > gradeB) return 1;
+
+      // Sort by dueDate within gradeType
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+  };
+
   // --- Submit form (create or update) ---
   const submitForm = async () => {
     if (!selectedCourse || !userId) return;
@@ -120,11 +135,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await createTask({ ...payload, userId, createdAt: new Date() });
       }
 
-      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
 
-      // Find task by title within current course
       const updated =
         refreshed.find(
           (t) => t.title === taskName && t.courseId === selectedCourse.courseId
@@ -172,7 +185,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
 
       const created = await createTask(newTask);
 
-      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
 
@@ -193,7 +205,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       await deleteTask(userId, selectedTask.taskId);
       const refreshed = await getTasks(userId, null, selectedCourse?.courseId ?? null);
       setTasks(refreshed);
-      // Clear selection if no tasks remain
       setSelectedTask(refreshed[0] ?? null);
 
       onTasksChanged?.();
@@ -231,7 +242,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
           <div className="edit-task-select-label-due-date">Date</div>
         </div>
         <div className="edit-task-task-card-cont">
-          {tasks.map((task, i) => (
+          {sortTasksForDisplay(tasks).map((task, i) => (
             <div
               key={`edit-task-task-card-${i}`}
               className={`edit-task-task-card ${
