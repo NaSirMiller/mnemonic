@@ -23,10 +23,14 @@ export default function TimeHistogram({ data }: { data: any[] }) {
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey="courseName" />
       <YAxis tickFormatter={(val) => Math.round(val).toString()} />
+
       <Tooltip
         formatter={(val: number) => `${formatHours(val * 60)}`}
+        // Add labelFormatter to show "Time: <course>"
+        labelFormatter={(label) => `Time: ${label}`}
       />
-      <Bar dataKey="hours" fill="#2F4872" name="" />
+
+      <Bar dataKey="hours" fill="#2F4872" name="Time" />
     </BarChart>
   );
 }

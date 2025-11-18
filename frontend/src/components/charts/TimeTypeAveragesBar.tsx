@@ -28,15 +28,14 @@ export default function TimeTypeAveragesBar({
     <BarChart width={650} height={350} data={chartData}>
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey="type" />
-      <YAxis
-        tickFormatter={(val) => Math.round(val).toString()} // return string
-      />
+      <YAxis tickFormatter={(val) => Math.round(val).toString()} />
       <Tooltip
         formatter={(val: number) =>
           `${formatHours(val * 60)} ${showAverage ? "(avg)" : "(total)"}`
         }
+        labelFormatter={(label) => `Time: ${label}`} // <-- add this
       />
-      <Bar dataKey="hours" fill="#2F4872" name="" />
+      <Bar dataKey="hours" fill="#2F4872" name="Time" />
     </BarChart>
   );
 }
