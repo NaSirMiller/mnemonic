@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import "./EditTask.css";
 import { AuthContext } from "../../context/AuthContext";
-import { getCourses } from "../../../services/coursesService";
+import { getCourses, updateCourse } from "../../../services/coursesService";
 import { getTasks, createTask, updateTask, deleteTask } from "../../../services/tasksService";
 import type { Course } from "../../../../../shared/models/course";
 import type { Task } from "../../../../../shared/models/task";
@@ -33,6 +33,27 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
     return localISOTime;
   };
+
+  const recalculateGrade = async (userId: string, courseId: string) => {
+    try {
+      const tasks = await getTasks(userId, null, courseId);
+      const course = await getCourses(userId, courseId);
+      let grade = 0;
+      
+      for (let i = 0; i < tasks.length; i++){
+        grade += tasks[i].grade ?? 0 * (tasks[i].weight || 0);
+      }
+      const updatedCourse: Course = {
+        courseName: course[0].courseName,
+        currentGrade: grade / tasks.length,
+        gradeTypes: course[0].gradeTypes,
+        userId: userId
+      };
+      await updateCourse(userId, courseId, updatedCourse);
+    } catch (error) {
+      console.error("Couldn't set grade: ", error);
+    }
+  }
 
   // --- Load courses ---
   useEffect(() => {
@@ -118,6 +139,10 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await updateTask(userId, selectedTask.taskId, payload);
       } else {
         await createTask({ ...payload, userId, createdAt: new Date() });
+      }
+
+      if (payload.grade != selectedTask?.grade && selectedCourse.courseId != null) {
+        await recalculateGrade(userId, selectedCourse.courseId);
       }
 
       // Refresh tasks for current course only
