@@ -1,4 +1,4 @@
-import admin from "../firebase_admin";
+import admin from "../firebaseAdmin";
 import { Course } from "../../../shared/models/course";
 
 export class CourseRepository {

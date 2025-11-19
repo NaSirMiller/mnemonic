@@ -16,6 +16,8 @@ import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
+import { SyllabusUploader } from "../../components/file/SyllabusUploader";
+// import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -29,6 +31,7 @@ function TaskPage() {
 
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
+  const [showSyllabusForm, setShowSyllabusForm] = useState(false);
 
   // --- Helper: sort tasks ---
   const sortTasks = (tasks: Task[]) => {
@@ -247,23 +250,30 @@ function TaskPage() {
         >
           Edit Courses
         </div>
+        <div
+          className="task-page-syllabus-button"
+          onClick={() => setShowSyllabusForm(!showSyllabusForm)}
+        >
+          Upload Syllabus
+        </div>
       </div>
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {["All Courses", ...availableCourses.map((c) => c.courseName ?? "")].map(
-          (courseName, i) => (
-            <div
-              key={`task-page-${courseName}-${i}`}
-              className={`task-page-course ${
-                selectedCourseTab === courseName ? "selected" : ""
-              }`}
-              onClick={() => setSelectedCourseTab(courseName)}
-            >
-              {courseName}
-            </div>
-          )
-        )}
+        {[
+          "All Courses",
+          ...availableCourses.map((c) => c.courseName ?? ""),
+        ].map((courseName, i) => (
+          <div
+            key={`task-page-${courseName}-${i}`}
+            className={`task-page-course ${
+              selectedCourseTab === courseName ? "selected" : ""
+            }`}
+            onClick={() => setSelectedCourseTab(courseName)}
+          >
+            {courseName}
+          </div>
+        ))}
       </div>
 
       {/* Task List */}
@@ -313,6 +323,16 @@ function TaskPage() {
       {showEditCourse && (
         <div className="opacity" onClick={() => setShowEditCourse(false)}>
           <EditCourse onCoursesChanged={refreshCourses} />
+        </div>
+      )}
+      {/* {showSyllabusForm && (
+        <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
+          <ProposedTasksViewer />
+        </div>
+      )} */}
+      {showSyllabusForm && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <SyllabusUploader />
         </div>
       )}
     </div>

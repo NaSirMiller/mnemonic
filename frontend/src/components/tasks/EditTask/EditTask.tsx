@@ -1,8 +1,14 @@
 import { useState, useEffect, useContext } from "react";
+
 import "./EditTask.css";
 import { AuthContext } from "../../context/AuthContext";
 import { getCourses } from "../../../services/coursesService";
-import { getTasks, createTask, updateTask, deleteTask } from "../../../services/tasksService";
+import {
+  getTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+} from "../../../services/tasksService";
 import type { Course } from "../../../../../shared/models/course";
 import type { Task } from "../../../../../shared/models/task";
 
@@ -58,7 +64,11 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     if (!selectedCourse || !userId) return;
     (async () => {
       try {
-        const fetchedTasks = await getTasks(userId, null, selectedCourse.courseId);
+        const fetchedTasks = await getTasks(
+          userId,
+          null,
+          selectedCourse.courseId
+        );
         setTasks(fetchedTasks);
         setSelectedTask(fetchedTasks.length > 0 ? fetchedTasks[0] : null);
         setGradeWeights(Object.keys(selectedCourse.gradeTypes || {}));
@@ -83,7 +93,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGradeWeight(selectedTask.gradeType ?? "");
     setSelectedGradeWeight(selectedTask.gradeType ?? "");
     setDueDate(
-      selectedTask.dueDate ? formatDateForInput(new Date(selectedTask.dueDate)) : ""
+      selectedTask.dueDate
+        ? formatDateForInput(new Date(selectedTask.dueDate))
+        : ""
     );
     const completed = selectedTask.currentTime ?? 0;
     const estimated = selectedTask.expectedTime ?? 0;
@@ -111,8 +123,8 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     try {
       const nameTaken = tasks.some(
         (t) =>
-          (t.title ?? "").trim().toLowerCase() === taskName.trim().toLowerCase() &&
-          t.taskId !== selectedTask?.taskId
+          (t.title ?? "").trim().toLowerCase() ===
+            taskName.trim().toLowerCase() && t.taskId !== selectedTask?.taskId
       );
 
       if (nameTaken) {
@@ -136,7 +148,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
 
       setTaskNameError("");
 
-      const [completedStr, estimatedStr] = timeSpent.split("/").map((s) => s.trim());
+      const [completedStr, estimatedStr] = timeSpent
+        .split("/")
+        .map((s) => s.trim());
       const weight =
         selectedCourse.gradeTypes && taskGradeWeight
           ? selectedCourse.gradeTypes[taskGradeWeight]
@@ -217,7 +231,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       setTasks(refreshed);
 
       const newlyCreated =
-        refreshed.find((t) => t.taskId === created.taskId) ?? refreshed.at(-1) ?? null;
+        refreshed.find((t) => t.taskId === created.taskId) ??
+        refreshed.at(-1) ??
+        null;
       setSelectedTask(newlyCreated);
 
       onTasksChanged?.();
@@ -230,7 +246,11 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     if (!selectedTask?.taskId || !userId) return;
     try {
       await deleteTask(userId, selectedTask.taskId);
-      const refreshed = await getTasks(userId, null, selectedCourse?.courseId ?? null);
+      const refreshed = await getTasks(
+        userId,
+        null,
+        selectedCourse?.courseId ?? null
+      );
       setTasks(refreshed);
       setSelectedTask(refreshed[0] ?? null);
 
@@ -282,7 +302,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
               onClick={() => setSelectedTask(task)}
             >
               <div className="edit-task-task-card-name">{task.title}</div>
-              <div className="edit-task-task-card-grade">{(task.grade ?? 0) * 100}</div>
+              <div className="edit-task-task-card-grade">
+                {(task.grade ?? 0) * 100}
+              </div>
               <div className="edit-task-task-card-time-spent">
                 {`${task.currentTime ?? 0} / ${task.expectedTime ?? 0}`}
               </div>
@@ -301,7 +323,10 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
             <div className="edit-task-task-card-grade">0</div>
             <div className="edit-task-task-card-time-spent">0 / 0</div>
             <div className="edit-task-task-card-due-date">
-              {new Date().toLocaleString("en-US", { month: "short", day: "numeric" })}
+              {new Date().toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
             </div>
             <div className="edit-task-dark-card"></div>
           </div>
@@ -382,14 +407,18 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       </div>
 
       {/* SUCCESS POPUP FOR SUBMIT */}
-      {submitSuccessMsg && <div className="edit-task-success-popup">{submitSuccessMsg}</div>}
+      {submitSuccessMsg && (
+        <div className="edit-task-success-popup">{submitSuccessMsg}</div>
+      )}
 
       <div className="edit-task-delete-task" onClick={handleDeleteTask}>
         Delete Task
       </div>
 
       {/* SUCCESS POPUP FOR DELETE */}
-      {deleteSuccessMsg && <div className="edit-task-success-popup">{deleteSuccessMsg}</div>}
+      {deleteSuccessMsg && (
+        <div className="edit-task-success-popup">{deleteSuccessMsg}</div>
+      )}
     </div>
   );
 }
