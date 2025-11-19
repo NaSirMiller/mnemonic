@@ -8,3 +8,7 @@ const uploadFile = async (file: File) => {
   const syllabusHtml: string = await sendFileAsHtml(fileContent, fileName);
   setSyllabus(syllabusHtml);
 };
+
+export function ProposedTasksViewer() {
+  return <div></div>;
+}

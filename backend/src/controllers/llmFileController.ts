@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import multer from "multer";
+// import type multer from "multer";
 
 import { convertDocBufferToHtmlString } from "../utils/fileUtils";
 

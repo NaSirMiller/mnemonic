@@ -16,6 +16,7 @@ import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
+import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -29,6 +30,7 @@ function TaskPage() {
 
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
+  const [showSyllabusForm, setShowSyllabusForm] = useState(false);
 
   // --- SORTING FUNCTION ---
   const sortTasksByDueDate = (tasks: Task[]) => {
@@ -237,6 +239,12 @@ function TaskPage() {
         >
           Edit Courses
         </div>
+        <div
+          className="task-page-syllabus-button"
+          onClick={() => setShowSyllabusForm(!showSyllabusForm)}
+        >
+          Upload Syllabus
+        </div>
       </div>
 
       {/* Course Tabs */}
@@ -304,6 +312,11 @@ function TaskPage() {
       {showEditCourse && (
         <div className="opacity" onClick={() => setShowEditCourse(false)}>
           <EditCourse onCoursesChanged={refreshCourses} />
+        </div>
+      )}
+      {showSyllabusForm && (
+        <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
+          <ProposedTasksViewer />
         </div>
       )}
     </div>
