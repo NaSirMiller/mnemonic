@@ -100,7 +100,6 @@ function TaskPage() {
         // APPLY SORT HERE
         const sorted = sortTasksByDueDate(tasks);
         setAvailableTasks(sorted);
-
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
@@ -183,7 +182,6 @@ function TaskPage() {
       // Apply sorting again
       const sorted = sortTasksByDueDate(tasks);
       setAvailableTasks(sorted);
-
     } catch (err) {
       console.error("Failed to refresh tasks:", err);
     }
@@ -243,19 +241,20 @@ function TaskPage() {
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {["All Courses", ...availableCourses.map((c) => c.courseName ?? "")].map(
-          (courseName, i) => (
-            <div
-              key={`task-page-${courseName}-${i}`}
-              className={`task-page-course ${
-                selectedCourseTab === courseName ? "selected" : ""
-              }`}
-              onClick={() => setSelectedCourseTab(courseName)}
-            >
-              {courseName}
-            </div>
-          )
-        )}
+        {[
+          "All Courses",
+          ...availableCourses.map((c) => c.courseName ?? ""),
+        ].map((courseName, i) => (
+          <div
+            key={`task-page-${courseName}-${i}`}
+            className={`task-page-course ${
+              selectedCourseTab === courseName ? "selected" : ""
+            }`}
+            onClick={() => setSelectedCourseTab(courseName)}
+          >
+            {courseName}
+          </div>
+        ))}
       </div>
 
       {/* Task List */}
@@ -288,9 +287,7 @@ function TaskPage() {
                     }).format(task.dueDate)
                   : "No due date"
               }
-              timeSpent={`${task.currentTime ?? 0} / ${
-                task.expectedTime ?? 0
-              }`}
+              timeSpent={`${task.currentTime ?? 0} / ${task.expectedTime ?? 0}`}
               checked={task.isComplete ?? false}
               onClick={() => toggleChecked(i)}
             />

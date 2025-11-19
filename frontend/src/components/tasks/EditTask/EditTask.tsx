@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+
 import "./EditTask.css";
 import { AuthContext } from "../../context/AuthContext";
 import { getCourses } from "../../../services/coursesService";
@@ -10,8 +11,6 @@ import {
 } from "../../../services/tasksService";
 import type { Course } from "../../../../../shared/models/course";
 import type { Task } from "../../../../../shared/models/task";
-
-import { FileInput } from "../../file/FileInput";
 
 type EditTaskProps = {
   onTasksChanged?: () => void; // Callback to refresh parent task page
@@ -357,8 +356,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         />
         <div className="edit-task-right-icon">%</div>
       </div>
-
-      <FileInput />
 
       <div className="edit-task-submit-task" onClick={submitForm}>
         Submit Task

@@ -4,7 +4,7 @@ import express, { Application } from "express";
 import { authRouter } from "./routes/authRoute";
 import { courseRouter } from "./routes/courseRoute";
 import { tasksRouter } from "./routes/tasksRoute";
-import { fileRouter } from "./routes/fileRoute";
+import { fileRouter } from "./routes/llmFileRoute";
 
 const app: Application = express();
 
