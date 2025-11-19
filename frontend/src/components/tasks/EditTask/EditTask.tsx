@@ -83,6 +83,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         const avg = sum / count;      
         grade += avg * weight;   
       }
+      grade = Number(grade.toFixed(4));
       const updatedCourse: Course = {
         courseName: course[0].courseName,
         currentGrade: grade,
