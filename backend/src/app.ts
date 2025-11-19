@@ -1,5 +1,5 @@
-import express, { Application } from "express";
 import cors from "cors";
+import express, { Application } from "express";
 
 import { authRouter } from "./routes/authRoute";
 import { courseRouter } from "./routes/courseRoute";

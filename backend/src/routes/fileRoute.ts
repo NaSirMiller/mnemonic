@@ -1,5 +1,6 @@
 // src/routes/fileRoute.ts
 import { Router } from "express";
+import { upload } from "../middleware";
 import {
   getFile,
   uploadFile,
@@ -11,4 +12,4 @@ export const fileRouter = Router();
 fileRouter.get("/:fileId", getFile);
 fileRouter.delete("/:fileId", deleteFile);
 fileRouter.put("/:fileId", editFile);
-fileRouter.post("/", uploadFile);
+fileRouter.post("/", upload.single("file"), uploadFile);
