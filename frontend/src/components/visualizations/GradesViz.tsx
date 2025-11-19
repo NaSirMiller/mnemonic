@@ -30,7 +30,7 @@ export default function GradesViz({ courseName, isAllCourses }: GradesVizProps) 
             const courses = await getCourses(userId, null);
             const formatted = courses.map((c) => ({
               courseName: c.courseName,
-              grade: ((c as any).currentGrade ?? 0) * 100, // multiply by 100
+              grade: (((c as any).currentGrade ?? 0) * 100).toFixed(2), // multiply by 100
             }));
             setHistogramData(formatted);
             } else {
@@ -59,7 +59,7 @@ export default function GradesViz({ courseName, isAllCourses }: GradesVizProps) 
             const formatted = Object.entries(bucket).map(([type, grades]) => ({
               type,
               avg:
-                (grades.reduce((a, b) => a + b, 0) / (grades.length === 0 ? 1 : grades.length)) * 100, // multiply by 100
+                ((grades.reduce((a, b) => a + b, 0) / (grades.length === 0 ? 1 : grades.length)) * 100).toFixed(2), // multiply by 100
             }));
             setGradeTypeData(formatted);
             }
