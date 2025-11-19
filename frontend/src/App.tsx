@@ -10,6 +10,7 @@ import { LoginPage } from "./pages/login/LoginPage.tsx";
 import { ProtectedRoute } from "./components/login/ProtectedRoute.tsx";
 import TaskPage from "./pages/tasks/TaskPage.tsx";
 import HomePage from "./pages/home/HomePage.tsx";
+import VisulizationsPage from "./pages/visualizations/VisualizationsPage.tsx";
 import NavBar from "./components/navbar/NavBar.tsx";
 import { AuthProvider } from "./components/context/AuthContext.tsx";
 
@@ -42,6 +43,14 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <TaskPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/visualizations",
+        element: (
+          <ProtectedRoute>
+            <VisulizationsPage />
           </ProtectedRoute>
         ),
       },

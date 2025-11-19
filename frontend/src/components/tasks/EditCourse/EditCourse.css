@@ -250,3 +250,17 @@
     font-size: 0.85rem;
     margin-top: 4px;
 }
+.edit-course-success-popup {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: #343434;
+    padding: 10px 20px;
+    border-radius: 10px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
