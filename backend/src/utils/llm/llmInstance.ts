@@ -1,4 +1,4 @@
-import { LLMInstanceConfig } from "../../../shared/models/llm";
+import { LLMInstanceConfig } from "../../../../shared/models/llm";
 import { LLMClient } from "./llmClient";
 
 export class LLMInstance {

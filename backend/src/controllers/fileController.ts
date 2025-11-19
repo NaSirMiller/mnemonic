@@ -6,9 +6,7 @@
 export async function getFile() {
   // request: Request, response: Response
 }
-export async function uploadFile() {
-  // request: Request, response: Response
-}
+export async function uploadFile(request: Request, response: Response) {}
 export async function deleteFile() {}
 // request: Request, response: Response
 export async function editFile() {}
