@@ -27,9 +27,12 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedGradeWeight, setSelectedGradeWeight] = useState<string>("");
 
+  // --- NEW: Duplicate name error state ---
+  const [taskNameError, setTaskNameError] = useState<string>("");
+
   // --- Helper to convert Date to local datetime-local string ---
   const formatDateForInput = (date: Date) => {
-    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
+    const tzOffset = date.getTimezoneOffset() * 60000;
     const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
     return localISOTime;
   };
@@ -69,7 +72,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   // --- Populate form when a task is selected ---
   useEffect(() => {
     if (!selectedTask) {
-      // Clear form if no task selected
       setTaskName("");
       setTaskGradeWeight("");
       setSelectedGradeWeight("");
@@ -91,7 +93,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
   }, [selectedTask]);
 
-  // --- Sort tasks by gradeType then dueDate ---
+  // --- Sort tasks for display ---
   const sortTasksForDisplay = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
       const gradeA = a.gradeType ?? "";
@@ -99,7 +101,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       if (gradeA < gradeB) return -1;
       if (gradeA > gradeB) return 1;
 
-      // Sort by dueDate within gradeType
       if (!a.dueDate && !b.dueDate) return 0;
       if (!a.dueDate) return 1;
       if (!b.dueDate) return -1;
@@ -110,7 +111,39 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   // --- Submit form (create or update) ---
   const submitForm = async () => {
     if (!selectedCourse || !userId) return;
+
     try {
+      // --- DUPLICATE NAME CHECK (NEW) ---
+      const nameTaken = tasks.some(
+        (t) =>
+          (t.title ?? "").trim().toLowerCase() === taskName.trim().toLowerCase() &&
+          t.taskId !== selectedTask?.taskId
+      );
+
+      if (nameTaken) {
+        setTaskNameError("Task name already exists in this course!");
+
+        // Reset form back to original selectedTask values
+        if (selectedTask) {
+          setTaskName(selectedTask.title ?? "");
+          setTaskGradeWeight(selectedTask.gradeType ?? "");
+          setSelectedGradeWeight(selectedTask.gradeType ?? "");
+          setDueDate(
+            selectedTask.dueDate
+              ? formatDateForInput(new Date(selectedTask.dueDate))
+              : ""
+          );
+          const completed = selectedTask.currentTime ?? 0;
+          const estimated = selectedTask.expectedTime ?? 0;
+          setTimeSpent(`${completed} / ${estimated}`);
+          setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
+        }
+
+        return; // block submit
+      }
+
+      setTaskNameError("");
+
       const [completedStr, estimatedStr] = timeSpent.split("/").map((s) => s.trim());
       const weight =
         selectedCourse.gradeTypes && taskGradeWeight
@@ -285,6 +318,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         value={taskName}
         onChange={(e) => setTaskName(e.target.value)}
       />
+
+      {/* --- NEW: Duplicate task name error --- */}
+      {taskNameError && <div className="edit-task-error">{taskNameError}</div>}
 
       <div className="edit-task-section-title">Task Grade Weight*</div>
       <div className="edit-task-grade-weight-cont">
