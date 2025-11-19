@@ -307,7 +307,10 @@ function TaskPage() {
       {/* Edit Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
-          <EditTask onTasksChanged={refreshTasks} />
+        <EditTask onTasksChanged={() => {
+          refreshTasks();
+          refreshCourses();
+        }} />
         </div>
       )}
       {showEditCourse && (

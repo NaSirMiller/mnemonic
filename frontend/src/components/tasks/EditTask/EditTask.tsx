@@ -42,14 +42,50 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     try {
       const tasks = await getTasks(userId, null, courseId);
       const course = await getCourses(userId, courseId);
-      let grade = 0;
+      const grouped: Record<string, { sum: number; count: number; weight: number }> = {};
       
       for (let i = 0; i < tasks.length; i++){
-        grade += tasks[i].grade ?? 0 * (tasks[i].weight || 0);
+        const type = tasks[i].gradeType ?? "";
+        // Ignore missing or zero/negative grades
+        const grade = tasks[i].grade ?? 0;
+        if (grade <= 0) continue;
+        if (!grouped[type]) {
+          grouped[type] = { sum: 0, count: 0, weight: tasks[i].weight || 0 };
+        }
+        grouped[type].sum += grade;
+        grouped[type].count++;
+      }
+
+      
+      // If no graded tasks exist at all
+      if (Object.keys(grouped).length === 0) {
+        await updateCourse(userId, courseId, {
+          ...course[0],
+          currentGrade: 0
+        });
+        return;
+      }
+
+      // --- NORMALIZE WEIGHTS ---
+      let totalWeight = 0;
+      for (const type in grouped) {
+        totalWeight += grouped[type].weight;
+      }
+      // Normalize so remaining weights sum to 1
+      for (const type in grouped) {
+        grouped[type].weight = grouped[type].weight / totalWeight;
+      }
+
+      let grade = 0;
+      
+      for (const type in grouped) {
+        const { sum, count, weight } = grouped[type];
+        const avg = sum / count;      
+        grade += avg * weight;   
       }
       const updatedCourse: Course = {
         courseName: course[0].courseName,
-        currentGrade: grade / tasks.length,
+        currentGrade: grade,
         gradeTypes: course[0].gradeTypes,
         userId: userId
       };
@@ -182,7 +218,8 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await createTask({ ...payload, userId, createdAt: new Date() });
       }
 
-      if (payload.grade != selectedTask?.grade && selectedCourse.courseId != null) {
+      // Recalculate course grade based on all updates, including deletion and grade type changes
+      if (selectedCourse.courseId != null) {
         await recalculateGrade(userId, selectedCourse.courseId);
       }
 
