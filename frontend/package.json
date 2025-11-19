@@ -18,7 +18,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "recharts": "^3.4.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -27,6 +28,7 @@
     "@types/jest": "^30.0.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "@types/recharts": "^1.8.29",
     "@vitejs/plugin-react": "^5.0.3",
     "cross-env": "^10.1.0",
     "eslint": "^9.36.0",

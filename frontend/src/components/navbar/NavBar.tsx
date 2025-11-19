@@ -6,7 +6,7 @@ import "./NavBar.css";
 
 function NavBar() {
     const [ menuOpen, setMenuOpen ] = useState( false ); // controls mobile nav bar
-    const buttonTexts = [ "Home", "Tasks" ]; // array of buttons
+    const buttonTexts = [ "Home", "Tasks" , "Visualizations"]; // array of buttons
 
     const navigate = useNavigate();
     const { logout } = useAuth();
@@ -18,6 +18,8 @@ function NavBar() {
                 return "Home";
             case "/tasks":
                 return "Tasks";
+            case "/visualizations":
+                return "Visualizations";
             default:
                 return "";
         }
@@ -28,6 +30,8 @@ function NavBar() {
             navigate( "/" );
         if ( text === "Tasks" )
             navigate( "/tasks" );
+        if ( text === "Visualizations" )
+            navigate( "/visualizations" );
     };
     const handleLogout = async () => {
         await logout();        

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { courseRepo } from "../repositories/courseRepository";
+import { taskRepo } from "../repositories/taskRepository";
+import { deleteCalendarEvent } from "../utils/googleCalendar";
 import type {
   NumericFieldValidationResult,
   ValidationResult,
@@ -140,10 +142,29 @@ export async function deleteCourse(request: Request, response: Response) {
   let errorMessage: string;
 
   try {
+    // Get all tasks for this course
+    const tasks = await taskRepo.getAllUserTasks(userId, courseId);
+
+    // Delete each task + its Google Calendar event
+    for (const task of tasks) {
+      try {
+        await taskRepo.deleteTask(userId, task.taskId!);
+
+        if (task.googleEventId) {
+          await deleteCalendarEvent(userId, task.googleEventId);
+        }
+      } catch (err) {
+        console.error(`Error deleting task ${task.taskId}:`, err);
+      }
+    }
+
+    // Delete the course itself
     await courseRepo.deleteCourse(userId, courseId);
+
     return response.status(200).json({
-      message: `Successfully deleted course ${courseId}`,
+      message: `Successfully deleted course ${courseId} and all related tasks.`,
     });
+
   } catch (err) {
     errorMessage =
       err instanceof Error

@@ -33,9 +33,14 @@ function TaskPage() {
   const [showEditCourse, setShowEditCourse] = useState(false);
   const [showSyllabusForm, setShowSyllabusForm] = useState(false);
 
-  // --- SORTING FUNCTION ---
-  const sortTasksByDueDate = (tasks: Task[]) => {
+  // --- Helper: sort tasks ---
+  const sortTasks = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
+      // 1. Incomplete tasks first
+      if ((a.isComplete ?? false) && !(b.isComplete ?? false)) return 1;
+      if (!(a.isComplete ?? false) && (b.isComplete ?? false)) return -1;
+
+      // 2. Sort by due date
       if (!a.dueDate && !b.dueDate) return 0;
       if (!a.dueDate) return 1; // a goes later
       if (!b.dueDate) return -1; // b goes later
@@ -43,7 +48,14 @@ function TaskPage() {
     });
   };
 
-  // Load user profile
+  // --- Helper: get course name from courseId ---
+  const getCourseName = (courseId: string | null | undefined) => {
+    if (!courseId) return "";
+    const match = availableCourses.find((c) => c.courseId === courseId);
+    return match?.courseName ?? courseId; // fallback to ID
+  };
+
+  // --- Load user profile ---
   useEffect(() => {
     if (!uid || uid.length > 128) return;
     async function loadUser() {
@@ -57,7 +69,7 @@ function TaskPage() {
     loadUser();
   }, [uid]);
 
-  // Fetch courses
+  // --- Fetch courses ---
   useEffect(() => {
     if (!uid) return;
     async function fetchCourses() {
@@ -71,7 +83,7 @@ function TaskPage() {
     fetchCourses();
   }, [uid]);
 
-  // Fetch tasks
+  // --- Fetch tasks ---
   useEffect(() => {
     if (!uid) return;
 
@@ -91,17 +103,17 @@ function TaskPage() {
 
           setSelectedGrade(selectedCourse.currentGrade ?? 0);
 
-          const totalMinutes = tasks.reduce(
+          // Calculate total time spent
+          const totalHoursDecimal = tasks.reduce(
             (sum, t) => sum + (t.currentTime ?? 0),
             0
           );
-          const hours = Math.floor(totalMinutes / 60);
-          const minutes = totalMinutes % 60;
+          const hours = Math.floor(totalHoursDecimal);
+          const minutes = Math.round((totalHoursDecimal - hours) * 60);
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
 
-        // APPLY SORT HERE
-        const sorted = sortTasksByDueDate(tasks);
+        const sorted = sortTasks(tasks);
         setAvailableTasks(sorted);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
@@ -111,7 +123,7 @@ function TaskPage() {
     fetchTasks();
   }, [selectedCourseTab, availableCourses, uid]);
 
-  // Prevent background scroll
+  // --- Prevent background scroll when modals open ---
   useEffect(() => {
     document.body.style.overflow =
       showEditTask || showEditCourse ? "hidden" : "auto";
@@ -120,14 +132,13 @@ function TaskPage() {
     };
   }, [showEditTask, showEditCourse]);
 
-  // Toggle task completion
+  // --- Toggle task completion ---
   const toggleChecked = async (index: number) => {
     const task = availableTasks[index];
     if (!task || !uid || !task.taskId) return;
 
     const updatedIsComplete = !task.isComplete;
 
-    // Optimistic UI update
     setAvailableTasks((prev) => {
       const copy = [...prev];
       copy[index] = { ...copy[index], isComplete: updatedIsComplete };
@@ -146,7 +157,7 @@ function TaskPage() {
     }
   };
 
-  // Refresh courses/tasks
+  // --- Refresh courses/tasks ---
   const refreshCourses = async () => {
     if (!uid) return;
     try {
@@ -182,8 +193,7 @@ function TaskPage() {
         tasks = await getTasks(uid, null, selectedCourse.courseId);
       }
 
-      // Apply sorting again
-      const sorted = sortTasksByDueDate(tasks);
+      const sorted = sortTasks(tasks);
       setAvailableTasks(sorted);
     } catch (err) {
       console.error("Failed to refresh tasks:", err);
@@ -283,7 +293,7 @@ function TaskPage() {
               name={task.title ?? ""}
               course={
                 selectedCourseTab === "All Courses"
-                  ? task.courseId ?? ""
+                  ? getCourseName(task.courseId)
                   : selectedCourseTab
               }
               grade={task.grade! * 100}

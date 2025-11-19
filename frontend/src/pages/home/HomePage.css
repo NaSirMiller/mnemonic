@@ -135,7 +135,6 @@
     color: #ffffffcc;
 }
 
-/* Calendar event “badges” */
 .calendar-event {
     background-color: #2F4872;
     border-radius: 8px;
@@ -145,15 +144,21 @@
     margin-top: 6px;
 
     display: flex;
-    align-items: center;        /* vertically center text */
-    justify-content: center;    /* horizontally center text */
+    align-items: center;       /* vertical center */
+    justify-content: center;   /* center by default */
     width: 100%;
-    text-align: center;
 
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: hidden;          /* clip overflowing text */
 }
+
+.calendar-event-text {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: block;
+    max-width: 100%;          /* ensure it doesn’t overflow parent */
+}
+
 
 
 /* Adjust event layout within each day cell */

@@ -32,6 +32,10 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     Record<string, string>
   >({});
 
+  // Success messages
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
+
   const buildCoursePayload = (): Course => {
     if (!userId) throw new Error("User ID not available");
 
@@ -68,7 +72,7 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     setCourseGrade(((course.currentGrade ?? 0) * 100).toFixed(2));
 
     const gradeTypesPercent: Record<string, number> = {};
-    const gradeTypes = course.gradeTypes ?? {}; // <-- fallback
+    const gradeTypes = course.gradeTypes ?? {};
     for (const [k, v] of Object.entries(gradeTypes)) {
       gradeTypesPercent[k] = v * 100;
     }
@@ -113,7 +117,6 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       const refreshedCourses = await getCourses(userId, null);
       setCourses(refreshedCourses);
 
-      // Automatically select the newly created course
       const newlyCreated = refreshedCourses.find(
         (c) => c.courseName === newName
       );
@@ -175,7 +178,9 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
 
       const nameTaken = courses.some(
         (c) =>
-          c.courseName === courseName && c.courseId !== selectedCourse?.courseId
+          (c.courseName ?? "").trim().toLowerCase() ===
+            courseName.trim().toLowerCase() &&
+          c.courseId !== selectedCourse?.courseId
       );
       if (nameTaken) {
         setCourseNameError("Course name taken!");
@@ -188,6 +193,11 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         const refreshedCourses = await getCourses(userId, null);
         setCourses(refreshedCourses);
         selectCourse(created);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
         if (onCoursesChanged) onCoursesChanged();
       } else if (selectedCourse.courseId) {
         await updateCourse(userId, selectedCourse.courseId, payload);
@@ -197,6 +207,11 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
           (c) => c.courseId === selectedCourse.courseId
         );
         if (reselected) selectCourse(reselected);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
         if (onCoursesChanged) onCoursesChanged();
       }
     } catch (err) {
@@ -210,10 +225,8 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     try {
       await deleteCourse(userId, selectedCourse.courseId);
 
-      // Call parent refresh first
       if (onCoursesChanged) onCoursesChanged();
 
-      // Update local state
       const remainingCourses = courses.filter(
         (c) => c.courseId !== selectedCourse.courseId
       );
@@ -228,6 +241,10 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         setCourseGradeWeights({});
         setGradeOrder([]);
       }
+
+      // Success popup
+      setDeleteSuccessMsg("Course deleted!");
+      setTimeout(() => setDeleteSuccessMsg(""), 2000);
     } catch (err) {
       console.error("Failed to delete course:", err);
     }
@@ -331,9 +348,16 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       <div className="edit-course-submit-course" onClick={submitForm}>
         Submit Course
       </div>
+      {submitSuccessMsg && (
+        <div className="edit-course-success-popup">{submitSuccessMsg}</div>
+      )}
+
       <div className="edit-course-delete-course" onClick={handleDeleteCourse}>
         Delete Course
       </div>
+      {deleteSuccessMsg && (
+        <div className="edit-course-success-popup">{deleteSuccessMsg}</div>
+      )}
     </div>
   );
 }

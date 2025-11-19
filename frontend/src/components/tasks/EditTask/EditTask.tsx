@@ -13,7 +13,7 @@ import type { Course } from "../../../../../shared/models/course";
 import type { Task } from "../../../../../shared/models/task";
 
 type EditTaskProps = {
-  onTasksChanged?: () => void; // Callback to refresh parent task page
+  onTasksChanged?: () => void;
 };
 
 function EditTask({ onTasksChanged }: EditTaskProps) {
@@ -33,16 +33,17 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedGradeWeight, setSelectedGradeWeight] = useState<string>("");
 
-  // --- Helper to convert Date to local datetime-local string ---
+  const [taskNameError, setTaskNameError] = useState<string>("");
+
+  // Separate success messages
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
+
   const formatDateForInput = (date: Date) => {
-    const tzOffset = date.getTimezoneOffset() * 60000; // offset in ms
-    const localISOTime = new Date(date.getTime() - tzOffset)
-      .toISOString()
-      .slice(0, 16);
-    return localISOTime;
+    const tzOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
   };
 
-  // --- Load courses ---
   useEffect(() => {
     if (!userId) return;
     (async () => {
@@ -59,7 +60,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     })();
   }, [userId]);
 
-  // --- Load tasks + gradeWeights when course changes ---
   useEffect(() => {
     if (!selectedCourse || !userId) return;
     (async () => {
@@ -70,7 +70,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
           selectedCourse.courseId
         );
         setTasks(fetchedTasks);
-        // select first task or null if no tasks
         setSelectedTask(fetchedTasks.length > 0 ? fetchedTasks[0] : null);
         setGradeWeights(Object.keys(selectedCourse.gradeTypes || {}));
       } catch (err) {
@@ -79,10 +78,8 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     })();
   }, [selectedCourse, userId]);
 
-  // --- Populate form when a task is selected ---
   useEffect(() => {
     if (!selectedTask) {
-      // Clear form if no task selected
       setTaskName("");
       setTaskGradeWeight("");
       setSelectedGradeWeight("");
@@ -106,10 +103,51 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
   }, [selectedTask]);
 
-  // --- Submit form (create or update) ---
+  const sortTasksForDisplay = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      const gradeA = a.gradeType ?? "";
+      const gradeB = b.gradeType ?? "";
+      if (gradeA < gradeB) return -1;
+      if (gradeA > gradeB) return 1;
+
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+    });
+  };
+
   const submitForm = async () => {
     if (!selectedCourse || !userId) return;
+
     try {
+      const nameTaken = tasks.some(
+        (t) =>
+          (t.title ?? "").trim().toLowerCase() ===
+            taskName.trim().toLowerCase() && t.taskId !== selectedTask?.taskId
+      );
+
+      if (nameTaken) {
+        setTaskNameError("Task name already exists in this course!");
+        if (selectedTask) {
+          setTaskName(selectedTask.title ?? "");
+          setTaskGradeWeight(selectedTask.gradeType ?? "");
+          setSelectedGradeWeight(selectedTask.gradeType ?? "");
+          setDueDate(
+            selectedTask.dueDate
+              ? formatDateForInput(new Date(selectedTask.dueDate))
+              : ""
+          );
+          const completed = selectedTask.currentTime ?? 0;
+          const estimated = selectedTask.expectedTime ?? 0;
+          setTimeSpent(`${completed} / ${estimated}`);
+          setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
+        }
+        return;
+      }
+
+      setTaskNameError("");
+
       const [completedStr, estimatedStr] = timeSpent
         .split("/")
         .map((s) => s.trim());
@@ -136,16 +174,18 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await createTask({ ...payload, userId, createdAt: new Date() });
       }
 
-      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
 
-      // Find task by title within current course
       const updated =
         refreshed.find(
           (t) => t.title === taskName && t.courseId === selectedCourse.courseId
         ) ?? null;
       setSelectedTask(updated);
+
+      // SUCCESS POPUP FOR SUBMIT
+      setSubmitSuccessMsg("Task submitted!");
+      setTimeout(() => setSubmitSuccessMsg(""), 2000);
 
       onTasksChanged?.();
     } catch (err) {
@@ -153,7 +193,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     }
   };
 
-  // --- Add new task ---
   const handleNewTask = async () => {
     if (!selectedCourse || !userId) return;
 
@@ -188,7 +227,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
 
       const created = await createTask(newTask);
 
-      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
 
@@ -204,7 +242,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     }
   };
 
-  // --- Delete task ---
   const handleDeleteTask = async () => {
     if (!selectedTask?.taskId || !userId) return;
     try {
@@ -215,8 +252,11 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         selectedCourse?.courseId ?? null
       );
       setTasks(refreshed);
-      // Clear selection if no tasks remain
       setSelectedTask(refreshed[0] ?? null);
+
+      // SUCCESS POPUP FOR DELETE
+      setDeleteSuccessMsg("Task deleted!");
+      setTimeout(() => setDeleteSuccessMsg(""), 2000);
 
       onTasksChanged?.();
     } catch (err) {
@@ -253,7 +293,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
           <div className="edit-task-select-label-due-date">Date</div>
         </div>
         <div className="edit-task-task-card-cont">
-          {tasks.map((task, i) => (
+          {sortTasksForDisplay(tasks).map((task, i) => (
             <div
               key={`edit-task-task-card-${i}`}
               className={`edit-task-task-card ${
@@ -293,7 +333,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         </div>
       </div>
 
-      {/* Task Form */}
+      {/* Task Name */}
       <div className="edit-task-section-title">Task Name*</div>
       <input
         name="taskName"
@@ -301,7 +341,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         value={taskName}
         onChange={(e) => setTaskName(e.target.value)}
       />
+      {taskNameError && <div className="edit-task-error">{taskNameError}</div>}
 
+      {/* Grade Weight */}
       <div className="edit-task-section-title">Task Grade Weight*</div>
       <div className="edit-task-grade-weight-cont">
         {gradeWeights.map((gradeWeight, i) => (
@@ -327,6 +369,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         ))}
       </div>
 
+      {/* Due Date */}
       <div className="edit-task-section-title">Due Date*</div>
       <input
         type="datetime-local"
@@ -336,6 +379,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         onChange={(e) => setDueDate(e.target.value)}
       />
 
+      {/* Time Spent */}
       <div className="edit-task-section-title">Time Spent</div>
       <input
         name="timeSpent"
@@ -344,6 +388,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         onChange={(e) => setTimeSpent(e.target.value)}
       />
 
+      {/* Grade */}
       <div className="edit-task-section-title">Task Grade</div>
       <div className="edit-task-input-cont">
         <input
@@ -360,9 +405,20 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       <div className="edit-task-submit-task" onClick={submitForm}>
         Submit Task
       </div>
+
+      {/* SUCCESS POPUP FOR SUBMIT */}
+      {submitSuccessMsg && (
+        <div className="edit-task-success-popup">{submitSuccessMsg}</div>
+      )}
+
       <div className="edit-task-delete-task" onClick={handleDeleteTask}>
         Delete Task
       </div>
+
+      {/* SUCCESS POPUP FOR DELETE */}
+      {deleteSuccessMsg && (
+        <div className="edit-task-success-popup">{deleteSuccessMsg}</div>
+      )}
     </div>
   );
 }
