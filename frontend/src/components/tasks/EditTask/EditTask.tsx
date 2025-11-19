@@ -7,7 +7,7 @@ import type { Course } from "../../../../../shared/models/course";
 import type { Task } from "../../../../../shared/models/task";
 
 type EditTaskProps = {
-  onTasksChanged?: () => void; // Callback to refresh parent task page
+  onTasksChanged?: () => void;
 };
 
 function EditTask({ onTasksChanged }: EditTaskProps) {
@@ -27,17 +27,17 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [selectedGradeWeight, setSelectedGradeWeight] = useState<string>("");
 
-  // --- NEW: Duplicate name error state ---
   const [taskNameError, setTaskNameError] = useState<string>("");
 
-  // --- Helper to convert Date to local datetime-local string ---
+  // Separate success messages
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
+
   const formatDateForInput = (date: Date) => {
     const tzOffset = date.getTimezoneOffset() * 60000;
-    const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
-    return localISOTime;
+    return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
   };
 
-  // --- Load courses ---
   useEffect(() => {
     if (!userId) return;
     (async () => {
@@ -54,7 +54,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     })();
   }, [userId]);
 
-  // --- Load tasks + gradeWeights when course changes ---
   useEffect(() => {
     if (!selectedCourse || !userId) return;
     (async () => {
@@ -69,7 +68,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     })();
   }, [selectedCourse, userId]);
 
-  // --- Populate form when a task is selected ---
   useEffect(() => {
     if (!selectedTask) {
       setTaskName("");
@@ -93,7 +91,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
   }, [selectedTask]);
 
-  // --- Sort tasks for display ---
   const sortTasksForDisplay = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
       const gradeA = a.gradeType ?? "";
@@ -108,12 +105,10 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     });
   };
 
-  // --- Submit form (create or update) ---
   const submitForm = async () => {
     if (!selectedCourse || !userId) return;
 
     try {
-      // --- DUPLICATE NAME CHECK (NEW) ---
       const nameTaken = tasks.some(
         (t) =>
           (t.title ?? "").trim().toLowerCase() === taskName.trim().toLowerCase() &&
@@ -122,8 +117,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
 
       if (nameTaken) {
         setTaskNameError("Task name already exists in this course!");
-
-        // Reset form back to original selectedTask values
         if (selectedTask) {
           setTaskName(selectedTask.title ?? "");
           setTaskGradeWeight(selectedTask.gradeType ?? "");
@@ -138,8 +131,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
           setTimeSpent(`${completed} / ${estimated}`);
           setTaskGrade(((selectedTask.grade ?? 0) * 100).toFixed(2));
         }
-
-        return; // block submit
+        return;
       }
 
       setTaskNameError("");
@@ -177,13 +169,16 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         ) ?? null;
       setSelectedTask(updated);
 
+      // SUCCESS POPUP FOR SUBMIT
+      setSubmitSuccessMsg("Task submitted!");
+      setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
       onTasksChanged?.();
     } catch (err) {
       console.error("Error saving task:", err);
     }
   };
 
-  // --- Add new task ---
   const handleNewTask = async () => {
     if (!selectedCourse || !userId) return;
 
@@ -231,7 +226,6 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     }
   };
 
-  // --- Delete task ---
   const handleDeleteTask = async () => {
     if (!selectedTask?.taskId || !userId) return;
     try {
@@ -239,6 +233,10 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       const refreshed = await getTasks(userId, null, selectedCourse?.courseId ?? null);
       setTasks(refreshed);
       setSelectedTask(refreshed[0] ?? null);
+
+      // SUCCESS POPUP FOR DELETE
+      setDeleteSuccessMsg("Task deleted!");
+      setTimeout(() => setDeleteSuccessMsg(""), 2000);
 
       onTasksChanged?.();
     } catch (err) {
@@ -310,7 +308,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         </div>
       </div>
 
-      {/* Task Form */}
+      {/* Task Name */}
       <div className="edit-task-section-title">Task Name*</div>
       <input
         name="taskName"
@@ -318,10 +316,9 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         value={taskName}
         onChange={(e) => setTaskName(e.target.value)}
       />
-
-      {/* --- NEW: Duplicate task name error --- */}
       {taskNameError && <div className="edit-task-error">{taskNameError}</div>}
 
+      {/* Grade Weight */}
       <div className="edit-task-section-title">Task Grade Weight*</div>
       <div className="edit-task-grade-weight-cont">
         {gradeWeights.map((gradeWeight, i) => (
@@ -347,6 +344,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         ))}
       </div>
 
+      {/* Due Date */}
       <div className="edit-task-section-title">Due Date*</div>
       <input
         type="datetime-local"
@@ -356,6 +354,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         onChange={(e) => setDueDate(e.target.value)}
       />
 
+      {/* Time Spent */}
       <div className="edit-task-section-title">Time Spent</div>
       <input
         name="timeSpent"
@@ -364,6 +363,7 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         onChange={(e) => setTimeSpent(e.target.value)}
       />
 
+      {/* Grade */}
       <div className="edit-task-section-title">Task Grade</div>
       <div className="edit-task-input-cont">
         <input
@@ -380,9 +380,16 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
       <div className="edit-task-submit-task" onClick={submitForm}>
         Submit Task
       </div>
+
+      {/* SUCCESS POPUP FOR SUBMIT */}
+      {submitSuccessMsg && <div className="edit-task-success-popup">{submitSuccessMsg}</div>}
+
       <div className="edit-task-delete-task" onClick={handleDeleteTask}>
         Delete Task
       </div>
+
+      {/* SUCCESS POPUP FOR DELETE */}
+      {deleteSuccessMsg && <div className="edit-task-success-popup">{deleteSuccessMsg}</div>}
     </div>
   );
 }

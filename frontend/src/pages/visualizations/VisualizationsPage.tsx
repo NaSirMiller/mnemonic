@@ -30,6 +30,12 @@ function VisualizationsPage() {
     fetchCourses();
   }, [uid]);
 
+  // --- Handle visualization tab click ---
+  const handleVisualizationTabClick = (tab: string) => {
+    setSelectedVisualizationTab(tab);
+    setSelectedCourseTab("All Courses"); // Reset course selection to "All Courses"
+  };
+
   return (
     <div className="visualizations-page">
       {/* Course Tabs (same style as TaskPage) */}
@@ -57,7 +63,7 @@ function VisualizationsPage() {
             className={`visualizations-page-viz-tab ${
               selectedVisualizationTab === tab ? "selected" : ""
             }`}
-            onClick={() => setSelectedVisualizationTab(tab)}
+            onClick={() => handleVisualizationTabClick(tab)}
           >
             {tab}
           </div>

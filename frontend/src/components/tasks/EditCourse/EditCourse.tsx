@@ -23,6 +23,9 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
 
   const [tempGradeInputs, setTempGradeInputs] = useState<Record<string, string>>({});
 
+  // Success messages
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
 
   const buildCoursePayload = (): Course => {
     if (!userId) throw new Error("User ID not available");
@@ -54,13 +57,13 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     })();
   }, [userId]);
 
-    const selectCourse = (course: Course) => {
+  const selectCourse = (course: Course) => {
     setSelectedCourse(course);
     setCourseName(course.courseName ?? "");
     setCourseGrade(((course.currentGrade ?? 0) * 100).toFixed(2));
 
     const gradeTypesPercent: Record<string, number> = {};
-    const gradeTypes = course.gradeTypes ?? {}; // <-- fallback
+    const gradeTypes = course.gradeTypes ?? {};
     for (const [k, v] of Object.entries(gradeTypes)) {
         gradeTypesPercent[k] = v * 100;
     }
@@ -72,8 +75,7 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         if (wB !== wA) return wB - wA;
         return a.localeCompare(b);
     }));
-    };
-
+  };
 
   const handleSelectCourse = (courseName: string) => {
     const course = courses.find(c => c.courseName === courseName);
@@ -104,7 +106,6 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       const refreshedCourses = await getCourses(userId, null);
       setCourses(refreshedCourses);
 
-      // Automatically select the newly created course
       const newlyCreated = refreshedCourses.find(c => c.courseName === newName);
       if (newlyCreated) selectCourse(newlyCreated);
 
@@ -113,7 +114,6 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       console.error("Failed to create new course:", err);
     }
   };
-
 
   const handleNewGradeWeight = () => {
     const baseName = "New Grade";
@@ -157,7 +157,7 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       const payload = buildCoursePayload();
 
       const nameTaken = courses.some(
-        c => c.courseName === courseName && c.courseId !== selectedCourse?.courseId
+        c => (c.courseName ?? "").trim().toLowerCase() === courseName.trim().toLowerCase() && c.courseId !== selectedCourse?.courseId
       );
       if (nameTaken) {
         setCourseNameError("Course name taken!");
@@ -170,6 +170,11 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         const refreshedCourses = await getCourses(userId, null);
         setCourses(refreshedCourses);
         selectCourse(created);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
         if (onCoursesChanged) onCoursesChanged();
       } else if (selectedCourse.courseId) {
         await updateCourse(userId, selectedCourse.courseId, payload);
@@ -177,6 +182,11 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         setCourses(refreshedCourses);
         const reselected = refreshedCourses.find(c => c.courseId === selectedCourse.courseId);
         if (reselected) selectCourse(reselected);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
         if (onCoursesChanged) onCoursesChanged();
       }
 
@@ -185,35 +195,35 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
     }
   };
 
-    const handleDeleteCourse = async () => {
-        if (!userId || !selectedCourse || !selectedCourse.courseId) return;
+  const handleDeleteCourse = async () => {
+    if (!userId || !selectedCourse || !selectedCourse.courseId) return;
 
-        try {
-            await deleteCourse(userId, selectedCourse.courseId);
+    try {
+      await deleteCourse(userId, selectedCourse.courseId);
 
-            // Call parent refresh first
-            if (onCoursesChanged) onCoursesChanged();
+      if (onCoursesChanged) onCoursesChanged();
 
-            // Update local state
-            const remainingCourses = courses.filter(c => c.courseId !== selectedCourse.courseId);
-            setCourses(remainingCourses);
+      const remainingCourses = courses.filter(c => c.courseId !== selectedCourse.courseId);
+      setCourses(remainingCourses);
 
-            if (remainingCourses.length > 0) {
-            selectCourse(remainingCourses[0]);
-            } else {
-            setSelectedCourse(null);
-            setCourseName("");
-            setCourseGrade("");
-            setCourseGradeWeights({});
-            setGradeOrder([]);
-            }
+      if (remainingCourses.length > 0) {
+        selectCourse(remainingCourses[0]);
+      } else {
+        setSelectedCourse(null);
+        setCourseName("");
+        setCourseGrade("");
+        setCourseGradeWeights({});
+        setGradeOrder([]);
+      }
 
-        } catch (err) {
-            console.error("Failed to delete course:", err);
-        }
-    };
+      // Success popup
+      setDeleteSuccessMsg("Course deleted!");
+      setTimeout(() => setDeleteSuccessMsg(""), 2000);
 
-
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+    }
+  };
 
   return (
     <div className="edit-course" onClick={e => e.stopPropagation()}>
@@ -277,11 +287,11 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
                 onChange={e => {
                     const val = e.target.value;
                     setTempGradeInputs(prev => ({ ...prev, [grade]: val }));
-                    if (val === "") return; 
+                    if (val === "") return;
                     handleGradeWeightChange(grade, grade, Number(val));
                 }}
                 onKeyDown={e => e.key === "Enter" && reorderGrades()}
-                />
+              />
             </div>
           ))}
           <div className="edit-course-course-card" onClick={handleNewGradeWeight}>
@@ -293,7 +303,10 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
       </div>
 
       <div className="edit-course-submit-course" onClick={submitForm}>Submit Course</div>
+      {submitSuccessMsg && <div className="edit-course-success-popup">{submitSuccessMsg}</div>}
+
       <div className="edit-course-delete-course" onClick={handleDeleteCourse}>Delete Course</div>
+      {deleteSuccessMsg && <div className="edit-course-success-popup">{deleteSuccessMsg}</div>}
     </div>
   );
 }
