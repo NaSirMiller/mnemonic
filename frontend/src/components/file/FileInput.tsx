@@ -11,6 +11,7 @@ export function FileInput({ onUpload }: FileInputProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File selected:", event.target.files?.[0]);
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
   };
@@ -31,6 +32,7 @@ export function FileInput({ onUpload }: FileInputProps) {
           className="file-input-field"
         />
       </label>
+
       <button
         onClick={handleUpload}
         disabled={!selectedFile}

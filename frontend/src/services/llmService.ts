@@ -9,12 +9,11 @@ export class SendFileError extends Error {
   }
 }
 
-export async function sendFileAsHtml(
-  doc: Buffer,
-  filename: string
-): Promise<{ doc: string }> {
+export async function sendFileAsHtml(file: File): Promise<{ doc: string }> {
   try {
-    const result = await sendFileAsHtmlApi(doc, filename);
+    // Convert ArrayBuffer to Uint8Array if needed
+
+    const result = await sendFileAsHtmlApi(file);
 
     if (!result.doc) {
       throw new SendFileError("No HTML returned from server", "no-doc");

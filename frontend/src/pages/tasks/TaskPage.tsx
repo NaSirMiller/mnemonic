@@ -16,7 +16,8 @@ import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
-import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
+import { SyllabusUploader } from "../../components/file/SyllabusUploader";
+// import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -314,9 +315,14 @@ function TaskPage() {
           <EditCourse onCoursesChanged={refreshCourses} />
         </div>
       )}
-      {showSyllabusForm && (
+      {/* {showSyllabusForm && (
         <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
           <ProposedTasksViewer />
+        </div>
+      )} */}
+      {showSyllabusForm && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <SyllabusUploader />
         </div>
       )}
     </div>
