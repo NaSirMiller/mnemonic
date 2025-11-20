@@ -44,22 +44,27 @@ export function validateTaskTypes(task: Task): string[] {
     const expected = TaskFieldTypes[field];
 
     if (!expected) {
-      errors.push(`Provided field "${key}" is not a valid field for the type Task.`);
+      errors.push(
+        `Provided field "${key}" is not a valid field for the type Task.`
+      );
       continue; // skip further checks
     }
 
-    const expectedTypes: string[] = Array.isArray(expected) ? expected : [expected];
+    const expectedTypes: string[] = Array.isArray(expected)
+      ? expected
+      : [expected];
     const actualType = getType(value);
 
     if (!expectedTypes.includes(actualType)) {
       errors.push(
-        `Invalid type for "${field}": expected ${expectedTypes.join(" | ")}, got ${actualType}`
+        `Invalid type for "${field}": expected ${expectedTypes.join(
+          " | "
+        )}, got ${actualType}`
       );
     }
   }
   return errors;
 }
-
 
 export function isTaskTypeValid(task: Task): ValidationResult {
   const errors = validateTaskTypes(task);
@@ -93,7 +98,7 @@ export function setTaskDefaults(task: Task): Task {
     currentTime: 0,
     expectedTime: 0,
     weight: task.weight ?? -1,
-    gradeType: task.gradeType!,    
+    gradeType: task.gradeType!,
     dueDate: task.dueDate ?? null,
     description: task.description ?? "",
     grade: task.grade ?? 0,
@@ -182,4 +187,12 @@ export function normalizeTaskDates(task: Task): Task {
   }
 
   return normalizedTask;
+}
+
+export function taskToString(task: Task): string {
+  const taskName: string = task.title!;
+  const weighting: number = task.weight!;
+  const dueDate: Date = task.dueDate!;
+  const description: string | undefined = task.description;
+  return `Task(name=${taskName}, weight=${weighting}, due=${dueDate}, desc=${description})`;
 }
