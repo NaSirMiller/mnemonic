@@ -21,8 +21,8 @@ export default function TimeHistogram({ data }: { data: any[] }) {
   return (
     <BarChart width={650} height={350} data={chartData}>
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="courseName" />
-      <YAxis tickFormatter={(val) => Math.round(val).toString()} />
+      <XAxis dataKey="courseName" tick={ { fill: "#FFFFFF" } }/>
+      <YAxis tickFormatter={(val) => Math.round(val).toString()} tick={ { fill: "#FFFFFF" } }/>
 
       <Tooltip
         formatter={(val: number) => `${formatHours(val * 60)}`}

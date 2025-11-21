@@ -77,10 +77,33 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    position: relative;
+    display: inline-block;
+    overflow: visible;
 }
 .home-page-task-date {
     flex: 1;
     text-align: right;
+}
+
+.tooltip-text {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 5px 15px;
+    background-color: #333333;
+    font-size: 16px;
+
+    transform: translate( -15px, 40px );
+    pointer-events: none;
+
+    border-radius: 7px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+.home-page-task-name:hover .tooltip-text {
+    opacity: 1;
 }
 
 
@@ -138,7 +161,7 @@
 .calendar-event {
     background-color: #2F4872;
     border-radius: 8px;
-    padding: 3px 6px;
+    padding: 5px 6px;
     font-size: 12px;
     color: white;
     margin-top: 6px;

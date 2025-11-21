@@ -139,7 +139,10 @@ function HomePage() {
         <div className="home-page-task-cont">
           {orderedTasks.map((task, i) => (
             <div key={"task-" + i} className="home-page-task">
-              <div className="home-page-task-name">{task.title}</div>
+              <div className="home-page-task-name">
+                {task.title}
+                <span className="tooltip-text">hello world</span>
+              </div>
               <div className="home-page-task-date">
                 {task.dueDate
                   ? task.dueDate.toLocaleDateString("en-US", {

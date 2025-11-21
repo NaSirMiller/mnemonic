@@ -92,6 +92,7 @@ export default function GradesVsTimeScatter({ data }: { data: any[] }) {
         position: "insideBottom",
         dy: 20,
       }}
+      tick={ { fill: "#FFFFFF" } }
     />
 
     <YAxis
@@ -104,6 +105,7 @@ export default function GradesVsTimeScatter({ data }: { data: any[] }) {
         angle: -90,
         dx: -20,
       }}
+      tick={ { fill: "#FFFFFF" } }
     />
 
     {/* Pass the component itself, NOT JSX */}
