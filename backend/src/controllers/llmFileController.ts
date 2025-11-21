@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 // import type multer from "multer";
 
-import { convertDocBufferToHtmlString } from "../utils/fileUtils";
+import {
+  convertDocBufferToHtmlString,
+  convertHtmlToText,
+} from "../utils/fileUtils";
 
 export async function sendFileAsHtml(
   request: Request & { file?: Express.Multer.File },
@@ -13,6 +16,7 @@ export async function sendFileAsHtml(
   console.log(`Received file - ${request.file.originalname}`);
 
   const htmlString: string = await convertDocBufferToHtmlString(docBuffer);
+  const docText: string = convertHtmlToText(htmlString);
 
-  response.status(200).json({ doc: htmlString });
+  response.status(200).json({ doc: docText });
 }

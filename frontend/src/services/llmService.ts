@@ -57,7 +57,7 @@ export async function getDocText(file: File): Promise<{ doc: string }> {
 
 export async function getProposedCourseInfo(
   doc: string
-): Promise<{ course: Course; tasks: Task[] }> {
+): Promise<{ course: Course; tasks: Task[]; error: string }> {
   try {
     const result = await getProposedCourseInfoApi(doc);
 

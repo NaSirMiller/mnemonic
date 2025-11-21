@@ -1,19 +1,25 @@
 import { useState } from "react";
-import { getDocText } from "../../services/llmService";
-import { FileInput } from "./FileInput";
 
-export function SyllabusUploader() {
-  const [, setSyllabus] = useState<string | null>(null);
+interface SyllabusUploaderProps {
+  onSubmit: (file: File) => void;
+}
 
-  const uploadFile = async (file: File) => {
-    // const fileContent: Buffer = Buffer.from(await file.arrayBuffer());
-    // const fileName: string = file.name;
+export function SyllabusUploader({ onSubmit }: SyllabusUploaderProps) {
+  const [file, setFile] = useState<File | null>(null);
 
-    const response = await getDocText(file);
-    const syllabusHtml: string = response.doc;
-    setSyllabus(syllabusHtml);
-    console.log(syllabusHtml);
+  const handleUpload = () => {
+    if (!file) return;
+    onSubmit(file);
   };
 
-  return <FileInput onUpload={uploadFile} />;
+  return (
+    <div className="syllabus-uploader">
+      <input
+        type="file"
+        accept=".pdf,.docx,.txt"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+      />
+      <button onClick={handleUpload}>Upload</button>
+    </div>
+  );
 }

@@ -10,6 +10,7 @@ import type { FullUser } from "../../../../shared/models/user";
 import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
 import { getTasks, updateTask } from "../../services/tasksService";
+import { getDocText } from "../../services/llmService";
 
 import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
@@ -17,7 +18,7 @@ import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
 import { SyllabusUploader } from "../../components/file/SyllabusUploader";
-// import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
+import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -32,6 +33,9 @@ function TaskPage() {
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
   const [showSyllabusForm, setShowSyllabusForm] = useState(false);
+  const [syllabusFile, setSyllabusFile] = useState<File | null>(null);
+  const [showProposedTasks, setShowProposedTasks] = useState(false);
+  const [proposedDocText, setProposedDocText] = useState<string | null>(null);
 
   // --- Helper: sort tasks ---
   const sortTasks = (tasks: Task[]) => {
@@ -200,6 +204,28 @@ function TaskPage() {
     }
   };
 
+  const handleSyllabusSubmit = (file: File) => {
+    setSyllabusFile(file); // store file to pass to ProposedTasksViewer
+    setShowSyllabusForm(false); // close uploader popup
+    setShowProposedTasks(true); // open ProposedTasksViewer popup
+  };
+
+  useEffect(() => {
+    if (!syllabusFile) return;
+
+    const loadDoc = async () => {
+      try {
+        const { doc } = await getDocText(syllabusFile);
+        setProposedDocText(doc);
+        setShowProposedTasks(true); // show viewer after processing
+      } catch (err) {
+        console.error("Failed to load syllabus:", err);
+      }
+    };
+
+    loadDoc();
+  }, [syllabusFile]);
+
   return (
     <div className="task-page">
       {/* Profile Section */}
@@ -325,14 +351,20 @@ function TaskPage() {
           <EditCourse onCoursesChanged={refreshCourses} />
         </div>
       )}
-      {/* {showSyllabusForm && (
-        <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
-          <ProposedTasksViewer />
-        </div>
-      )} */}
       {showSyllabusForm && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <SyllabusUploader />
+        <div
+          className="opacity"
+          onClick={() => setShowSyllabusForm(false)} // overlay click closes modal
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            {/* stops click inside modal from bubbling to overlay */}
+            <SyllabusUploader onSubmit={handleSyllabusSubmit} />
+          </div>
+        </div>
+      )}
+      {showProposedTasks && proposedDocText && (
+        <div className="opacity" onClick={() => setShowProposedTasks(false)}>
+          <ProposedTasksViewer document={proposedDocText} />
         </div>
       )}
     </div>
