@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendFileAsHtml } from "../../services/llmService";
+import { getDocText } from "../../services/llmService";
 import { FileInput } from "./FileInput";
 
 export function SyllabusUploader() {
@@ -9,7 +9,7 @@ export function SyllabusUploader() {
     // const fileContent: Buffer = Buffer.from(await file.arrayBuffer());
     // const fileName: string = file.name;
 
-    const response = await sendFileAsHtml(file);
+    const response = await getDocText(file);
     const syllabusHtml: string = response.doc;
     setSyllabus(syllabusHtml);
     console.log(syllabusHtml);

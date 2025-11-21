@@ -1,4 +1,4 @@
-import { sendFileAsHtml as sendFileAsHtmlApi } from "../api/llmFileApi";
+import { getDocText as getDocTextApi } from "../api/llmFileApi";
 import type { Course } from "../../../shared/models/course";
 import type { Task } from "../../../shared/models/task";
 import {
@@ -32,11 +32,11 @@ export class TasksListOrderingError extends Error {
     Object.setPrototypeOf(this, TasksListOrderingError.prototype);
   }
 }
-export async function sendFileAsHtml(file: File): Promise<{ doc: string }> {
+export async function getDocText(file: File): Promise<{ doc: string }> {
   try {
     // Convert ArrayBuffer to Uint8Array if needed
 
-    const result = await sendFileAsHtmlApi(file);
+    const result = await getDocTextApi(file);
 
     if (!result.doc) {
       throw new SendFileError("No HTML returned from server", "no-doc");
@@ -57,11 +57,11 @@ export async function sendFileAsHtml(file: File): Promise<{ doc: string }> {
 
 export async function getProposedCourseInfo(
   doc: string
-): Promise<{ courses: Course[]; tasks: Task[] }> {
+): Promise<{ course: Course; tasks: Task[] }> {
   try {
     const result = await getProposedCourseInfoApi(doc);
 
-    if (!result.courses) {
+    if (!result.course) {
       throw new CourseTasksCreationError(
         "No courses provided by LLM",
         "no-doc"

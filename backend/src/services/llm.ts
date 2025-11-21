@@ -27,9 +27,26 @@ class LLMService {
     docText: string
   ): Promise<CourseTasksCreationResponse> {
     const requestPrompt: string = getCreationRequestPrompt(docText);
-    const response: string = await this.llm.generate(requestPrompt);
-    const proposals: CourseTasksCreationResponse = JSON.parse(response);
-    return proposals;
+
+    let attempt: number = 0;
+    const maxNumAttempts: number = 5;
+
+    while (attempt < maxNumAttempts) {
+      try {
+        const response: string = await this.llm.generate(requestPrompt);
+        const proposals: CourseTasksCreationResponse = JSON.parse(response);
+        return proposals;
+      } catch (error) {
+        console.error(`LLM failed to provide valid format.`);
+        if (attempt < maxNumAttempts) console.error(`Trying again...`);
+        attempt += 1;
+      }
+    }
+    return {
+      course: { gradeTypes: {} },
+      tasks: [],
+      error: "AI could not extract syllabi information.",
+    };
   }
 
   async getTasksOrdering(tasks: Task[]): Promise<Task[]> {
@@ -42,7 +59,7 @@ class LLMService {
       tasksMap[i] = task;
       stringifiedTasks.push(`id=${i}:${taskToString(task)}`); // Convert task to string representation with id assigned.
     }
-    const tasksListString: string = stringifiedTasks.join("\n"); // TODO: Use in actual prompt.
+    // const tasksListString: string = stringifiedTasks.join("\n"); // TODO: Use in actual prompt.
     const response: string = await this.llm.generate(""); // TODO: Add actual prompt.
     const taskIdOrdering: number[] = JSON.parse(response);
     const orderedTasks: Task[] = [];
