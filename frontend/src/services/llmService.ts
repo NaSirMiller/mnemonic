@@ -60,6 +60,13 @@ export async function getProposedCourseInfo(
 ): Promise<{ course: Course; tasks: Task[]; error: string }> {
   try {
     const result = await getProposedCourseInfoApi(doc);
+    console.log(
+      `getProposedCourseInfo (service layer): ${JSON.stringify(
+        result,
+        null,
+        2
+      )}`
+    );
 
     if (!result.course) {
       throw new CourseTasksCreationError(

@@ -7,7 +7,7 @@ export async function getProposedCourseInfo(
 ) {
   const { doc } = request.body;
   try {
-    const proposals = llmService.getCourseAndTasks(doc);
+    const proposals = await llmService.getCourseAndTasks(doc);
     response.status(200).json(proposals);
   } catch (err) {
     let errorMessage: string;
@@ -24,7 +24,7 @@ export async function getProposedCourseInfo(
 export async function getTasksList(request: Request, response: Response) {
   const { tasks } = request.body;
   try {
-    const tasksList = llmService.getTasksOrdering(tasks);
+    const tasksList = await llmService.getTasksOrdering(tasks);
     response.status(200).json({ tasks: tasksList });
   } catch (err) {
     let errorMessage: string;

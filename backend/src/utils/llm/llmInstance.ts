@@ -14,4 +14,8 @@ export class LLMInstance {
 
     return text;
   }
+
+  getModel(): string {
+    return this.config.model;
+  }
 }

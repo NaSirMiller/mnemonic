@@ -1,11 +1,10 @@
 function getCreationAgentResponseForm(): string {
   return `{
-  "courses": [
+  "course": 
     {
       "courseName": "Applied Data Science",
       "gradeTypes": { "Homework": 0.4, "Quizzes": 0.1, "Project": 0.5 }
-    }
-  ],
+    },
   "tasks": [
     {
       "title": "Self-formed project teams deadline",
@@ -43,12 +42,11 @@ Assignments:
 
 Expected JSON Output:
 {
-  "courses": [
+  "course":
     {
       "courseName": "Applied Data Science - ISYE-4360",
       "gradeTypes": { "Homework": 0.4, "Quizzes": 0.1, "Project": 0.5 }
-    }
-  ],
+    },
   "tasks": [
     {
       "title": "Self-formed project teams deadline",

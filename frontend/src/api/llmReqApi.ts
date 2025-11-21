@@ -20,6 +20,10 @@ export async function getProposedCourseInfo(docText: string) {
   }
 
   const data = await res.json();
+  console.log(
+    `getProposedCourseInfo (service layer): ${JSON.stringify(data, null, 2)}`
+  );
+
   return data;
 }
 

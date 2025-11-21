@@ -33,6 +33,8 @@ export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
 
     try {
       const { course, tasks, error } = await getProposedCourseInfo(document);
+      console.log(`Course: ${course}`);
+      console.log(`Tasks: ${tasks}`);
       setProposedCourse(course);
       setProposedTasks(tasks ?? []);
       if (error) setErrorMessage(error);
