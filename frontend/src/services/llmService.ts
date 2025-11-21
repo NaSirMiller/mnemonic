@@ -1,4 +1,4 @@
-import { sendFileAsHtml as sendFileAsHtmlApi } from "../api/llmFileApi";
+import { getDocText as getDocTextApi } from "../api/llmFileApi";
 import type { Course } from "../../../shared/models/course";
 import type { Task } from "../../../shared/models/task";
 import {
@@ -32,11 +32,12 @@ export class TasksListOrderingError extends Error {
     Object.setPrototypeOf(this, TasksListOrderingError.prototype);
   }
 }
-export async function sendFileAsHtml(file: File): Promise<{ doc: string }> {
+export async function getDocText(file: File): Promise<{ doc: string }> {
   try {
     // Convert ArrayBuffer to Uint8Array if needed
 
-    const result = await sendFileAsHtmlApi(file);
+    const result = await getDocTextApi(file);
+    console.log(`Result service: ${JSON.stringify(result)}`);
 
     if (!result.doc) {
       throw new SendFileError("No HTML returned from server", "no-doc");
@@ -57,9 +58,10 @@ export async function sendFileAsHtml(file: File): Promise<{ doc: string }> {
 
 export async function getProposedCourseInfo(
   doc: string
-): Promise<{ courses: Course[]; tasks: Task[] }> {
+): Promise<{ course: Course; tasks: Task[]; error: string }> {
   try {
     const result = await getProposedCourseInfoApi(doc);
+    console.log("Raw LLM response:", JSON.stringify(result, null, 2));
 
     if (!result.courses) {
       throw new CourseTasksCreationError(
@@ -70,19 +72,18 @@ export async function getProposedCourseInfo(
     if (!result.tasks) {
       throw new CourseTasksCreationError("No tasks provided by LLM", "no-doc");
     }
+    if (!result.error) {
+      console.log("error field was not provided, setting to empty string");
+      result.error = "";
+    }
 
     return result;
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Error requesting syllabus extraction:", error.message);
-      throw new CourseTasksCreationError(
-        `Error sending file: ${error.message}`,
-        "api-error"
-      );
-    }
+    const err = error as Error;
+    console.error("Error requesting syllabus extraction:", err?.message);
     throw new CourseTasksCreationError(
-      "Unknown error requesting syllabus extraction:",
-      "unknown"
+      `Error sending file: ${err?.message}`,
+      "api-error"
     );
   }
 }

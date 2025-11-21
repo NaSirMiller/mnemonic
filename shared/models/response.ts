@@ -2,6 +2,7 @@ import { Course } from "../models/course";
 import { Task } from "../models/task";
 
 export interface CourseTasksCreationResponse {
-  courses: Course[];
+  course: Course;
   tasks: Task[];
+  error: string;
 }

@@ -210,3 +210,47 @@
   flex-flow: column wrap;
   gap: 30px;
 }
+
+.syllabus-popup-box {
+  background-color: #343434;
+  padding: 20px;
+  border-radius: 12px;
+  width: fit-content;
+  margin: auto;
+  text-align: center;
+}
+
+.proposed-tasks-popup-box {
+  position: fixed; /* fixed to viewport */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* center horizontally and vertically */
+  background-color: #343434; /* dark background */
+  color: #ffffff; /* white text */
+  padding: 20px 30px; /* spacing inside box */
+  border-radius: 10px; /* rounded corners */
+  max-width: 90%; /* responsive width */
+  max-height: 80%; /* responsive height */
+  overflow-y: auto; /* scroll if content too tall */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* subtle shadow */
+  z-index: 1001; /* above overlay */
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}

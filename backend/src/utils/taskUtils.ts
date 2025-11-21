@@ -192,7 +192,7 @@ export function normalizeTaskDates(task: Task): Task {
 export function taskToString(task: Task): string {
   const taskName: string = task.title!;
   const weighting: number = task.weight!;
-  const dueDate: Date = task.dueDate!;
+  const dueDate: string = task.dueDate!.toISOString();
   const description: string | undefined = task.description;
   return `Task(name=${taskName}, weight=${weighting}, due=${dueDate}, desc=${description})`;
 }
