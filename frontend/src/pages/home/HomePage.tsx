@@ -4,6 +4,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { getTasks } from "../../services/tasksService";
 import "./HomePage.css";
 import type { Task } from "../../../../shared/models/task";
+import type { Course } from "../../../../shared/models/course";
+
 
 function HomePage() {
   const { accessToken, uid } = useAuth();
@@ -137,22 +139,26 @@ function HomePage() {
           <div className="home-page-task-type">Date</div>
         </div>
         <div className="home-page-task-cont">
-          {orderedTasks.map((task, i) => (
-            <div key={"task-" + i} className="home-page-task">
-              <div className="home-page-task-name">
-                {task.title}
-                <span className="tooltip-text">hello world</span>
+          {orderedTasks.map((task, i) => {
+            // courses does not exist yet
+            // const course = courses.find(c => c.id === task.courseId);
+            return (
+              <div key={"task-" + i} className="home-page-task">
+                <div className="home-page-task-name tooltip">
+                  {task.title}
+                  <span className="tooltip-text">{ task.courseId }</span>
+                </div>
+                <div className="home-page-task-date">
+                  {task.dueDate
+                    ? task.dueDate.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : "No due date"}
+                </div>
               </div>
-              <div className="home-page-task-date">
-                {task.dueDate
-                  ? task.dueDate.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : "No due date"}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
