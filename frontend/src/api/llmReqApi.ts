@@ -2,15 +2,14 @@ import type { Task } from "../../../shared/models/task";
 
 const BASE_URL: string = "http://localhost:5000";
 
-export async function getProposedCourseInfo(docText: string) {
-  console.log(`docText in API layer: ${docText}`);
+export async function getProposedCourseInfo(htmlDoc: string) {
   const url: string = `${BASE_URL}/api/llmReq/courses`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ doc: docText }),
+    body: JSON.stringify({ doc: htmlDoc }),
   });
 
   if (!res.ok) {
@@ -21,7 +20,6 @@ export async function getProposedCourseInfo(docText: string) {
   }
 
   const data = await res.json();
-  console.log(`Data api: ${JSON.stringify(data)}`);
   return data;
 }
 

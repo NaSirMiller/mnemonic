@@ -5,10 +5,9 @@ export async function getProposedCourseInfo(
   request: Request,
   response: Response
 ) {
-  const { doc } = request.body;
+  const { docText } = request.body;
   try {
-    const proposals = await llmService.getCourseAndTasks(doc);
-    console.log(`Controller proposals: ${JSON.stringify(proposals)}`);
+    const proposals = llmService.getCourseAndTasks(docText);
     response.status(200).json(proposals);
   } catch (err) {
     let errorMessage: string;

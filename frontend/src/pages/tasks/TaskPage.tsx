@@ -2,15 +2,14 @@
 import { useState, useEffect } from "react";
 
 import { useAuth } from "../../hooks/useAuth";
-import { useProposedCoursesAndTasks } from "../../hooks/useProposedCoursesAndTasks";
 
 import type { Course } from "../../../../shared/models/course";
 import type { Task } from "../../../../shared/models/task";
 import type { FullUser } from "../../../../shared/models/user";
 
 import { getUser } from "../../services/authService";
-import { createCourse, getCourses } from "../../services/coursesService";
-import { createTask, getTasks, updateTask } from "../../services/tasksService";
+import { getCourses } from "../../services/coursesService";
+import { getTasks, updateTask } from "../../services/tasksService";
 
 import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
@@ -18,7 +17,7 @@ import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
 import { SyllabusUploader } from "../../components/file/SyllabusUploader";
-import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
+// import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -34,15 +33,27 @@ function TaskPage() {
   const [showEditCourse, setShowEditCourse] = useState(false);
   const [showSyllabusForm, setShowSyllabusForm] = useState(false);
 
-  const [, setRecentProposedCourse] = useState<Course | null>(null);
-  const [, setRecentProposedTasks] = useState<Task[] | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  // --- Helper: sort tasks ---
+  const sortTasks = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      // 1. Incomplete tasks first
+      if ((a.isComplete ?? false) && !(b.isComplete ?? false)) return 1;
+      if (!(a.isComplete ?? false) && (b.isComplete ?? false)) return -1;
 
-  const [currentDoc, setCurrentDoc] = useState<string | null>(null);
+      // 2. Sort by due date
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1; // a goes later
+      if (!b.dueDate) return -1; // b goes later
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    });
+  };
 
-  // --- Hook to fetch LLM proposed courses/tasks ---
-  const { course: proposedCourse, tasks: proposedTasks } =
-    useProposedCoursesAndTasks(currentDoc ?? "");
+  // --- Helper: get course name from courseId ---
+  const getCourseName = (courseId: string | null | undefined) => {
+    if (!courseId) return "";
+    const match = availableCourses.find((c) => c.courseId === courseId);
+    return match?.courseName ?? courseId; // fallback to ID
+  };
 
   // --- Load user profile ---
   useEffect(() => {
@@ -92,6 +103,7 @@ function TaskPage() {
 
           setSelectedGrade(selectedCourse.currentGrade ?? 0);
 
+          // Calculate total time spent
           const totalHoursDecimal = tasks.reduce(
             (sum, t) => sum + (t.currentTime ?? 0),
             0
@@ -101,16 +113,8 @@ function TaskPage() {
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
 
-        setAvailableTasks(
-          tasks.sort((a, b) => {
-            if ((a.isComplete ?? false) && !(b.isComplete ?? false)) return 1;
-            if (!(a.isComplete ?? false) && (b.isComplete ?? false)) return -1;
-            if (!a.dueDate && !b.dueDate) return 0;
-            if (!a.dueDate) return 1;
-            if (!b.dueDate) return -1;
-            return a.dueDate.getTime() - b.dueDate.getTime();
-          })
-        );
+        const sorted = sortTasks(tasks);
+        setAvailableTasks(sorted);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
@@ -122,12 +126,13 @@ function TaskPage() {
   // --- Prevent background scroll when modals open ---
   useEffect(() => {
     document.body.style.overflow =
-      showEditTask || showEditCourse || showSyllabusForm ? "hidden" : "auto";
+      showEditTask || showEditCourse ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [showEditTask, showEditCourse, showSyllabusForm]);
+  }, [showEditTask, showEditCourse]);
 
+  // --- Toggle task completion ---
   const toggleChecked = async (index: number) => {
     const task = availableTasks[index];
     if (!task || !uid || !task.taskId) return;
@@ -152,64 +157,46 @@ function TaskPage() {
     }
   };
 
-  // --- Helper: get course name from courseId ---
-  const getCourseName = (courseId: string | null | undefined) => {
-    if (!courseId) return "";
-    const match = availableCourses.find((c) => c.courseId === courseId);
-    return match?.courseName ?? courseId;
-  };
+  // --- Refresh courses/tasks ---
+  const refreshCourses = async () => {
+    if (!uid) return;
+    try {
+      const courses = await getCourses(uid, null);
+      setAvailableCourses(courses);
 
-  // --- Show modal for Upload Syllabus / Proposed Tasks ---
-  const handleUploadClick = () => {
-    if (proposedCourse && proposedTasks?.length && !isSubmitted) {
-      setCurrentDoc(currentDoc ?? ""); // show ProposedTasksViewer
-    } else {
-      setShowSyllabusForm(true);
-      setIsSubmitted(false); // reset so next upload triggers SyllabusUploader
+      if (selectedCourseTab !== "All Courses") {
+        const selectedCourse = courses.find(
+          (c) => c.courseName === selectedCourseTab
+        );
+        if (!selectedCourse) setSelectedCourseTab("All Courses");
+      }
+
+      await refreshTasks();
+    } catch (err) {
+      console.error("Failed to refresh courses:", err);
     }
   };
 
-  const handleCourseSubmit = async (course: Course) => {
+  const refreshTasks = async () => {
     if (!uid) return;
-
     try {
-      if (!course.courseId) {
-        // Create course
-        const newCourse = await createCourse({ ...course, userId: uid });
-        setAvailableCourses((prev) => [...prev, newCourse]);
-        // } else {
-        //   // Update course
-        //   await updateCourse(uid, course.courseId, course);
-        //   setAvailableCourses((prev) =>
-        //     prev.map((c) =>
-        //       c.courseId === course.courseId ? { ...c, ...course } : c
-        //     )
-        //   );
-      }
-    } catch (err) {
-      console.error("Error submitting course:", err);
-    }
-  };
+      let tasks: Task[] = [];
 
-  const handleTasksSubmit = async (tasks: Task[]) => {
-    if (!uid) return;
+      if (selectedCourseTab === "All Courses") {
+        tasks = await getTasks(uid, null, null);
+      } else {
+        const selectedCourse = availableCourses.find(
+          (c) => c.courseName === selectedCourseTab
+        );
+        if (!selectedCourse) return;
 
-    try {
-      for (const task of tasks) {
-        if (!task.taskId) {
-          await createTask({ ...task, userId: uid, createdAt: new Date() });
-        }
+        tasks = await getTasks(uid, null, selectedCourse.courseId);
       }
 
-      // Refresh tasks for the course
-      const refreshedTasks = await getTasks(
-        uid,
-        null,
-        tasks[0]?.courseId ?? null
-      );
-      setAvailableTasks(refreshedTasks);
+      const sorted = sortTasks(tasks);
+      setAvailableTasks(sorted);
     } catch (err) {
-      console.error("Error submitting tasks:", err);
+      console.error("Failed to refresh tasks:", err);
     }
   };
 
@@ -263,7 +250,10 @@ function TaskPage() {
         >
           Edit Courses
         </div>
-        <div className="task-page-syllabus-button" onClick={handleUploadClick}>
+        <div
+          className="task-page-syllabus-button"
+          onClick={() => setShowSyllabusForm(!showSyllabusForm)}
+        >
           Upload Syllabus
         </div>
       </div>
@@ -327,80 +317,22 @@ function TaskPage() {
       {/* Edit Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
-          <EditTask onTasksChanged={() => {}} />
+          <EditTask onTasksChanged={refreshTasks} />
         </div>
       )}
       {showEditCourse && (
         <div className="opacity" onClick={() => setShowEditCourse(false)}>
-          <EditCourse onCoursesChanged={() => {}} />
+          <EditCourse onCoursesChanged={refreshCourses} />
         </div>
       )}
       {/* {showSyllabusForm && (
         <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="syllabus-popup-box"
-          >
-            <SyllabusUploader
-              onUpload={(fileHtml: string) => {
-                if (!fileHtml) return;
-                setShowSyllabusForm(false);
-                setCurrentDoc(fileHtml);
-                setRecentProposedCourse(proposedCourse);
-                setRecentProposedTasks(proposedTasks);
-                setIsSubmitted(false);
-                setShowSyllabusForm(false);
-              }}
-            />
-          </div>
-        </div>
-      )} */}
-
-      {/* Proposed Tasks Viewer
-      {currentDoc && proposedCourse && proposedTasks && (
-        <div className="opacity" onClick={() => setCurrentDoc(null)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="proposed-tasks-popup-box"
-          >
-            <ProposedTasksViewer
-              document={currentDoc}
-              onSubmitCourse={async (course) => {
-                // call your CourseListForm submit logic
-                await handleCourseSubmit(course);
-              }}
-              onSubmitTasks={async (tasks) => {
-                // call your TaskListForm submit logic
-                await handleTasksSubmit(tasks);
-              }}
-              onAllSubmitted={() => {
-                // close the ProposedTasksViewer
-                setCurrentDoc(null);
-              }}
-            />
-          </div>
+          <ProposedTasksViewer />
         </div>
       )} */}
       {showSyllabusForm && (
-        <div className="opacity" onClick={() => setShowSyllabusForm(false)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="syllabus-popup-box"
-          >
-            <SyllabusUploader onUpload={(html) => setCurrentDoc(html)} />
-          </div>
-        </div>
-      )}
-
-      {/* Proposed Tasks Viewer */}
-      {currentDoc && (
-        <div className="opacity" onClick={() => setCurrentDoc(null)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="proposed-tasks-popup-box"
-          >
-            <ProposedTasksViewer document={currentDoc} />
-          </div>
+        <div onClick={(e) => e.stopPropagation()}>
+          <SyllabusUploader />
         </div>
       )}
     </div>

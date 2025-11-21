@@ -7,13 +7,11 @@ export class LLMInstance {
   async generate(userPrompt: string): Promise<string> {
     const { model, systemPrompt } = this.config;
 
-    const response = await this.client.chat(model, [
+    const { text } = await this.client.chat(model, [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ]);
 
-    const content = response.text ?? "";
-    // console.log("LLM raw response:", content);
-    return content;
+    return text;
   }
 }

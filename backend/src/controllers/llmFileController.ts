@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
 // import type multer from "multer";
 
-import {
-  convertDocBufferToHtmlString,
-  convertHtmlToText,
-} from "../utils/fileUtils";
+import { convertDocBufferToHtmlString } from "../utils/fileUtils";
 
-export async function getDocText(
+export async function sendFileAsHtml(
   request: Request & { file?: Express.Multer.File },
   response: Response
 ) {
@@ -15,10 +12,7 @@ export async function getDocText(
   const docBuffer: Buffer = request.file.buffer;
   console.log(`Received file - ${request.file.originalname}`);
 
-  // const docText: string = await convertDocBufferToHtmlString(docBuffer);
+  const htmlString: string = await convertDocBufferToHtmlString(docBuffer);
 
-  const html: string = await convertDocBufferToHtmlString(docBuffer);
-  const docText: string = convertHtmlToText(html);
-
-  response.status(200).json({ doc: docText });
+  response.status(200).json({ doc: htmlString });
 }

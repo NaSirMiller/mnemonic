@@ -1,477 +1,131 @@
-// import { useState, useEffect, useContext } from "react";
-// import "./EditCourse.css";
-// import {
-//   createCourse,
-//   updateCourse,
-//   deleteCourse,
-//   getCourses,
-// } from "../../../services/coursesService";
-// import type { Course } from "../../../../../shared/models/course";
-// import { AuthContext } from "../../context/AuthContext";
-
-// interface EditCourseProps {
-//   onCoursesChanged?: () => void;
-// }
-
-// function EditCourse({ onCoursesChanged }: EditCourseProps) {
-//   const auth = useContext(AuthContext);
-//   const userId = auth?.uid;
-
-//   const [courseName, setCourseName] = useState<string>("");
-//   const [courseGrade, setCourseGrade] = useState<string>("");
-//   const [courseGradeWeights, setCourseGradeWeights] = useState<
-//     Record<string, number>
-//   >({});
-//   const [courseNameError, setCourseNameError] = useState<string>("");
-
-//   const [courses, setCourses] = useState<Course[]>([]);
-//   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-//   const [gradeOrder, setGradeOrder] = useState<string[]>([]);
-
-//   const [tempGradeInputs, setTempGradeInputs] = useState<
-//     Record<string, string>
-//   >({});
-
-//   // Success messages
-//   const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
-//   const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
-
-//   const buildCoursePayload = (): Course => {
-//     if (!userId) throw new Error("User ID not available");
-
-//     const filteredGradeTypes: Record<string, number> = {};
-//     Object.entries(courseGradeWeights).forEach(([k, v]) => {
-//       if (k.trim() !== "") filteredGradeTypes[k.trim()] = v / 100;
-//     });
-
-//     return {
-//       courseName,
-//       currentGrade: (parseFloat(courseGrade) || 0) / 100,
-//       gradeTypes: filteredGradeTypes,
-//       userId,
-//     };
-//   };
-
-//   // Fetch courses on load
-//   useEffect(() => {
-//     if (!userId) return;
-//     (async () => {
-//       try {
-//         const fetchedCourses = await getCourses(userId, null);
-//         setCourses(fetchedCourses);
-//         if (fetchedCourses.length > 0) selectCourse(fetchedCourses[0]);
-//       } catch (err) {
-//         console.error("Error fetching courses:", err);
-//       }
-//     })();
-//   }, [userId]);
-
-//   const selectCourse = (course: Course) => {
-//     setSelectedCourse(course);
-//     setCourseName(course.courseName ?? "");
-//     setCourseGrade(((course.currentGrade ?? 0) * 100).toFixed(2));
-
-//     const gradeTypesPercent: Record<string, number> = {};
-//     const gradeTypes = course.gradeTypes ?? {};
-//     for (const [k, v] of Object.entries(gradeTypes)) {
-//       gradeTypesPercent[k] = v * 100;
-//     }
-
-//     setCourseGradeWeights(gradeTypesPercent);
-//     setGradeOrder(
-//       Object.keys(gradeTypesPercent).sort((a, b) => {
-//         const wA = gradeTypesPercent[a];
-//         const wB = gradeTypesPercent[b];
-//         if (wB !== wA) return wB - wA;
-//         return a.localeCompare(b);
-//       })
-//     );
-//   };
-
-//   const handleSelectCourse = (courseName: string) => {
-//     const course = courses.find((c) => c.courseName === courseName);
-//     if (course) selectCourse(course);
-//   };
-
-//   const handleNewCourse = async () => {
-//     if (!userId) return console.warn("User not logged in.");
-
-//     const baseName = "New Course";
-//     let newName = baseName;
-//     let counter = 1;
-//     const existingNames = new Set(courses.map((c) => c.courseName));
-//     while (existingNames.has(newName)) {
-//       newName = `${baseName} ${counter}`;
-//       counter++;
-//     }
-
-//     const newCourse: Course = {
-//       courseName: newName,
-//       currentGrade: 0,
-//       gradeTypes: {},
-//       userId,
-//     };
-
-//     try {
-//       await createCourse(newCourse);
-//       const refreshedCourses = await getCourses(userId, null);
-//       setCourses(refreshedCourses);
-
-//       const newlyCreated = refreshedCourses.find(
-//         (c) => c.courseName === newName
-//       );
-//       if (newlyCreated) selectCourse(newlyCreated);
-
-//       if (onCoursesChanged) onCoursesChanged();
-//     } catch (err) {
-//       console.error("Failed to create new course:", err);
-//     }
-//   };
-
-//   const handleNewGradeWeight = () => {
-//     const baseName = "New Grade";
-//     let newName = baseName;
-//     let counter = 1;
-//     while (courseGradeWeights[newName] !== undefined)
-//       newName = `${baseName} ${counter++}`;
-//     setCourseGradeWeights((prev) => ({ ...prev, [newName]: 0 }));
-//     setGradeOrder((prev) => [...prev, newName]);
-//   };
-
-//   const reorderGrades = () => {
-//     setGradeOrder((prevOrder) =>
-//       [...prevOrder].sort((a, b) => {
-//         const wA = courseGradeWeights[a];
-//         const wB = courseGradeWeights[b];
-//         if (wB !== wA) return wB - wA;
-//         return a.localeCompare(b);
-//       })
-//     );
-//   };
-
-//   const handleGradeWeightChange = (
-//     oldGrade: string,
-//     newGrade: string,
-//     newWeight?: number
-//   ) => {
-//     setCourseGradeWeights((prev) => {
-//       const updated = { ...prev };
-//       if (newGrade !== oldGrade) {
-//         const weightValue = newWeight ?? updated[oldGrade] ?? 0;
-//         delete updated[oldGrade];
-//         updated[newGrade] = weightValue;
-//         setGradeOrder((prevOrder) =>
-//           prevOrder.map((g) => (g === oldGrade ? newGrade : g))
-//         );
-//       } else if (newWeight !== undefined) {
-//         updated[oldGrade] = newWeight;
-//       }
-//       return updated;
-//     });
-//   };
-
-//   const submitForm = async () => {
-//     if (!userId || !courseName.trim()) return;
-
-//     try {
-//       const payload = buildCoursePayload();
-
-//       const nameTaken = courses.some(
-//         (c) =>
-//           (c.courseName ?? "").trim().toLowerCase() ===
-//             courseName.trim().toLowerCase() &&
-//           c.courseId !== selectedCourse?.courseId
-//       );
-//       if (nameTaken) {
-//         setCourseNameError("Course name taken!");
-//         if (selectedCourse) selectCourse(selectedCourse);
-//         return;
-//       } else setCourseNameError("");
-
-//       if (!selectedCourse) {
-//         const created = await createCourse(payload);
-//         const refreshedCourses = await getCourses(userId, null);
-//         setCourses(refreshedCourses);
-//         selectCourse(created);
-
-//         // Success popup
-//         setSubmitSuccessMsg("Course submitted!");
-//         setTimeout(() => setSubmitSuccessMsg(""), 2000);
-
-//         if (onCoursesChanged) onCoursesChanged();
-//       } else if (selectedCourse.courseId) {
-//         await updateCourse(userId, selectedCourse.courseId, payload);
-//         const refreshedCourses = await getCourses(userId, null);
-//         setCourses(refreshedCourses);
-//         const reselected = refreshedCourses.find(
-//           (c) => c.courseId === selectedCourse.courseId
-//         );
-//         if (reselected) selectCourse(reselected);
-
-//         // Success popup
-//         setSubmitSuccessMsg("Course submitted!");
-//         setTimeout(() => setSubmitSuccessMsg(""), 2000);
-
-//         if (onCoursesChanged) onCoursesChanged();
-//       }
-//     } catch (err) {
-//       console.error("Error writing course:", err);
-//     }
-//   };
-
-//   const handleDeleteCourse = async () => {
-//     if (!userId || !selectedCourse || !selectedCourse.courseId) return;
-
-//     try {
-//       await deleteCourse(userId, selectedCourse.courseId);
-
-//       if (onCoursesChanged) onCoursesChanged();
-
-//       const remainingCourses = courses.filter(
-//         (c) => c.courseId !== selectedCourse.courseId
-//       );
-//       setCourses(remainingCourses);
-
-//       if (remainingCourses.length > 0) {
-//         selectCourse(remainingCourses[0]);
-//       } else {
-//         setSelectedCourse(null);
-//         setCourseName("");
-//         setCourseGrade("");
-//         setCourseGradeWeights({});
-//         setGradeOrder([]);
-//       }
-
-//       // Success popup
-//       setDeleteSuccessMsg("Course deleted!");
-//       setTimeout(() => setDeleteSuccessMsg(""), 2000);
-//     } catch (err) {
-//       console.error("Failed to delete course:", err);
-//     }
-//   };
-
-//   return (
-//     <div className="edit-course" onClick={(e) => e.stopPropagation()}>
-//       <div className="edit-course-title">Edit Courses</div>
-
-//       <div className="edit-course-course-cont">
-//         {courses.map((course, i) => (
-//           <div
-//             key={`edit-course-${course.courseName}-${i}`}
-//             className={`edit-course-course ${
-//               selectedCourse?.courseName === course.courseName ? "selected" : ""
-//             }`}
-//             onClick={() => handleSelectCourse(course.courseName!)}
-//           >
-//             {course.courseName}
-//           </div>
-//         ))}
-//         <div className="edit-course-course-add" onClick={handleNewCourse}>
-//           Add Course
-//         </div>
-//       </div>
-
-//       <div className="edit-course-section-title">Course Name*</div>
-//       <input
-//         name="courseName"
-//         className="edit-course-text-input"
-//         value={courseName}
-//         onChange={(e) => setCourseName(e.target.value)}
-//       />
-//       {courseNameError && (
-//         <div className="edit-course-error">{courseNameError}</div>
-//       )}
-
-//       <div className="edit-course-section-title">Course Grade</div>
-//       <div className="edit-course-input-cont">
-//         <input
-//           type="number"
-//           step="0.01"
-//           name="courseGrade"
-//           className="edit-course-text-input"
-//           value={courseGrade}
-//           onChange={(e) => setCourseGrade(e.target.value)}
-//         />
-//         <div className="edit-course-right-icon">%</div>
-//       </div>
-
-//       <div className="edit-course-section-title">Grade Weighting</div>
-//       <div className="edit-course-grade-weight-cont">
-//         <div className="edit-course-label-cont">
-//           <div className="edit-course-label-name">Name</div>
-//           <div className="edit-course-label-final-grade">% of Final Grade</div>
-//         </div>
-
-//         <div className="edit-course-course-card-cont">
-//           {gradeOrder.map((grade, i) => (
-//             <div
-//               key={`edit-course-course-card-${i}`}
-//               className="edit-course-course-card"
-//             >
-//               <input
-//                 className="edit-course-course-card-name"
-//                 value={grade}
-//                 onChange={(e) => handleGradeWeightChange(grade, e.target.value)}
-//               />
-//               <input
-//                 className="edit-course-course-card-final-grade"
-//                 type="number"
-//                 step="0.01"
-//                 value={
-//                   tempGradeInputs[grade] ??
-//                   courseGradeWeights[grade]?.toString() ??
-//                   ""
-//                 }
-//                 onChange={(e) => {
-//                   const val = e.target.value;
-//                   setTempGradeInputs((prev) => ({ ...prev, [grade]: val }));
-//                   if (val === "") return;
-//                   handleGradeWeightChange(grade, grade, Number(val));
-//                 }}
-//                 onKeyDown={(e) => e.key === "Enter" && reorderGrades()}
-//               />
-//             </div>
-//           ))}
-//           <div
-//             className="edit-course-course-card"
-//             onClick={handleNewGradeWeight}
-//           >
-//             <div className="edit-course-course-card-name">
-//               Add Grade Type (ex. Text, Project)
-//             </div>
-//             <div className="edit-course-course-card-final-grade">0</div>
-//             <div className="edit-course-dark-card"></div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="edit-course-submit-course" onClick={submitForm}>
-//         Submit Course
-//       </div>
-//       {submitSuccessMsg && (
-//         <div className="edit-course-success-popup">{submitSuccessMsg}</div>
-//       )}
-
-//       <div className="edit-course-delete-course" onClick={handleDeleteCourse}>
-//         Delete Course
-//       </div>
-//       {deleteSuccessMsg && (
-//         <div className="edit-course-success-popup">{deleteSuccessMsg}</div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default EditCourse;
-
 import { useState, useEffect, useContext } from "react";
 import "./EditCourse.css";
-import type { Course } from "../../../../../shared/models/course";
 import {
   createCourse,
   updateCourse,
   deleteCourse,
   getCourses,
 } from "../../../services/coursesService";
-
+import type { Course } from "../../../../../shared/models/course";
 import { AuthContext } from "../../context/AuthContext";
 
-interface CourseFormProps {
-  userId: string;
-  selectedCourse: Course | null;
-  courses: Course[];
-  setSelectedCourse: (course: Course | null) => void;
+interface EditCourseProps {
   onCoursesChanged?: () => void;
 }
 
-export function CourseForm({
-  userId,
-  selectedCourse,
-  courses,
-  setSelectedCourse,
-  onCoursesChanged,
-}: CourseFormProps) {
-  const [courseName, setCourseName] = useState("");
-  const [courseGrade, setCourseGrade] = useState("");
+function EditCourse({ onCoursesChanged }: EditCourseProps) {
+  const auth = useContext(AuthContext);
+  const userId = auth?.uid;
+
+  const [courseName, setCourseName] = useState<string>("");
+  const [courseGrade, setCourseGrade] = useState<string>("");
   const [courseGradeWeights, setCourseGradeWeights] = useState<
     Record<string, number>
   >({});
+  const [courseNameError, setCourseNameError] = useState<string>("");
+
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [gradeOrder, setGradeOrder] = useState<string[]>([]);
+
   const [tempGradeInputs, setTempGradeInputs] = useState<
     Record<string, string>
   >({});
 
-  const [courseNameError, setCourseNameError] = useState("");
-  const [submitSuccessMsg, setSubmitSuccessMsg] = useState("");
-  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState("");
+  // Success messages
+  const [submitSuccessMsg, setSubmitSuccessMsg] = useState<string>("");
+  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string>("");
 
-  useEffect(() => {
-    if (!selectedCourse) {
-      setCourseName("");
-      setCourseGrade("");
-      setCourseGradeWeights({});
-      setGradeOrder([]);
-      setTempGradeInputs({});
-      return;
-    }
+  const buildCoursePayload = (): Course => {
+    if (!userId) throw new Error("User ID not available");
 
-    setCourseName(selectedCourse.courseName ?? "");
-    setCourseGrade(((selectedCourse.currentGrade ?? 0) * 100).toFixed(2));
-
-    const weightsPercent: Record<string, number> = {};
-    const gradeTypes = selectedCourse.gradeTypes ?? {};
-    for (const [k, v] of Object.entries(gradeTypes))
-      weightsPercent[k] = v * 100;
-
-    setCourseGradeWeights(weightsPercent);
-    setGradeOrder(
-      Object.keys(weightsPercent).sort((a, b) => {
-        const wA = weightsPercent[a],
-          wB = weightsPercent[b];
-        if (wB !== wA) return wB - wA;
-        return a.localeCompare(b);
-      })
-    );
-  }, [selectedCourse]);
-
-  const buildPayload = (): Course => ({
-    courseName,
-    currentGrade: (parseFloat(courseGrade) || 0) / 100,
-    gradeTypes: Object.fromEntries(
-      Object.entries(courseGradeWeights).map(([k, v]) => [k.trim(), v / 100])
-    ),
-    userId,
-  });
-
-  const handleGradeWeightChange = (
-    oldGrade: string,
-    newGrade: string,
-    newWeight?: number
-  ) => {
-    setCourseGradeWeights((prev) => {
-      const updated = { ...prev };
-      if (newGrade !== oldGrade) {
-        updated[newGrade] = newWeight ?? updated[oldGrade] ?? 0;
-        delete updated[oldGrade];
-        setGradeOrder((prevOrder) =>
-          prevOrder.map((g) => (g === oldGrade ? newGrade : g))
-        );
-      } else if (newWeight !== undefined) {
-        updated[oldGrade] = newWeight;
-      }
-      return updated;
+    const filteredGradeTypes: Record<string, number> = {};
+    Object.entries(courseGradeWeights).forEach(([k, v]) => {
+      if (k.trim() !== "") filteredGradeTypes[k.trim()] = v / 100;
     });
+
+    return {
+      courseName,
+      currentGrade: (parseFloat(courseGrade) || 0) / 100,
+      gradeTypes: filteredGradeTypes,
+      userId,
+    };
   };
 
-  const reorderGrades = () => {
-    setGradeOrder((prevOrder) =>
-      [...prevOrder].sort((a, b) => {
-        const wA = courseGradeWeights[a],
-          wB = courseGradeWeights[b];
+  // Fetch courses on load
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      try {
+        const fetchedCourses = await getCourses(userId, null);
+        setCourses(fetchedCourses);
+        if (fetchedCourses.length > 0) selectCourse(fetchedCourses[0]);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+      }
+    })();
+  }, [userId]);
+
+  const selectCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setCourseName(course.courseName ?? "");
+    setCourseGrade(((course.currentGrade ?? 0) * 100).toFixed(2));
+
+    const gradeTypesPercent: Record<string, number> = {};
+    const gradeTypes = course.gradeTypes ?? {};
+    for (const [k, v] of Object.entries(gradeTypes)) {
+      gradeTypesPercent[k] = v * 100;
+    }
+
+    setCourseGradeWeights(gradeTypesPercent);
+    setGradeOrder(
+      Object.keys(gradeTypesPercent).sort((a, b) => {
+        const wA = gradeTypesPercent[a];
+        const wB = gradeTypesPercent[b];
         if (wB !== wA) return wB - wA;
         return a.localeCompare(b);
       })
     );
+  };
+
+  const handleSelectCourse = (courseName: string) => {
+    const course = courses.find((c) => c.courseName === courseName);
+    if (course) selectCourse(course);
+  };
+
+  const handleNewCourse = async () => {
+    if (!userId) return console.warn("User not logged in.");
+
+    const baseName = "New Course";
+    let newName = baseName;
+    let counter = 1;
+    const existingNames = new Set(courses.map((c) => c.courseName));
+    while (existingNames.has(newName)) {
+      newName = `${baseName} ${counter}`;
+      counter++;
+    }
+
+    const newCourse: Course = {
+      courseName: newName,
+      currentGrade: 0,
+      gradeTypes: {},
+      userId,
+    };
+
+    try {
+      await createCourse(newCourse);
+      const refreshedCourses = await getCourses(userId, null);
+      setCourses(refreshedCourses);
+
+      const newlyCreated = refreshedCourses.find(
+        (c) => c.courseName === newName
+      );
+      if (newlyCreated) selectCourse(newlyCreated);
+
+      if (onCoursesChanged) onCoursesChanged();
+    } catch (err) {
+      console.error("Failed to create new course:", err);
+    }
   };
 
   const handleNewGradeWeight = () => {
@@ -484,66 +138,142 @@ export function CourseForm({
     setGradeOrder((prev) => [...prev, newName]);
   };
 
-  const submitForm = async () => {
-    if (!courseName.trim()) return;
-
-    const nameTaken = courses.some(
-      (c) =>
-        c.courseName?.trim().toLowerCase() ===
-          courseName.trim().toLowerCase() &&
-        c.courseId !== selectedCourse?.courseId
+  const reorderGrades = () => {
+    setGradeOrder((prevOrder) =>
+      [...prevOrder].sort((a, b) => {
+        const wA = courseGradeWeights[a];
+        const wB = courseGradeWeights[b];
+        if (wB !== wA) return wB - wA;
+        return a.localeCompare(b);
+      })
     );
-    if (nameTaken) {
-      setCourseNameError("Course name taken!");
-      return;
-    } else setCourseNameError("");
+  };
 
-    const payload = buildPayload();
+  const handleGradeWeightChange = (
+    oldGrade: string,
+    newGrade: string,
+    newWeight?: number
+  ) => {
+    setCourseGradeWeights((prev) => {
+      const updated = { ...prev };
+      if (newGrade !== oldGrade) {
+        const weightValue = newWeight ?? updated[oldGrade] ?? 0;
+        delete updated[oldGrade];
+        updated[newGrade] = weightValue;
+        setGradeOrder((prevOrder) =>
+          prevOrder.map((g) => (g === oldGrade ? newGrade : g))
+        );
+      } else if (newWeight !== undefined) {
+        updated[oldGrade] = newWeight;
+      }
+      return updated;
+    });
+  };
+
+  const submitForm = async () => {
+    if (!userId || !courseName.trim()) return;
 
     try {
-      if (!selectedCourse) {
-        await createCourse(payload);
-      } else {
-        await updateCourse(userId, selectedCourse.courseId!, payload);
-      }
+      const payload = buildCoursePayload();
 
-      const refreshedCourses = await getCourses(userId, null);
-      setSelectedCourse(
-        refreshedCourses.find((c) => c.courseName === payload.courseName) ??
-          null
+      const nameTaken = courses.some(
+        (c) =>
+          (c.courseName ?? "").trim().toLowerCase() ===
+            courseName.trim().toLowerCase() &&
+          c.courseId !== selectedCourse?.courseId
       );
+      if (nameTaken) {
+        setCourseNameError("Course name taken!");
+        if (selectedCourse) selectCourse(selectedCourse);
+        return;
+      } else setCourseNameError("");
 
-      setSubmitSuccessMsg("Course submitted!");
-      setTimeout(() => setSubmitSuccessMsg(""), 2000);
-      onCoursesChanged?.();
+      if (!selectedCourse) {
+        const created = await createCourse(payload);
+        const refreshedCourses = await getCourses(userId, null);
+        setCourses(refreshedCourses);
+        selectCourse(created);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
+        if (onCoursesChanged) onCoursesChanged();
+      } else if (selectedCourse.courseId) {
+        await updateCourse(userId, selectedCourse.courseId, payload);
+        const refreshedCourses = await getCourses(userId, null);
+        setCourses(refreshedCourses);
+        const reselected = refreshedCourses.find(
+          (c) => c.courseId === selectedCourse.courseId
+        );
+        if (reselected) selectCourse(reselected);
+
+        // Success popup
+        setSubmitSuccessMsg("Course submitted!");
+        setTimeout(() => setSubmitSuccessMsg(""), 2000);
+
+        if (onCoursesChanged) onCoursesChanged();
+      }
     } catch (err) {
-      console.error("Error submitting course:", err);
+      console.error("Error writing course:", err);
     }
   };
 
   const handleDeleteCourse = async () => {
-    if (!selectedCourse?.courseId) return;
+    if (!userId || !selectedCourse || !selectedCourse.courseId) return;
 
     try {
       await deleteCourse(userId, selectedCourse.courseId);
-      onCoursesChanged?.();
+
+      if (onCoursesChanged) onCoursesChanged();
 
       const remainingCourses = courses.filter(
         (c) => c.courseId !== selectedCourse.courseId
       );
-      setSelectedCourse(remainingCourses[0] ?? null);
+      setCourses(remainingCourses);
 
+      if (remainingCourses.length > 0) {
+        selectCourse(remainingCourses[0]);
+      } else {
+        setSelectedCourse(null);
+        setCourseName("");
+        setCourseGrade("");
+        setCourseGradeWeights({});
+        setGradeOrder([]);
+      }
+
+      // Success popup
       setDeleteSuccessMsg("Course deleted!");
       setTimeout(() => setDeleteSuccessMsg(""), 2000);
     } catch (err) {
-      console.error("Error deleting course:", err);
+      console.error("Failed to delete course:", err);
     }
   };
 
   return (
-    <>
+    <div className="edit-course" onClick={(e) => e.stopPropagation()}>
+      <div className="edit-course-title">Edit Courses</div>
+
+      <div className="edit-course-course-cont">
+        {courses.map((course, i) => (
+          <div
+            key={`edit-course-${course.courseName}-${i}`}
+            className={`edit-course-course ${
+              selectedCourse?.courseName === course.courseName ? "selected" : ""
+            }`}
+            onClick={() => handleSelectCourse(course.courseName!)}
+          >
+            {course.courseName}
+          </div>
+        ))}
+        <div className="edit-course-course-add" onClick={handleNewCourse}>
+          Add Course
+        </div>
+      </div>
+
       <div className="edit-course-section-title">Course Name*</div>
       <input
+        name="courseName"
         className="edit-course-text-input"
         value={courseName}
         onChange={(e) => setCourseName(e.target.value)}
@@ -557,6 +287,7 @@ export function CourseForm({
         <input
           type="number"
           step="0.01"
+          name="courseGrade"
           className="edit-course-text-input"
           value={courseGrade}
           onChange={(e) => setCourseGrade(e.target.value)}
@@ -573,16 +304,19 @@ export function CourseForm({
 
         <div className="edit-course-course-card-cont">
           {gradeOrder.map((grade, i) => (
-            <div key={i} className="edit-course-course-card">
+            <div
+              key={`edit-course-course-card-${i}`}
+              className="edit-course-course-card"
+            >
               <input
                 className="edit-course-course-card-name"
                 value={grade}
                 onChange={(e) => handleGradeWeightChange(grade, e.target.value)}
               />
               <input
+                className="edit-course-course-card-final-grade"
                 type="number"
                 step="0.01"
-                className="edit-course-course-card-final-grade"
                 value={
                   tempGradeInputs[grade] ??
                   courseGradeWeights[grade]?.toString() ??
@@ -624,98 +358,8 @@ export function CourseForm({
       {deleteSuccessMsg && (
         <div className="edit-course-success-popup">{deleteSuccessMsg}</div>
       )}
-    </>
-  );
-}
-
-interface EditCourseProps {
-  onCoursesChanged?: () => void;
-}
-
-export default function EditCourse({ onCoursesChanged }: EditCourseProps) {
-  const auth = useContext(AuthContext);
-  const userId = auth?.uid;
-
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-
-  useEffect(() => {
-    if (!userId) return;
-    (async () => {
-      try {
-        const fetched = await getCourses(userId, null);
-        setCourses(fetched);
-        if (fetched.length > 0) setSelectedCourse(fetched[0]);
-      } catch (err) {
-        console.error("Error fetching courses:", err);
-      }
-    })();
-  }, [userId]);
-
-  const handleSelectCourse = (courseName: string) => {
-    const course = courses.find((c) => c.courseName === courseName);
-    if (course) setSelectedCourse(course);
-  };
-
-  const handleNewCourse = async () => {
-    if (!userId) return console.warn("User not logged in.");
-
-    const baseName = "New Course";
-    let newName = baseName;
-    let counter = 1;
-    const existingNames = new Set(courses.map((c) => c.courseName));
-    while (existingNames.has(newName)) newName = `${baseName} ${counter++}`;
-
-    const newCourse: Course = {
-      courseName: newName,
-      currentGrade: 0,
-      gradeTypes: {},
-      userId,
-    };
-
-    try {
-      await createCourse(newCourse);
-      const refreshedCourses = await getCourses(userId, null);
-      setCourses(refreshedCourses);
-      setSelectedCourse(
-        refreshedCourses.find((c) => c.courseName === newName) ?? null
-      );
-      onCoursesChanged?.();
-    } catch (err) {
-      console.error("Failed to create new course:", err);
-    }
-  };
-
-  return (
-    <div className="edit-course" onClick={(e) => e.stopPropagation()}>
-      <div className="edit-course-title">Edit Courses</div>
-
-      <div className="edit-course-course-cont">
-        {courses.map((course, i) => (
-          <div
-            key={`edit-course-${course.courseName}-${i}`}
-            className={`edit-course-course ${
-              selectedCourse?.courseName === course.courseName ? "selected" : ""
-            }`}
-            onClick={() => handleSelectCourse(course.courseName!)}
-          >
-            {course.courseName}
-          </div>
-        ))}
-        <div className="edit-course-course-add" onClick={handleNewCourse}>
-          Add Course
-        </div>
-      </div>
-
-      {userId && (
-        <CourseForm
-          userId={userId}
-          selectedCourse={selectedCourse}
-          courses={courses}
-          setSelectedCourse={setSelectedCourse}
-          onCoursesChanged={onCoursesChanged}
-        />
-      )}
     </div>
   );
 }
+
+export default EditCourse;

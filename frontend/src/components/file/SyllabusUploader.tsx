@@ -1,16 +1,18 @@
-import { getDocText } from "../../services/llmService";
+import { useState } from "react";
+import { sendFileAsHtml } from "../../services/llmService";
 import { FileInput } from "./FileInput";
 
-interface SyllabusUploaderProps {
-  onUpload: (fileHtml: string) => void;
-}
+export function SyllabusUploader() {
+  const [, setSyllabus] = useState<string | null>(null);
 
-export function SyllabusUploader({ onUpload }: SyllabusUploaderProps) {
   const uploadFile = async (file: File) => {
-    const response = await getDocText(file);
-    const docText: string = response.doc;
-    onUpload(docText);
-    console.log(`PDF to string: ${docText}`);
+    // const fileContent: Buffer = Buffer.from(await file.arrayBuffer());
+    // const fileName: string = file.name;
+
+    const response = await sendFileAsHtml(file);
+    const syllabusHtml: string = response.doc;
+    setSyllabus(syllabusHtml);
+    console.log(syllabusHtml);
   };
 
   return <FileInput onUpload={uploadFile} />;

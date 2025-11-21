@@ -10,7 +10,7 @@ import { taskToString } from "../utils/taskUtils";
 import { Task } from "../../../shared/models/task";
 import { CourseTasksCreationResponse } from "../../../shared/models/response";
 
-const DEFAULT_MODEL_NAME = "openai/gpt-4o-mini";
+const DEFAULT_MODEL_NAME = "deepseek/deepseek-r1-distill-llama-70b:free";
 const client = new LLMClient();
 
 const courseTasksConfig: LLMInstanceConfig = {
@@ -27,25 +27,9 @@ class LLMService {
     docText: string
   ): Promise<CourseTasksCreationResponse> {
     const requestPrompt: string = getCreationRequestPrompt(docText);
-    let attempt: number = 0;
-    let maxNumAttempts: number = 5;
-    while (attempt < maxNumAttempts) {
-      const response: string = await this.llm.generate(requestPrompt);
-      try {
-        const proposals: CourseTasksCreationResponse = JSON.parse(response);
-        return proposals;
-      } catch (error) {
-        console.error(`Error ocurred: ${error}`);
-        if (attempt < maxNumAttempts) console.error("Trying again...");
-
-        attempt += 1;
-      }
-    }
-    return {
-      course: { gradeTypes: {}, courseName: "" },
-      tasks: [],
-      error: "Could not extract data from document. Please try another method.",
-    };
+    const response: string = await this.llm.generate(requestPrompt);
+    const proposals: CourseTasksCreationResponse = JSON.parse(response);
+    return proposals;
   }
 
   async getTasksOrdering(tasks: Task[]): Promise<Task[]> {
@@ -58,7 +42,7 @@ class LLMService {
       tasksMap[i] = task;
       stringifiedTasks.push(`id=${i}:${taskToString(task)}`); // Convert task to string representation with id assigned.
     }
-    // const tasksListString: string = stringifiedTasks.join("\n"); // TODO: Use in actual prompt.
+    const tasksListString: string = stringifiedTasks.join("\n"); // TODO: Use in actual prompt.
     const response: string = await this.llm.generate(""); // TODO: Add actual prompt.
     const taskIdOrdering: number[] = JSON.parse(response);
     const orderedTasks: Task[] = [];
