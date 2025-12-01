@@ -352,21 +352,53 @@ function TaskPage() {
         </div>
       )}
       {showSyllabusForm && (
-        <div
-          className="opacity"
-          onClick={() => setShowSyllabusForm(false)} // overlay click closes modal
+  <div
+    className="modal-overlay"
+    onClick={() => setShowSyllabusForm(false)}
+  >
+    <div
+      className="modal-content"
+      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+    >
+      <div className="modal-header">
+        <h2>Upload Syllabus</h2>
+        <button
+          className="modal-close-btn"
+          onClick={() => setShowSyllabusForm(false)}
         >
-          <div onClick={(e) => e.stopPropagation()}>
-            {/* stops click inside modal from bubbling to overlay */}
-            <SyllabusUploader onSubmit={handleSyllabusSubmit} />
-          </div>
-        </div>
-      )}
-      {showProposedTasks && proposedDocText && (
-        <div className="opacity" onClick={() => setShowProposedTasks(false)}>
-          <ProposedTasksViewer document={proposedDocText} />
-        </div>
-      )}
+          ×
+        </button>
+      </div>
+
+      <SyllabusUploader onSubmit={handleSyllabusSubmit} />
+    </div>
+  </div>
+)}
+
+{showProposedTasks && proposedDocText && (
+  <div
+    className="modal-overlay"
+    onClick={() => setShowProposedTasks(false)}
+  >
+    <div
+      className="modal-content"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="modal-header">
+        <h2>Proposed Course & Tasks</h2>
+        <button
+          className="modal-close-btn"
+          onClick={() => setShowProposedTasks(false)}
+        >
+          ×
+        </button>
+      </div>
+
+      <ProposedTasksViewer document={proposedDocText} />
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

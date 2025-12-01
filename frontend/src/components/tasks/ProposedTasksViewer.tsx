@@ -50,7 +50,10 @@ export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
   }, [document, loadProposedInfo]);
 
   const handleSubmitAll = async () => {
-    if (!courseFormPayload) return;
+    if (!courseFormPayload) {
+      console.log("No course data to submit.");
+      return;
+    }
 
     try {
       // Create Course
