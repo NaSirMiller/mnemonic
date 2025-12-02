@@ -1,0 +1,227 @@
+.task-form-container {
+  width: 50%;
+  max-width: 950px;
+  margin: auto;
+  padding: 50px;
+  padding-bottom: 10px;
+
+  text-align: center;
+
+  background-color: #2a2a2a;
+  z-index: 100;
+}
+
+.task-form-title {
+  width: 100%;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+/* input sections */
+.task-form-section-title {
+  width: 100%;
+  text-align: left;
+  font-size: 28px;
+}
+
+.task-form-input-cont {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.task-form-text-input {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 50px;
+  padding: 15px 30px;
+
+  font-size: 20px;
+
+  outline: none;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
+  background-color: transparent;
+  * {
+    color: #ffffff;
+  }
+}
+
+.task-form-text-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 1;
+}
+
+.task-form-text-input::-webkit-outer-spin-button,
+.task-form-text-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.task-form-text-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.task-form-right-icon {
+  position: absolute;
+  right: 40px;
+  top: calc(50% - 22.5px);
+  transform: translateY(-50%);
+  font-size: 24px;
+}
+
+/* select input */
+.task-form-select {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 50px;
+  padding: 15px 30px;
+
+  font-size: 20px;
+
+  outline: none;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
+  background-color: transparent;
+  color: #ffffff;
+}
+
+/* task cards and containers */
+.task-form-task-card-cont {
+  height: fit-content;
+  display: flex;
+  flex-flow: column wrap;
+  gap: 20px;
+}
+
+.task-form-task-card {
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 100%;
+  height: 50px;
+  min-width: 0;
+  padding: 0 20px;
+
+  font-size: 18px;
+
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 10px;
+  background-color: #525252;
+
+  user-select: none;
+}
+
+.task-form-task-card:hover {
+  cursor: pointer;
+}
+
+.task-form-task-card.selected {
+  background-color: #2f4872;
+}
+
+.task-form-dark-card {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+
+  border-radius: 10px;
+  user-select: none;
+  background-color: #00000040;
+}
+
+.task-form-task-card-name {
+  text-align: left;
+  flex: 5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-form-task-card-grade,
+.task-form-task-card-due-date {
+  text-align: left;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-form-task-card-time-spent {
+  text-align: left;
+  flex: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* buttons */
+.task-form-submit-task {
+  width: fit-content;
+  padding: 10px 30px;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 50px;
+
+  font-size: 20px;
+  font-weight: bold;
+
+  border-radius: 10px;
+  background-color: #7ea16b;
+}
+
+.task-form-submit-task:hover {
+  cursor: pointer;
+}
+
+.task-form-delete-task {
+  width: fit-content;
+  padding: 7px 20px;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 50px;
+
+  font-size: 16px;
+
+  border-radius: 10px;
+  background-color: #d72638;
+}
+
+.task-form-delete-task:hover {
+  cursor: pointer;
+}
+
+.task-form-error {
+  color: red;
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+/* Success popup */
+.task-form-success-popup {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #343434;
+  padding: 10px 20px;
+  border-radius: 10px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}

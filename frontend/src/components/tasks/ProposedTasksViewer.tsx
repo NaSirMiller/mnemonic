@@ -1,3 +1,153 @@
+// import { useState, useEffect, useCallback } from "react";
+
+// import { LoadingSpinner } from "../LoadingSpinner";
+// import { TabsView } from "../TabsView";
+
+// import { getProposedCourseInfo } from "../../services/llmService";
+// import type { Course } from "../../../../shared/models/course";
+// import type { Task } from "../../../../shared/models/task";
+// import { createCourse } from "../../services/coursesService";
+// import { createTask } from "../../services/tasksService";
+// import { useAuth } from "../../hooks/useAuth";
+// import { CourseForm } from "./CourseForm";
+// import { TaskForm } from "./TaskForm";
+
+// interface ProposedTaskViewerProps {
+//   document: string;
+// }
+
+// export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
+//   const { uid } = useAuth();
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [proposedCourse, setProposedCourse] = useState<Course | null>(null);
+//   const [proposedTasks, setProposedTasks] = useState<Task[] | null>(null);
+//   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+//   const [courseFormPayload, setCourseFormPayload] = useState<Course | null>(
+//     null
+//   );
+//   const [taskFormsPayloads, setTaskFormsPayloads] = useState<Task[]>([]);
+
+//   useEffect(() => {
+//     if (proposedCourse) {
+//       setCourseFormPayload({
+//         ...proposedCourse,
+//         userId: uid!,
+//       });
+//     }
+//   }, [proposedCourse, uid]);
+
+//   useEffect(() => {
+//     if (proposedTasks) {
+//       setTaskFormsPayloads(proposedTasks);
+//     }
+//   }, [proposedTasks]);
+
+//   const loadProposedInfo = useCallback(async () => {
+//     setIsLoading(true);
+
+//     try {
+//       const { course, tasks, error } = await getProposedCourseInfo(document);
+//       console.log(`Course: ${JSON.stringify(course, null, 2)}`);
+//       console.log(`Tasks: ${JSON.stringify(tasks, null, 2)}`);
+//       setProposedCourse(course);
+//       setProposedTasks(tasks ?? []);
+//       if (error) setErrorMessage(error);
+//     } catch (err) {
+//       setErrorMessage(err instanceof Error ? err.message : "Unknown error");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   }, [document]);
+
+//   useEffect(() => {
+//     if (document) loadProposedInfo();
+//   }, [document, loadProposedInfo]);
+
+//   const handleSubmitAll = async () => {
+//     if (!courseFormPayload) {
+//       console.log("No course data to submit.");
+//       return;
+//     }
+
+//     try {
+//       // Create Course
+//       const createdCourse = await createCourse(courseFormPayload);
+//       const validTasks = taskFormsPayloads.map((t) => ({
+//         ...t,
+//         title: t.title || "Untitled Task",
+//         courseId: createdCourse.courseId || courseFormPayload.courseId,
+//       }));
+
+//       // Create all tasks
+//       await Promise.all(
+//         validTasks.map((t) =>
+//           createTask({
+//             ...t,
+//             userId: uid!,
+//             createdAt: new Date(),
+//             lastUpdatedAt: new Date(),
+//           })
+//         )
+//       );
+
+//       alert("Course and tasks created!");
+//       loadProposedInfo();
+//     } catch (err) {
+//       console.error("Failed to submit all:", err);
+//     }
+//   };
+
+//   if (isLoading || !proposedCourse || !proposedTasks) return <LoadingSpinner />;
+//   if (errorMessage) return <div>{errorMessage}</div>;
+
+//   return (
+//     <div>
+//       <TabsView
+//         initial="courses"
+//         tabs={[
+//           {
+//             label: "Courses",
+//             value: "courses",
+//             content: (
+//               <CourseForm
+//                 course={proposedCourse}
+//                 onChange={setCourseFormPayload}
+//               />
+//             ),
+//           },
+//           {
+//             label: "Tasks",
+//             value: "tasks",
+//             content: (
+//               <div>
+//                 {taskFormsPayloads.map((task, i) => (
+//                   <TaskForm
+//                     key={i}
+//                     task={task}
+//                     course={courseFormPayload ?? proposedCourse}
+//                     onChange={(t) =>
+//                       setTaskFormsPayloads((prev) => {
+//                         const copy = [...prev];
+//                         copy[i] = t;
+//                         return copy;
+//                       })
+//                     }
+//                   />
+//                 ))}
+//               </div>
+//             ),
+//           },
+//         ]}
+//       />
+
+//       <div style={{ marginTop: "1rem", textAlign: "right" }}>
+//         <button onClick={handleSubmitAll}>Submit Course & Tasks</button>
+//       </div>
+//     </div>
+//   );
+// }
+
 import { useState, useEffect, useCallback } from "react";
 
 import { LoadingSpinner } from "../LoadingSpinner";
@@ -9,18 +159,61 @@ import type { Task } from "../../../../shared/models/task";
 import { createCourse } from "../../services/coursesService";
 import { createTask } from "../../services/tasksService";
 import { useAuth } from "../../hooks/useAuth";
-import { CourseForm } from "./CourseForm";
-import { TaskForm } from "./TaskForm";
+import { CourseForm } from "./forms/CourseForm";
+import { TaskForm } from "./forms/TaskForm";
+
+// Mock data for UI development
+const mockCourse: Course = {
+  courseId: "mock-course-1",
+  courseName: "Sample Course",
+  currentGrade: 0,
+  gradeTypes: { "Test 1": 0.2, "Test 2": 0.2, Final: 0.6 },
+  userId: "mock-user",
+};
+
+const mockTasks: Task[] = [
+  {
+    title: "Test 1",
+    gradeType: "Test 1",
+    dueDate: new Date(),
+    currentTime: 0,
+    expectedTime: 1,
+    grade: 0,
+    courseId: mockCourse.courseId,
+    userId: "mock-user",
+    priority: 0,
+    createdAt: new Date(),
+    lastUpdatedAt: new Date(),
+  },
+  {
+    title: "Final",
+    gradeType: "Final",
+    dueDate: new Date(),
+    currentTime: 0,
+    expectedTime: 3,
+    grade: 0,
+    courseId: mockCourse.courseId,
+    userId: "mock-user",
+    priority: 0,
+    createdAt: new Date(),
+    lastUpdatedAt: new Date(),
+  },
+];
 
 interface ProposedTaskViewerProps {
   document: string;
+  useMock?: boolean; // new prop for UI development
 }
 
-export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
+export function ProposedTasksViewer({
+  document,
+  useMock = false,
+}: ProposedTaskViewerProps) {
   const { uid } = useAuth();
+
   const [isLoading, setIsLoading] = useState(false);
   const [proposedCourse, setProposedCourse] = useState<Course | null>(null);
-  const [proposedTasks, setProposedTasks] = useState<Task[] | null>(null);
+  const [proposedTasks, setProposedTasks] = useState<Task[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [courseFormPayload, setCourseFormPayload] = useState<Course | null>(
@@ -28,54 +221,63 @@ export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
   );
   const [taskFormsPayloads, setTaskFormsPayloads] = useState<Task[]>([]);
 
+  // Load data from API or mock
   const loadProposedInfo = useCallback(async () => {
     setIsLoading(true);
-
     try {
-      const { course, tasks, error } = await getProposedCourseInfo(document);
-      console.log(`Course: ${course}`);
-      console.log(`Tasks: ${tasks}`);
-      setProposedCourse(course);
-      setProposedTasks(tasks ?? []);
-      if (error) setErrorMessage(error);
+      if (useMock) {
+        setProposedCourse({ ...mockCourse, userId: uid! });
+        setCourseFormPayload({ ...mockCourse, userId: uid! });
+        setProposedTasks(mockTasks);
+        setTaskFormsPayloads(mockTasks);
+      } else {
+        const { course, tasks, error } = await getProposedCourseInfo(document);
+        if (error) setErrorMessage(error);
+        setProposedCourse(course ? { ...course, userId: uid! } : null);
+        setCourseFormPayload(course ? { ...course, userId: uid! } : null);
+        setProposedTasks(tasks ?? []);
+        setTaskFormsPayloads(tasks ?? []);
+      }
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setIsLoading(false);
     }
-  }, [document]);
+  }, [document, uid, useMock]);
 
   useEffect(() => {
-    if (document) loadProposedInfo();
-  }, [document, loadProposedInfo]);
+    if (document || useMock) loadProposedInfo();
+  }, [document, loadProposedInfo, useMock]);
 
+  // ACID-style submission: create course, then tasks. If tasks fail, log error.
   const handleSubmitAll = async () => {
-    if (!courseFormPayload) {
-      console.log("No course data to submit.");
+    if (!courseFormPayload || taskFormsPayloads.length === 0) {
+      console.log("No course or tasks data to submit.");
       return;
     }
 
     try {
-      // Create Course
+      // 1️⃣ Create Course
       const createdCourse = await createCourse(courseFormPayload);
 
-      // Create all tasks
-      await Promise.all(
-        taskFormsPayloads.map((t) =>
-          createTask({
-            ...t,
-            courseId: createdCourse.courseId,
-            userId: uid!,
-            createdAt: new Date(),
-            lastUpdatedAt: new Date(),
-          })
-        )
-      );
+      // 2️⃣ Prepare tasks with courseId and userId
+      const validTasks = taskFormsPayloads.map((t) => ({
+        ...t,
+        title: t.title || "Untitled Task",
+        courseId: createdCourse.courseId,
+        userId: uid!,
+        createdAt: new Date(),
+        lastUpdatedAt: new Date(),
+      }));
 
-      alert("Course and tasks created!");
+      // 3️⃣ Create all tasks
+      await Promise.all(validTasks.map((t) => createTask(t)));
+
+      alert("Course and tasks created successfully!");
       loadProposedInfo();
     } catch (err) {
       console.error("Failed to submit all:", err);
+      alert("Failed to create course and tasks. See console for details.");
     }
   };
 
@@ -92,7 +294,7 @@ export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
             value: "courses",
             content: (
               <CourseForm
-                course={proposedCourse}
+                course={courseFormPayload ?? proposedCourse}
                 onChange={setCourseFormPayload}
               />
             ),
@@ -102,11 +304,11 @@ export function ProposedTasksViewer({ document }: ProposedTaskViewerProps) {
             value: "tasks",
             content: (
               <div>
-                {proposedTasks.map((task, i) => (
+                {taskFormsPayloads.map((task, i) => (
                   <TaskForm
                     key={i}
                     task={task}
-                    course={courseFormPayload ?? proposedCourse ?? null}
+                    course={courseFormPayload ?? proposedCourse}
                     onChange={(t) =>
                       setTaskFormsPayloads((prev) => {
                         const copy = [...prev];
