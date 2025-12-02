@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import Modal from "react-modal";
 import "./EditTask.css";
 import { AuthContext } from "../../context/AuthContext";
 import { getCourses, updateCourse } from "../../../services/coursesService";
@@ -446,15 +447,42 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         Submit Task
       </div>
 
-      {/* SUCCESS POPUP FOR SUBMIT */}
-      {submitSuccessMsg && <div className="edit-task-success-popup">{submitSuccessMsg}</div>}
+      <Modal
+        isOpen={!!submitSuccessMsg}
+        onRequestClose={() => setSubmitSuccessMsg(null)}
+        overlayClassName="modal-overlay"
+        className="modal-content"
+      >
+        <div className="error-label">Success</div>
+        <div className="error-message">{submitSuccessMsg}</div>
+        <button
+          onClick={() => setSubmitSuccessMsg(null)}
+          className="modal-close-button"
+        >
+          Close
+        </button>
+      </Modal>
+
 
       <div className="edit-task-delete-task" onClick={handleDeleteTask}>
         Delete Task
       </div>
 
-      {/* SUCCESS POPUP FOR DELETE */}
-      {deleteSuccessMsg && <div className="edit-task-success-popup">{deleteSuccessMsg}</div>}
+      <Modal
+        isOpen={!!deleteSuccessMsg}
+        onRequestClose={() => setDeleteSuccessMsg(null)}
+        overlayClassName="modal-overlay"
+        className="modal-content"
+      >
+        <div className="error-label">Success</div>
+        <div className="error-message">{deleteSuccessMsg}</div>
+        <button
+          onClick={() => setDeleteSuccessMsg(null)}
+          className="modal-close-button"
+        >
+          Close
+        </button>
+      </Modal>
     </div>
   );
 }

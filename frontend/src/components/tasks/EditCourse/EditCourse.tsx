@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import Modal from "react-modal";
 import "./EditCourse.css";
 import { createCourse, updateCourse, deleteCourse, getCourses } from "../../../services/coursesService";
 import type { Course } from "../../../../../shared/models/course";
@@ -302,11 +303,46 @@ function EditCourse({ onCoursesChanged }: EditCourseProps) {
         </div>
       </div>
 
-      <div className="edit-course-submit-course" onClick={submitForm}>Submit Course</div>
-      {submitSuccessMsg && <div className="edit-course-success-popup">{submitSuccessMsg}</div>}
+      <div className="edit-course-submit-course" onClick={submitForm}>
+        Submit Course
+      </div>
 
-      <div className="edit-course-delete-course" onClick={handleDeleteCourse}>Delete Course</div>
-      {deleteSuccessMsg && <div className="edit-course-success-popup">{deleteSuccessMsg}</div>}
+      <Modal
+        isOpen={!!submitSuccessMsg}
+        onRequestClose={() => setSubmitSuccessMsg(null)}
+        overlayClassName="modal-overlay"
+        className="modal-content"
+      >
+        <div className="error-label">Success</div>
+        <div className="error-message">{submitSuccessMsg}</div>
+        <button
+          onClick={() => setSubmitSuccessMsg(null)}
+          className="modal-close-button"
+        >
+          Close
+        </button>
+      </Modal>
+
+
+      <div className="edit-course-delete-course" onClick={handleDeleteCourse}>
+        Delete Course
+      </div>
+
+      <Modal
+        isOpen={!!deleteSuccessMsg}
+        onRequestClose={() => setDeleteSuccessMsg(null)}
+        overlayClassName="modal-overlay"
+        className="modal-content"
+      >
+        <div className="error-label">Success</div>
+        <div className="error-message">{deleteSuccessMsg}</div>
+        <button
+          onClick={() => setDeleteSuccessMsg(null)}
+          className="modal-close-button"
+        >
+          Close
+        </button>
+      </Modal>
     </div>
   );
 }
