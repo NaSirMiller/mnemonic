@@ -1,0 +1,11 @@
+/* Default dot color */
+.slick-dots li button:before {
+  color: white !important;
+  opacity: 0.5;
+}
+
+/* Active (selected) dot color */
+.slick-dots li.slick-active button:before {
+  color: #2f4872 !important;
+  opacity: 1;
+}

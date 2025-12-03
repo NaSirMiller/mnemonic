@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from "../utils/googleCalendar";
+import {
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+} from "../utils/googleCalendar";
 import { taskRepo } from "../repositories/taskRepository";
 import type { Task } from "../../../shared/models/task";
 import type {
@@ -29,7 +33,8 @@ export async function createUserTask(request: Request, response: Response) {
       return response.status(400).json({ message: errorMessage });
     }
 
-    const taskValidationResult: ValidationResult = isTaskTypeValid(normalizedDates);
+    const taskValidationResult: ValidationResult =
+      isTaskTypeValid(normalizedDates);
     if (!taskValidationResult.isValid) {
       errorMessage = taskValidationResult.firstError!;
       return response.status(400).json({ message: errorMessage });
@@ -48,34 +53,38 @@ export async function createUserTask(request: Request, response: Response) {
 
     // Create Google Calendar event using taskId as eventId
     // after creating the task in Firestore
-    const storedTask = await taskRepo.getSingleUserTask(createdTask.userId!, createdTask.taskId!);
+    const storedTask = await taskRepo.getSingleUserTask(
+      createdTask.userId!,
+      createdTask.taskId!
+    );
 
     if (storedTask.userId) {
       try {
-        const calendarEvent = await createCalendarEvent(storedTask.userId, storedTask);
-        await taskRepo.updateTask(storedTask.userId, storedTask.taskId!, { 
-          googleEventId: calendarEvent.id 
+        const calendarEvent = await createCalendarEvent(
+          storedTask.userId,
+          storedTask
+        );
+        await taskRepo.updateTask(storedTask.userId, storedTask.taskId!, {
+          googleEventId: calendarEvent.id,
         });
         storedTask.googleEventId = calendarEvent.id;
       } catch (calendarError) {
         console.error("Error creating Google Calendar event:", calendarError);
       }
     }
-
-
-
     return response.status(200).json({
       message: "Successfully created a task",
       task: createdTask,
     });
-
   } catch (err) {
-    errorMessage = err instanceof Error ? err.message : "Unknown error: " + JSON.stringify(err);
+    errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Unknown error: " + JSON.stringify(err);
     console.error(err);
     return response.status(400).json({ message: errorMessage });
   }
 }
-
 
 export async function getUserTasks(request: Request, response: Response) {
   const { userId } = request.params;
@@ -143,7 +152,6 @@ export async function updateUserTask(request: Request, response: Response) {
     await taskRepo.updateTask(userId, taskId, normalizedTask);
     const storedTask = await taskRepo.getSingleUserTask(userId, taskId);
 
-
     // Update calendar event if needed
     await updateCalendarEvent(userId, storedTask, previousTask);
 
@@ -168,7 +176,7 @@ export async function deleteUserTask(request: Request, response: Response) {
   try {
     const task: Task = await taskRepo.getSingleUserTask(userId, taskId);
     await taskRepo.deleteTask(userId, taskId);
-    
+
     // Delete corresponding Google Calendar event if it exists
     if (task.googleEventId) {
       try {
@@ -182,7 +190,10 @@ export async function deleteUserTask(request: Request, response: Response) {
       message: `Successfully deleted task ${taskId}`,
     });
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : "Unknown error: " + JSON.stringify(err);
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Unknown error: " + JSON.stringify(err);
     console.error(err);
     return response.status(400).json({ message: errorMessage });
   }

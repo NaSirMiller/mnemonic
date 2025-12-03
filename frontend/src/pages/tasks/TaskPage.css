@@ -1,193 +1,264 @@
 .task-page {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: calc( 100vh - 70px );
-    padding: 70px 5%;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  padding: 70px 5%;
 
-    background-color: #2A2A2A;
-    color: white;
+  background-color: #2a2a2a;
+  color: white;
 }
 ::-webkit-scrollbar {
-    display: none;
+  display: none;
 }
 
 .opacity {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    padding: 50px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 50px 0;
 
-    background-color: #FFFFFF40;
-    z-index: 10;
+  background-color: #ffffff40;
+  z-index: 10;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
 }
 
 /* all courses info */
 .task-page-profile-cont {
-    width: 100%;
+  width: 100%;
 
-    position: relative;
+  position: relative;
 
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 .task-page-profile-pic {
-    box-sizing: border-box;
-    height: 250px;
-    width: 250px;
+  box-sizing: border-box;
+  height: 250px;
+  width: 250px;
 
-    object-fit: cover;
-    object-position: center top;
+  object-fit: cover;
+  object-position: center top;
 
-    text-align: center;
-    line-height: 150px;
+  text-align: center;
+  line-height: 150px;
 
-    border-radius: 125px;
-    background-color: #FFFFFF10;
+  border-radius: 125px;
+  background-color: #ffffff10;
 }
 .task-page-profile-name {
-    padding-left: 50px;
+  padding-left: 50px;
 
-    font-size: 48px;
-    font-weight: bold;
+  font-size: 48px;
+  font-weight: bold;
 
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 /* course info top */
 .task-page-course-info {
-    display: flex;
-    flex-flow: column wrap;
-    justify-content: space-between;
-    gap: 20px;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: space-between;
+  gap: 20px;
 }
 .task-page-course-name {
-    width: 100%;
-    padding-left: 50px;
+  width: 100%;
+  padding-left: 50px;
 
-    font-size: 48px;
-    font-weight: bold;
+  font-size: 48px;
+  font-weight: bold;
 }
 .task-page-course-details-cont {
-    width: 100%;
-    padding-left: 50px;
+  width: 100%;
+  padding-left: 50px;
 
-    display: flex;
-    flex-direction: row;
-    gap: 50px;
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
 }
 .task-page-course-detail {
-    padding: 0 40px;
-    height: 150px;
+  padding: 0 40px;
+  height: 150px;
 
-    font-size: 28px;
+  font-size: 28px;
 
-    display: flex;
-    flex-flow: column wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
 
-    border-radius: 10px;
-    border: 3px solid #FFFFFF30;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
 }
 
 /* edit buttons */
 .task-page-edit-cont {
-    width: 100%;
-    padding-top: 50px;
-    padding-bottom: 20px;
+  width: 100%;
+  padding-top: 50px;
+  padding-bottom: 20px;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    gap: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 30px;
 }
 .task-page-edit-button {
-    padding: 8px 20px;
+  padding: 8px 20px;
 
-    font-size: 18px;
+  font-size: 18px;
 
-    border-radius: 10px;
-    background-color: #2F4872;
+  border-radius: 10px;
+  background-color: #2f4872;
 }
 .task-page-edit-button:hover {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+.task-page-syllabus-button {
+  padding: 8px 20px;
+
+  font-size: 18px;
+
+  border-radius: 10px;
+  background-color: #7fabf8;
+}
+.task-page-syllabus-button:hover {
+  cursor: pointer;
 }
 
 /* courses */
 .task-page-course-cont {
-    height: 80px;
-    width: 100%;
-    padding: 0 20px;
+  height: 80px;
+  width: 100%;
+  padding: 0 20px;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
 
-    border-radius: 10px;
-    border: 3px solid #FFFFFF30;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
 }
 .task-page-course {
-    padding: 10px 30px;
-    flex-grow: 1;
+  padding: 10px 30px;
+  flex-grow: 1;
 
-    font-size: 22px;
-    text-align: center;
+  font-size: 22px;
+  text-align: center;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-    border-radius: 10px;
-    background-color: #343434;
+  border-radius: 10px;
+  background-color: #343434;
 }
 .task-page-course:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 .task-page-course.selected {
-    background-color: #2F4872;
+  background-color: #2f4872;
 }
 
 /* task table */
 .task-page-task-cont {
-    width: 100%;
-    margin-top: 30px;
-    padding: 30px 50px;
+  width: 100%;
+  margin-top: 30px;
+  padding: 30px 50px;
 
-    border-radius: 10px;
-    border: 3px solid #FFFFFF30;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
 }
 .task-page-task-label-cont {
-    margin: 0 30px;
-    margin-bottom: 15px;
+  margin: 0 30px;
+  margin-bottom: 15px;
 
-    font-size: 22px;
+  font-size: 22px;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    gap: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  gap: 20px;
 
-    user-select: none;
+  user-select: none;
 }
-.task-page-task-label-checkbox { height: 25px; width: 25px; }
-.task-page-task-label-name { flex: 5; }
-.task-page-task-label-course { flex: 5; }
-.task-page-task-label-grade { flex: 1; }
-.task-page-task-label-time-spent { flex: 2; }
-.task-page-task-label-due-date { flex: 2; }
+.task-page-task-label-checkbox {
+  height: 25px;
+  width: 25px;
+}
+.task-page-task-label-name {
+  flex: 5;
+}
+.task-page-task-label-course {
+  flex: 5;
+}
+.task-page-task-label-grade {
+  flex: 1;
+}
+.task-page-task-label-time-spent {
+  flex: 2;
+}
+.task-page-task-label-due-date {
+  flex: 2;
+}
 
 .task-page-task-flex-cont {
-    display: flex;
-    flex-flow: column wrap;
-    gap: 30px;
+  display: flex;
+  flex-flow: column wrap;
+  gap: 30px;
+}
+
+.modal-olay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+
+  background: #ffffff40;
+}
+
+.modal-cnt {
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+
+  background: #2a2a2a;
+  color: #e5e7eb;
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid #374151;
+
+  padding: 1.5rem 1.75rem;
+  overflow-y: auto;
+}
+
+.modal-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-clse-btn {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+.modal-clse-btn:hover {
+  color: #e5e7eb;
 }

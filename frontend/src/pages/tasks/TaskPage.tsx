@@ -10,12 +10,15 @@ import type { FullUser } from "../../../../shared/models/user";
 import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
 import { getTasks, updateTask } from "../../services/tasksService";
+import { getDocText } from "../../services/llmService";
 
 import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
 import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 
 import "./TaskPage.css";
+import { SyllabusUploader } from "../../components/file/SyllabusUploader";
+import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -29,6 +32,10 @@ function TaskPage() {
 
   const [showEditTask, setShowEditTask] = useState(false);
   const [showEditCourse, setShowEditCourse] = useState(false);
+  const [showSyllabusForm, setShowSyllabusForm] = useState(false);
+  const [syllabusFile, setSyllabusFile] = useState<File | null>(null);
+  const [showProposedTasks, setShowProposedTasks] = useState(false);
+  const [proposedDocText, setProposedDocText] = useState<string | null>(null);
 
   // --- Helper: sort tasks ---
   const sortTasks = (tasks: Task[]) => {
@@ -197,6 +204,28 @@ function TaskPage() {
     }
   };
 
+  const handleSyllabusSubmit = (file: File) => {
+    setSyllabusFile(file); // store file to pass to ProposedTasksViewer
+    setShowSyllabusForm(false); // close uploader popup
+    setShowProposedTasks(true); // open ProposedTasksViewer popup
+  };
+
+  useEffect(() => {
+    if (!syllabusFile) return;
+
+    const loadDoc = async () => {
+      try {
+        const { doc } = await getDocText(syllabusFile);
+        setProposedDocText(doc);
+        setShowProposedTasks(true); // show viewer after processing
+      } catch (err) {
+        console.error("Failed to load syllabus:", err);
+      }
+    };
+
+    loadDoc();
+  }, [syllabusFile]);
+
   return (
     <div className="task-page">
       {/* Profile Section */}
@@ -247,23 +276,30 @@ function TaskPage() {
         >
           Edit Courses
         </div>
+        <div
+          className="task-page-syllabus-button"
+          onClick={() => setShowSyllabusForm(!showSyllabusForm)}
+        >
+          Upload Syllabus
+        </div>
       </div>
 
       {/* Course Tabs */}
       <div className="task-page-course-cont">
-        {["All Courses", ...availableCourses.map((c) => c.courseName ?? "")].map(
-          (courseName, i) => (
-            <div
-              key={`task-page-${courseName}-${i}`}
-              className={`task-page-course ${
-                selectedCourseTab === courseName ? "selected" : ""
-              }`}
-              onClick={() => setSelectedCourseTab(courseName)}
-            >
-              {courseName}
-            </div>
-          )
-        )}
+        {[
+          "All Courses",
+          ...availableCourses.map((c) => c.courseName ?? ""),
+        ].map((courseName, i) => (
+          <div
+            key={`task-page-${courseName}-${i}`}
+            className={`task-page-course ${
+              selectedCourseTab === courseName ? "selected" : ""
+            }`}
+            onClick={() => setSelectedCourseTab(courseName)}
+          >
+            {courseName}
+          </div>
+        ))}
       </div>
 
       {/* Task List */}
@@ -307,15 +343,55 @@ function TaskPage() {
       {/* Edit Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
-        <EditTask onTasksChanged={() => {
-          refreshTasks();
-          refreshCourses();
-        }} />
+          <EditTask
+            onTasksChanged={() => {
+              refreshTasks();
+              refreshCourses();
+            }}
+          />
         </div>
       )}
       {showEditCourse && (
         <div className="opacity" onClick={() => setShowEditCourse(false)}>
           <EditCourse onCoursesChanged={refreshCourses} />
+        </div>
+      )}
+      {showSyllabusForm && (
+        <div className="modal-olay" onClick={() => setShowSyllabusForm(false)}>
+          <div
+            className="modal-cnt"
+            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+          >
+            <div className="modal-hdr">
+              <h2>Upload Syllabus</h2>
+              <button
+                className="modal-clse-btn"
+                onClick={() => setShowSyllabusForm(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <SyllabusUploader onSubmit={handleSyllabusSubmit} />
+          </div>
+        </div>
+      )}
+
+      {showProposedTasks && proposedDocText && (
+        <div className="modal-olay" onClick={() => setShowProposedTasks(false)}>
+          <div className="modal-cnt" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <h2>Proposed Course & Tasks</h2>
+              <button
+                className="modal-clse-btn"
+                onClick={() => setShowProposedTasks(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <ProposedTasksViewer document={proposedDocText} useMock={false} />
+          </div>
         </div>
       )}
     </div>

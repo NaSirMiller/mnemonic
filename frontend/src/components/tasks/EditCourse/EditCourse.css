@@ -1,266 +1,272 @@
 .edit-course {
-    width: 50%;
-    max-width: 950px;
-    margin: auto;
-    padding: 50px;
-    padding-bottom: 10px;
+  width: 50%;
+  max-width: 950px;
+  margin: auto;
+  padding: 50px;
+  padding-bottom: 10px;
 
-    text-align: center;
+  text-align: center;
 
-    background-color: #2A2A2A;
-    z-index: 100;
+  background-color: #2a2a2a;
+  z-index: 100;
+
+  border-radius: 10px;
 }
 
 .edit-course-title {
-    width: 100%;
+  width: 100%;
 
-    font-size: 40px;
-    font-weight: bold;
+  font-size: 40px;
+  font-weight: bold;
 }
 
 /* course selection */
 .edit-course-course-cont {
-    width: 100%;
-    height: 80px;
-    margin-top: 20px;
-    margin-bottom: 40px;
+  width: 100%;
+  height: 80px;
+  margin-top: 20px;
+  margin-bottom: 40px;
 
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    gap: 40px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
 }
 .edit-course-course {
-    padding: 13px 30px;
+  padding: 13px 30px;
 
-    font-size: 14px;
+  font-size: 14px;
 
-    position: relative;
+  position: relative;
 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-    border-radius: 10px;
-    background-color: #343434;
+  border-radius: 10px;
+  background-color: #343434;
 }
 .edit-course-course:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 .edit-course-course.selected {
-    background-color: #2F4872;
+  background-color: #2f4872;
 }
 .edit-course-course-add {
-    min-width: fit-content;
-    font-size: 14px;
-    color: #A1B5D8;
+  min-width: fit-content;
+  font-size: 14px;
+  color: #a1b5d8;
 }
 .edit-course-course-add:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 /* input sections */
 .edit-course-section-title {
-    width: 100%;
+  width: 100%;
 
-    text-align: left;
+  text-align: left;
 
-    font-size: 28px;
+  font-size: 28px;
 }
 .edit-course-input-cont {
-    width: 100%;
-    height: 100%;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 .edit-course-text-input {
-    all: unset;
-    box-sizing: border-box;
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 50px;
-    padding: 15px 30px;
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 50px;
+  padding: 15px 30px;
 
-    font-size: 20px;
+  font-size: 20px;
 
-    outline: none;
-    border-radius: 10px;
-    border: 3px solid #FFFFFF30;
-    background-color: transparent;
-    * {
-        color: #FFFFFF;
-    }
+  outline: none;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
+  background-color: transparent;
+  * {
+    color: #ffffff;
+  }
 }
 .edit-course-right-icon {
-    position: absolute;
-    right: 40px;
-    top: calc( 50% - 22.5px );
-    transform: translateY(-50%);
+  position: absolute;
+  right: 40px;
+  top: calc(50% - 22.5px);
+  transform: translateY(-50%);
 
-    font-size: 24px;
+  font-size: 24px;
 }
 .edit-course-text-input::-webkit-outer-spin-button,
 .edit-course-text-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
-.edit-course-text-input[type=number] {
-    -moz-appearance: textfield;
+.edit-course-text-input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* grade weight */
 .edit-course-grade-weight-cont {
-    width: 100%;
-    margin-top: 5px;
-    margin-bottom: 50px;
-    padding: 30px 20px;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 50px;
+  padding: 30px 20px;
 
-    border-radius: 10px;
-    border: 3px solid #FFFFFF30;
+  border-radius: 10px;
+  border: 3px solid #ffffff30;
 }
 
 .edit-course-label-cont {
-    margin-bottom: 15px;
-    padding: 0 20px;
+  margin-bottom: 15px;
+  padding: 0 20px;
 
-    font-size: 20px;
+  font-size: 20px;
 
-    text-align: left;
+  text-align: left;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
 
-    user-select: none;
+  user-select: none;
 }
-.edit-course-select-label-name { flex: 5; }
-.edit-course-select-label-final-grade { flex: 1; }
+.edit-course-select-label-name {
+  flex: 5;
+}
+.edit-course-select-label-final-grade {
+  flex: 1;
+}
 
 .edit-course-course-card-cont {
-    height: fit-content;
-    display: flex;
-    flex-flow: column wrap;
-    gap: 20px;
+  height: fit-content;
+  display: flex;
+  flex-flow: column wrap;
+  gap: 20px;
 }
 .edit-course-course-card {
-    flex-grow: 0;
-    flex-shrink: 0;
-    width: 100%;
-    height: 50px;
-    min-width: 0;
-    padding: 0 20px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  width: 100%;
+  height: 50px;
+  min-width: 0;
+  padding: 0 20px;
 
-    font-size: 18px;
+  font-size: 18px;
 
-    position: relative;
+  position: relative;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 
-    border-radius: 10px;
-    background-color: #525252;
+  border-radius: 10px;
+  background-color: #525252;
 
-    user-select: none;
+  user-select: none;
 }
 .edit-course-course-card-name {
-    all: unset;
-    box-sizing: border-box;
-    width: 100%;
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
 
-    text-align: left;
-    flex: 5;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  text-align: left;
+  flex: 5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .edit-course-course-card-final-grade {
-    all: unset;
-    box-sizing: border-box;
-    width: 100%;
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
 
-    text-align: right;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  text-align: right;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .edit-course-dark-card {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
 
-    border-radius: 10px;
-    user-select: none;
-    background-color: #00000040;
+  border-radius: 10px;
+  user-select: none;
+  background-color: #00000040;
 }
 
 /* grade weight input */
 .edit-course-course-card-final-grade::-webkit-outer-spin-button,
 .edit-course-course-card-final-grade::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
-.edit-course-course-card-final-grade[type=number] {
-    -moz-appearance: textfield;
+.edit-course-course-card-final-grade[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* button */
 .edit-course-delete-course {
-    width: fit-content;
-    padding: 7px 20px;
-    margin: auto;
-    margin-top: 20px;
-    margin-bottom: 50px;
+  width: fit-content;
+  padding: 7px 20px;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 50px;
 
-    font-size: 16px;
+  font-size: 16px;
 
-    border-radius: 10px;
-    background-color: #D72638;
+  border-radius: 10px;
+  background-color: #d72638;
 }
 .edit-course-delete-course:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .edit-course-submit-course {
-    width: fit-content;
-    padding: 10px 30px;
-    margin: auto;
-    margin-top: 10px;
-    margin-bottom: 50px;
+  width: fit-content;
+  padding: 10px 30px;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 50px;
 
-    font-size: 20px;
-    font-weight: bold;
+  font-size: 20px;
+  font-weight: bold;
 
-    border-radius: 10px;
-    background-color: #7EA16B;
+  border-radius: 10px;
+  background-color: #7ea16b;
 }
 .edit-course-submit-course:hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 .edit-course-error {
-    color: red;
-    font-size: 0.85rem;
-    margin-top: 4px;
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
 }
 .edit-course-success-popup {
-    margin-top: 10px;
-    margin-bottom: 20px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #FFFFFF;
-    background-color: #343434;
-    padding: 10px 20px;
-    border-radius: 10px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #343434;
+  padding: 10px 20px;
+  border-radius: 10px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
