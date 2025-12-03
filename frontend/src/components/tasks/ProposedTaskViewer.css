@@ -1,0 +1,18 @@
+.submit-course-with-tasks-button-container {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.submit-course-with-tasks-button {
+  color: white;
+  width: fit-content;
+  padding: 10px 30px;
+  margin: auto;
+  margin-top: 10px;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  border-radius: 10px;
+  background-color: #7ea16b;
+}

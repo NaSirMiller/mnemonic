@@ -16,13 +16,13 @@ export function TaskForm({ task, course, onChange }: TaskFormProps) {
 
   return (
     <div className="task-form-container">
+      <div className="task-form-title">Task Form </div>
       <div className="task-form-section-title">Task Name*</div>
       <input
         className="task-form-text-input"
         value={task.title}
         onChange={(e) => update({ title: e.target.value })}
       />
-
       <div className="task-form-section-title">Task Grade Type*</div>
       {course ? (
         <select
@@ -45,7 +45,6 @@ export function TaskForm({ task, course, onChange }: TaskFormProps) {
           onChange={(e) => update({ gradeType: e.target.value })}
         />
       )}
-
       <div className="task-form-section-title">Due Date</div>
       <input
         className="task-form-text-input"
@@ -59,33 +58,43 @@ export function TaskForm({ task, course, onChange }: TaskFormProps) {
           })
         }
       />
-
-      <div className="task-form-section-title">Time Spent</div>
-      <input
+      <div className="task-form-section-title">Description</div>
+      <textarea
         className="task-form-text-input"
-        value={`${task.currentTime} / ${task.expectedTime}`}
-        onChange={(e) => {
-          const [c, eT] = e.target.value
-            .split("/")
-            .map((v) => Number(v.trim()));
-          update({
-            currentTime: c ?? 0,
-            expectedTime: eT ?? 0,
-          });
-        }}
-      />
-
-      <div className="task-form-section-title">Task Grade (%)</div>
-      <input
-        className="task-form-text-input"
-        type="number"
-        value={(task.grade ?? 0) * 100}
+        value={task.description ?? ""}
         onChange={(e) =>
           update({
-            grade: Number(e.target.value) / 100,
+            description: e.target.value,
           })
         }
       />
     </div>
   );
 }
+
+// <div className="task-form-section-title">Time Spent</div>
+// <input
+//   className="task-form-text-input"
+//   value={`${task.currentTime} / ${task.expectedTime}`}
+//   onChange={(e) => {
+//     const [c, eT] = e.target.value
+//       .split("/")
+//       .map((v) => Number(v.trim()));
+//     update({
+//       currentTime: c ?? 0,
+//       expectedTime: eT ?? 0,
+//     });
+//   }}
+// />
+
+// <div className="task-form-section-title">Task Grade (%)</div>
+// <input
+//   className="task-form-text-input"
+//   type="number"
+//   value={(task.grade ?? 0) * 100}
+//   onChange={(e) =>
+//     update({
+//       grade: Number(e.target.value) / 100,
+//     })
+//   }
+// />
