@@ -352,53 +352,49 @@ function TaskPage() {
         </div>
       )}
       {showSyllabusForm && (
-  <div
-    className="modal-overlay"
-    onClick={() => setShowSyllabusForm(false)}
-  >
-    <div
-      className="modal-content"
-      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-    >
-      <div className="modal-header">
-        <h2>Upload Syllabus</h2>
-        <button
-          className="modal-close-btn"
+        <div
+          className="modal-overlay"
           onClick={() => setShowSyllabusForm(false)}
         >
-          ×
-        </button>
-      </div>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+          >
+            <div className="modal-header">
+              <h2>Upload Syllabus</h2>
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowSyllabusForm(false)}
+              >
+                ×
+              </button>
+            </div>
 
-      <SyllabusUploader onSubmit={handleSyllabusSubmit} />
-    </div>
-  </div>
-)}
+            <SyllabusUploader onSubmit={handleSyllabusSubmit} />
+          </div>
+        </div>
+      )}
 
-{showProposedTasks && proposedDocText && (
-  <div
-    className="modal-overlay"
-    onClick={() => setShowProposedTasks(false)}
-  >
-    <div
-      className="modal-content"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="modal-header">
-        <h2>Proposed Course & Tasks</h2>
-        <button
-          className="modal-close-btn"
+      {showProposedTasks && proposedDocText && (
+        <div
+          className="modal-overlay"
           onClick={() => setShowProposedTasks(false)}
         >
-          ×
-        </button>
-      </div>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Proposed Course & Tasks</h2>
+              <button
+                className="modal-close-btn"
+                onClick={() => setShowProposedTasks(false)}
+              >
+                ×
+              </button>
+            </div>
 
-      <ProposedTasksViewer document={proposedDocText} />
-    </div>
-  </div>
-)}
-
+            <ProposedTasksViewer document={proposedDocText} useMock={true} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
