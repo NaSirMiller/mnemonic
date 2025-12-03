@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import "./SyllabusUploader.css";
+
 interface SyllabusUploaderProps {
   onSubmit: (file: File) => void;
 }
@@ -26,5 +28,4 @@ export function SyllabusUploader({ onSubmit }: SyllabusUploaderProps) {
       <button onClick={handleUpload}>Upload</button>
     </div>
   );
-  
 }
