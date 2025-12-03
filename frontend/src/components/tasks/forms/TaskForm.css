@@ -228,3 +228,18 @@
   margin-right: auto;
   text-align: center;
 }
+
+.remove-task-button {
+  margin-top: 10px;
+  background-color: #d72638;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+.remove-task-button:hover {
+  background-color: #c44;
+}

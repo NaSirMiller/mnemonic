@@ -174,6 +174,11 @@ export function ProposedTasksViewer({
                           return copy;
                         })
                       }
+                      onRemove={() =>
+                        setTaskFormsPayloads((prev) =>
+                          prev.filter((_, idx) => idx !== i)
+                        )
+                      }
                     />
                   ))}
                 </Carousel>

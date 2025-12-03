@@ -7,9 +7,10 @@ interface TaskFormProps {
   task: Task;
   course?: Course | null;
   onChange: (task: Task) => void;
+  onRemove?: () => void;
 }
 
-export function TaskForm({ task, course, onChange }: TaskFormProps) {
+export function TaskForm({ task, course, onChange, onRemove }: TaskFormProps) {
   const update = (patch: Partial<Task>) => {
     onChange({ ...task, ...patch });
   };
@@ -68,6 +69,12 @@ export function TaskForm({ task, course, onChange }: TaskFormProps) {
           })
         }
       />
+      {/* Remove Task Button */}
+      {onRemove && (
+        <button className="remove-task-button" onClick={onRemove}>
+          Ignore Task
+        </button>
+      )}
     </div>
   );
 }
