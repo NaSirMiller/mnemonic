@@ -74,7 +74,9 @@ export default function TimeViz({ courseName, isAllCourses }: TimeVizProps) {
 
               return {
                 type,
-                minutes: showAverage ? avg : total,
+                minutes: showAverage
+                  ? Number(avg.toFixed(2))
+                  : total,
                 hasTime: total > 0,
               };
             })

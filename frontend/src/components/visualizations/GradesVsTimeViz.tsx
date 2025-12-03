@@ -52,8 +52,10 @@ export default function GradesVsTimeViz({
               ) {
                 allTasks.push({
                   name: `${course.courseName} – ${t.title || "Task"}`,
-                  grade: t.grade * 100,
-                  timeCompleteness: computeCompleteness(t.currentTime, t.expectedTime),
+                  grade: Number((t.grade * 100).toFixed(2)),
+                  timeCompleteness: Number(
+                    computeCompleteness(t.currentTime, t.expectedTime).toFixed(2)
+                  ),
                 });
               }
             });
@@ -83,8 +85,10 @@ export default function GradesVsTimeViz({
 
           const formatted = completed.map((t) => ({
             name: t.title || "Task",
-            grade: t.grade! * 100,
-            timeCompleteness: computeCompleteness(t.currentTime!, t.expectedTime!),
+            grade: Number((t.grade! * 100).toFixed(2)),
+            timeCompleteness: Number(
+              computeCompleteness(t.currentTime!, t.expectedTime!).toFixed(2)
+            ),
           }));
 
           setScatterData(formatted);

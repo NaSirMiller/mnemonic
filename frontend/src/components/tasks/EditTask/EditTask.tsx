@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 
 import "./EditTask.css";
 import { AuthContext } from "../../context/AuthContext";
-import { getCourses } from "../../../services/coursesService";
+import { getCourses, updateCourse } from "../../../services/coursesService";
 import {
   getTasks,
   createTask,
@@ -44,6 +44,67 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
     return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
   };
 
+  const recalculateGrade = async (userId: string, courseId: string) => {
+    try {
+      const tasks = await getTasks(userId, null, courseId);
+      const course = await getCourses(userId, courseId);
+      const grouped: Record<
+        string,
+        { sum: number; count: number; weight: number }
+      > = {};
+
+      for (let i = 0; i < tasks.length; i++) {
+        const type = tasks[i].gradeType ?? "";
+        // Ignore missing or zero/negative grades
+        const grade = tasks[i].grade ?? 0;
+        if (grade <= 0) continue;
+        if (!grouped[type]) {
+          grouped[type] = { sum: 0, count: 0, weight: tasks[i].weight || 0 };
+        }
+        grouped[type].sum += grade;
+        grouped[type].count++;
+      }
+
+      // If no graded tasks exist at all
+      if (Object.keys(grouped).length === 0) {
+        await updateCourse(userId, courseId, {
+          ...course[0],
+          currentGrade: 0,
+        });
+        return;
+      }
+
+      // --- NORMALIZE WEIGHTS ---
+      let totalWeight = 0;
+      for (const type in grouped) {
+        totalWeight += grouped[type].weight;
+      }
+      // Normalize so remaining weights sum to 1
+      for (const type in grouped) {
+        grouped[type].weight = grouped[type].weight / totalWeight;
+      }
+
+      let grade = 0;
+
+      for (const type in grouped) {
+        const { sum, count, weight } = grouped[type];
+        const avg = sum / count;
+        grade += avg * weight;
+      }
+      grade = Number(grade.toFixed(4));
+      const updatedCourse: Course = {
+        courseName: course[0].courseName,
+        currentGrade: grade,
+        gradeTypes: course[0].gradeTypes,
+        userId: userId,
+      };
+      await updateCourse(userId, courseId, updatedCourse);
+    } catch (error) {
+      console.error("Couldn't set grade: ", error);
+    }
+  };
+
+  // --- Load courses ---
   useEffect(() => {
     if (!userId) return;
     (async () => {
@@ -174,6 +235,12 @@ function EditTask({ onTasksChanged }: EditTaskProps) {
         await createTask({ ...payload, userId, createdAt: new Date() });
       }
 
+      // Recalculate course grade based on all updates, including deletion and grade type changes
+      if (selectedCourse.courseId != null) {
+        await recalculateGrade(userId, selectedCourse.courseId);
+      }
+
+      // Refresh tasks for current course only
       const refreshed = await getTasks(userId, null, selectedCourse.courseId);
       setTasks(refreshed);
 

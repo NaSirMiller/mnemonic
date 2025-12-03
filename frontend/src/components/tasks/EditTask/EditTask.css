@@ -30,12 +30,12 @@
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
 }
 .edit-task-course {
-  padding: 13px 10px;
+  padding: 13px 30px;
 
   font-size: 14px;
 
