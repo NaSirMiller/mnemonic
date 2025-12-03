@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
-import { LoadingSpinner } from "../LoadingSpinner";
-import { TabsView } from "../TabsView";
+import { LoadingSpinner } from "../general/LoadingSpinner";
+import { TabsView } from "../general/TabsView";
 
 import { getProposedCourseInfo } from "../../services/llmService";
 import type { Course } from "../../../../shared/models/course";
@@ -11,7 +11,7 @@ import { createTask } from "../../services/tasksService";
 import { useAuth } from "../../hooks/useAuth";
 import { CourseForm } from "./forms/CourseForm";
 import { TaskForm } from "./forms/TaskForm";
-import { Carousel } from "../Carousel";
+import { Carousel } from "../general/Carousel/Carousel";
 import "./ProposedTaskViewer.css";
 
 // Mock data for UI development
