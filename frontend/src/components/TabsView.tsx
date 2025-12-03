@@ -13,13 +13,22 @@ export interface TabItem {
 
 interface TabsViewProps {
   tabs: TabItem[];
-  initial?: string; // initial selected tab
+  initial?: string;
+  tabColor?: string;
+  selectedTabColor?: string;
+  indicatorColor?: string;
 }
 
-export function TabsView({ tabs, initial }: TabsViewProps) {
+export function TabsView({
+  tabs,
+  initial,
+  tabColor = "#727272ff",
+  selectedTabColor = "#fff",
+  indicatorColor = "#2f4872",
+}: TabsViewProps) {
   const [value, setValue] = React.useState(initial ?? tabs[0]?.value ?? "");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 
@@ -27,7 +36,20 @@ export function TabsView({ tabs, initial }: TabsViewProps) {
     <Box sx={{ width: "100%", typography: "body1" }}>
       <TabContext value={value}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <TabList onChange={handleChange}>
+          <TabList
+            onChange={handleChange}
+            sx={{
+              "& .MuiTab-root": {
+                color: tabColor,
+              },
+              "& .Mui-selected": {
+                color: `${selectedTabColor} !important`,
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: indicatorColor,
+              },
+            }}
+          >
             {tabs.map((t) => (
               <Tab key={t.value} label={t.label} value={t.value} />
             ))}
