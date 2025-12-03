@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import "./EditCourse/EditCourse.css";
 
 import type { Course } from "../../../../shared/models/course";
@@ -9,7 +8,6 @@ interface CourseFormProps {
 }
 
 export function CourseForm({ course, onChange }: CourseFormProps) {
-  const { uid } = useAuth();
   const [courseName, setCourseName] = useState("");
   const [courseGrade, setCourseGrade] = useState(""); // %
   const [gradeWeights, setGradeWeights] = useState<Record<string, number>>({});
@@ -68,9 +66,8 @@ export function CourseForm({ course, onChange }: CourseFormProps) {
       courseName,
       currentGrade: (parseFloat(courseGrade) || 0) / 100,
       gradeTypes: filtered,
-      uid,
     } as Course;
-  }, [courseName, courseGrade, gradeWeights, uid]);
+  }, [courseName, courseGrade, gradeWeights]);
 
   useEffect(() => {
     if (onChange) onChange(buildPayload());

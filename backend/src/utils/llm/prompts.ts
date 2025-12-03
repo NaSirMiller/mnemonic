@@ -8,7 +8,6 @@ function getCreationAgentResponseForm(): string {
   "tasks": [
     {
       "title": "Self-formed project teams deadline",
-      "courseName": "Applied Data Science",
       "currentTime": 0,
       "expectedTime": 0,
       "weight": -1,
@@ -50,7 +49,6 @@ Expected JSON Output:
   "tasks": [
     {
       "title": "Self-formed project teams deadline",
-      "courseName": "Applied Data Science - ISYE-4360",
       "currentTime": 0,
       "expectedTime": 0,
       "weight": -1,
@@ -65,7 +63,6 @@ Expected JSON Output:
     },
     {
       "title": "Project Proposal Round 1 ready",
-      "courseName": "Applied Data Science - ISYE-4360",
       "currentTime": 0,
       "expectedTime": 0,
       "weight": -1,
@@ -109,7 +106,6 @@ interface Course {
 \`\`\`ts
 interface Task {
   title?: string;
-  courseName?: string;
   currentTime?: number; // minutes
   expectedTime?: number; // minutes
   weight?: number; // 0-1, -1 if unknown
