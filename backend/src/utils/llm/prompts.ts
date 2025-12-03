@@ -8,17 +8,12 @@ function getCreationAgentResponseForm(): string {
   "tasks": [
     {
       "title": "Self-formed project teams deadline",
-      "currentTime": 0,
-      "expectedTime": 0,
+      "expectedTime": 15,
       "weight": -1,
       "gradeType": "Project",
       "dueDate": "2024-09-18",
       "description": "Deadline for forming project teams",
-      "grade": -1,
       "priority": -1,
-      "createdAt": null,
-      "lastUpdatedAt": null,
-      "isComplete": false
     }
   ],
   "error": ""
@@ -49,31 +44,21 @@ Expected JSON Output:
   "tasks": [
     {
       "title": "Self-formed project teams deadline",
-      "currentTime": 0,
       "expectedTime": 0,
       "weight": -1,
       "gradeType": "Project",
       "dueDate": "2024-09-18",
       "description": "Deadline for forming project teams",
-      "grade": -1,
       "priority": -1,
-      "createdAt": null,
-      "lastUpdatedAt": null,
-      "isComplete": false
     },
     {
       "title": "Project Proposal Round 1 ready",
-      "currentTime": 0,
       "expectedTime": 0,
       "weight": -1,
       "gradeType": "Project",
       "dueDate": "2024-10-02",
       "description": "Round 1 project proposals should be prepared",
-      "grade": -1,
       "priority": -1,
-      "createdAt": null,
-      "lastUpdatedAt": null,
-      "isComplete": false
     }
   ],
   "error": ""
@@ -106,17 +91,12 @@ interface Course {
 \`\`\`ts
 interface Task {
   title?: string;
-  currentTime?: number; // minutes
   expectedTime?: number; // minutes
   weight?: number; // 0-1, -1 if unknown
   gradeType?: string;
   dueDate?: string | null; // ISO-8601 YYYY-MM-DD
   description?: string;
-  grade?: number;
   priority?: number;
-  createdAt?: Date | null;
-  lastUpdatedAt?: Date | null;
-  isComplete?: boolean;
 }
 \`\`\`
 
@@ -125,7 +105,7 @@ interface Task {
 - Include all fields; do not add extra fields.
 - Do not wrap response with \`\`\`json\`\`\`
 - If insufficient info, leave the array empty.
-- The currentTime, expectedTime, and grade fields must be 0
+- The expectedTime must be a whole number in terms of minutes (minimum 0)
 
 ${creationExamplePrompt}
 

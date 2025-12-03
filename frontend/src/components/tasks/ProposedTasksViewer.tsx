@@ -4,10 +4,9 @@ import { LoadingSpinner } from "../general/LoadingSpinner";
 import { TabsView } from "../general/TabsView";
 
 import { getProposedCourseInfo } from "../../services/llmService";
+import { createCourseWithTasks } from "../../services/courseWithTasksService";
 import type { Course } from "../../../../shared/models/course";
 import type { Task } from "../../../../shared/models/task";
-import { createCourse } from "../../services/coursesService";
-import { createTask } from "../../services/tasksService";
 import { useAuth } from "../../hooks/useAuth";
 import { CourseForm } from "./forms/CourseForm";
 import { TaskForm } from "./forms/TaskForm";
@@ -101,7 +100,6 @@ export function ProposedTasksViewer({
     if (document || useMock) loadProposedInfo();
   }, [document, loadProposedInfo, useMock]);
 
-  // ACID-style submission: create course, then tasks. If tasks fail, log error.
   const handleSubmitAll = async () => {
     if (!courseFormPayload || taskFormsPayloads.length === 0) {
       console.log("No course or tasks data to submit.");
@@ -109,27 +107,24 @@ export function ProposedTasksViewer({
     }
 
     try {
-      // 1️⃣ Create Course
-      const createdCourse = await createCourse(courseFormPayload);
-
-      // 2️⃣ Prepare tasks with courseId and userId
       const validTasks = taskFormsPayloads.map((t) => ({
         ...t,
-        title: t.title || "Untitled Task",
-        courseId: createdCourse.courseId,
+        title: t.title,
         userId: uid!,
+        currentTime: 0,
+        grade: 0,
+        isComplete: false,
         createdAt: new Date(),
         lastUpdatedAt: new Date(),
       }));
 
-      // 3️⃣ Create all tasks
-      await Promise.all(validTasks.map((t) => createTask(t)));
+      await createCourseWithTasks(courseFormPayload, validTasks);
 
       alert("Course and tasks created successfully!");
       loadProposedInfo();
     } catch (err) {
-      console.error("Failed to submit all:", err);
-      alert("Failed to create course and tasks. See console for details.");
+      console.error("Failed to submit proposed course and tasks:", err);
+      alert("Failed to create suggested course and tasks.");
     }
   };
 
