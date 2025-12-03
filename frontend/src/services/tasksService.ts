@@ -44,6 +44,7 @@ export class DeleteTaskError extends Error {
 }
 
 export async function createTask(taskPayload: Task): Promise<Task> {
+  console.log("Creating task with payload:", taskPayload);
   try {
     const response = await createTaskApi(taskPayload);
 

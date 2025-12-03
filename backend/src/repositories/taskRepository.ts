@@ -1,4 +1,4 @@
-import admin from "../firebase_admin";
+import admin from "../firebaseAdmin";
 import { Task } from "../../../shared/models/task";
 
 export class TaskRepository {
