@@ -391,7 +391,7 @@ function TaskPage() {
               </button>
             </div>
 
-            <ProposedTasksViewer document={proposedDocText} useMock={false} />
+            <ProposedTasksViewer document={proposedDocText} useMock={true} />
           </div>
         </div>
       )}

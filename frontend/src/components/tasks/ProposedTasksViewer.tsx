@@ -134,8 +134,10 @@ export function ProposedTasksViewer({
       console.log(`Created Tasks: ${JSON.stringify(tasks, null, 2)}`);
 
       toast.success("Course and tasks created successfully!");
-      // Optionally reload proposed info
-      // loadProposedInfo();
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000); // 1 second delay
     } catch (err) {
       console.error("Failed to submit proposed course and tasks:", err);
       const msg =
