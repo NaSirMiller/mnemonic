@@ -11,6 +11,7 @@ import { createTask } from "../../services/tasksService";
 import { useAuth } from "../../hooks/useAuth";
 import { CourseForm } from "./forms/CourseForm";
 import { TaskForm } from "./forms/TaskForm";
+import { Carousel } from "../Carousel";
 import "./ProposedTaskViewer.css";
 
 // Mock data for UI development
@@ -155,20 +156,27 @@ export function ProposedTasksViewer({
             value: "tasks",
             content: (
               <div>
-                {taskFormsPayloads.map((task, i) => (
-                  <TaskForm
-                    key={i}
-                    task={task}
-                    course={courseFormPayload ?? proposedCourse}
-                    onChange={(t) =>
-                      setTaskFormsPayloads((prev) => {
-                        const copy = [...prev];
-                        copy[i] = t;
-                        return copy;
-                      })
-                    }
-                  />
-                ))}
+                <Carousel
+                  slidesToShow={1}
+                  slidesToScroll={1}
+                  infinite={true}
+                  dots={true}
+                >
+                  {taskFormsPayloads.map((task, i) => (
+                    <TaskForm
+                      key={i}
+                      task={task}
+                      course={courseFormPayload ?? proposedCourse}
+                      onChange={(t) =>
+                        setTaskFormsPayloads((prev) => {
+                          const copy = [...prev];
+                          copy[i] = t;
+                          return copy;
+                        })
+                      }
+                    />
+                  ))}
+                </Carousel>
               </div>
             ),
           },
