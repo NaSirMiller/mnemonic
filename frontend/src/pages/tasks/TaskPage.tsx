@@ -343,10 +343,12 @@ function TaskPage() {
       {/* Edit Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
-        <EditTask onTasksChanged={() => {
-          refreshTasks();
-          refreshCourses();
-        }} />
+          <EditTask
+            onTasksChanged={() => {
+              refreshTasks();
+              refreshCourses();
+            }}
+          />
         </div>
       )}
       {showEditCourse && (
@@ -355,18 +357,15 @@ function TaskPage() {
         </div>
       )}
       {showSyllabusForm && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowSyllabusForm(false)}
-        >
+        <div className="modal-olay" onClick={() => setShowSyllabusForm(false)}>
           <div
-            className="modal-content"
+            className="modal-cnt"
             onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
           >
-            <div className="modal-header">
+            <div className="modal-hdr">
               <h2>Upload Syllabus</h2>
               <button
-                className="modal-close-btn"
+                className="modal-clse-btn"
                 onClick={() => setShowSyllabusForm(false)}
               >
                 ×
@@ -379,12 +378,9 @@ function TaskPage() {
       )}
 
       {showProposedTasks && proposedDocText && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowProposedTasks(false)}
-        >
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="modal-olay" onClick={() => setShowProposedTasks(false)}>
+          <div className="modal-cnt" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-hdr">
               <h2>Proposed Course & Tasks</h2>
               <button
                 className="modal-close-btn"
@@ -394,7 +390,7 @@ function TaskPage() {
               </button>
             </div>
 
-            <ProposedTasksViewer document={proposedDocText} useMock={true} />
+            <ProposedTasksViewer document={proposedDocText} useMock={false} />
           </div>
         </div>
       )}

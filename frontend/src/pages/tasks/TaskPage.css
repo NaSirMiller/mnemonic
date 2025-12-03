@@ -217,7 +217,7 @@
   gap: 30px;
 }
 
-.modal-overlay {
+.modal-olay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -230,7 +230,7 @@
   background: #ffffff40;
 }
 
-.modal-content {
+.modal-cnt {
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
@@ -245,20 +245,20 @@
   overflow-y: auto;
 }
 
-.modal-header {
+.modal-hdr {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.modal-close-btn {
+.modal-clse-btn {
   border: none;
   background: transparent;
   color: #9ca3af;
   font-size: 1.25rem;
   cursor: pointer;
 }
-.modal-close-btn:hover {
+.modal-clse-btn:hover {
   color: #e5e7eb;
 }
