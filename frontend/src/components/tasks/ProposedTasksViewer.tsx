@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { LoadingSpinner } from "../general/LoadingSpinner";
 import { TabsView } from "../general/TabsView";
@@ -83,14 +85,19 @@ export function ProposedTasksViewer({
         setTaskFormsPayloads(mockTasks);
       } else {
         const { course, tasks, error } = await getProposedCourseInfo(document);
-        if (error) setErrorMessage(error);
+        if (error) {
+          setErrorMessage(error);
+          toast.error(error);
+        }
         setProposedCourse(course ? { ...course, userId: uid! } : null);
         setCourseFormPayload(course ? { ...course, userId: uid! } : null);
         setProposedTasks(tasks ?? []);
         setTaskFormsPayloads(tasks ?? []);
       }
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Unknown error");
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -100,9 +107,9 @@ export function ProposedTasksViewer({
     if (document || useMock) loadProposedInfo();
   }, [document, loadProposedInfo, useMock]);
 
-  const handleSubmitAll = async () => {
+  const handleSubmitSuggested = async () => {
     if (!courseFormPayload || taskFormsPayloads.length === 0) {
-      console.log("No course or tasks data to submit.");
+      toast.warn("No course or tasks data to submit.");
       return;
     }
 
@@ -118,13 +125,24 @@ export function ProposedTasksViewer({
         lastUpdatedAt: new Date(),
       }));
 
-      await createCourseWithTasks(courseFormPayload, validTasks);
+      const { course, tasks } = await createCourseWithTasks(
+        courseFormPayload,
+        validTasks
+      );
 
-      alert("Course and tasks created successfully!");
-      loadProposedInfo();
+      console.log(`Created Course: ${JSON.stringify(course, null, 2)}`);
+      console.log(`Created Tasks: ${JSON.stringify(tasks, null, 2)}`);
+
+      toast.success("Course and tasks created successfully!");
+      // Optionally reload proposed info
+      // loadProposedInfo();
     } catch (err) {
       console.error("Failed to submit proposed course and tasks:", err);
-      alert("Failed to create suggested course and tasks.");
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to create course and tasks.";
+      toast.error(msg);
     }
   };
 
@@ -186,11 +204,14 @@ export function ProposedTasksViewer({
       <div className="submit-course-with-tasks-button-container">
         <button
           className="submit-course-with-tasks-button"
-          onClick={handleSubmitAll}
+          onClick={handleSubmitSuggested}
         >
           Submit Course & Tasks
         </button>
       </div>
+
+      {/* Toast container */}
+      <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
     </div>
   );
 }

@@ -17,16 +17,22 @@ export async function createCourseWithTasksApi(
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    let errorData;
-    try {
-      errorData = await res.json();
-    } catch {
-      throw new Error(`An error occurred: ${res.status}`);
-    }
-    throw new Error(errorData.error || `An error occurred: ${res.status}`);
+  let data;
+  try {
+    data = await res.json(); // parse JSON first
+  } catch {
+    data = null; // body is empty or invalid
   }
 
-  const data = await res.json();
+  if (!res.ok) {
+    // Prefer the message from the server if it exists
+    const message =
+      data?.message ||
+      data?.error ||
+      res.statusText ||
+      `An error occurred: ${res.status}`;
+    throw new Error(message);
+  }
+
   return data; // { course: Course, tasks: Task[] }
 }

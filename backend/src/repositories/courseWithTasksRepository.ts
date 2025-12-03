@@ -9,6 +9,10 @@ export class CourseWithTasksRepository {
     course: Course,
     tasks: Task[]
   ): Promise<{ course: Course; tasks: Task[] }> {
+    console.log("=================== BACKEND ===========================");
+    console.log(`Course: ${JSON.stringify(course, null, 2)}`);
+    console.log(`Tasks: ${JSON.stringify(tasks, null, 2)}`);
+
     const batch = this.db.batch();
 
     // Create course doc reference

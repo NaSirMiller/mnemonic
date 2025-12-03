@@ -73,7 +73,8 @@ Instructions:
 2. Convert percentages to decimals (0-1).
 3. Tasks are assignments, projects, exams, or quizzes with a due date or expected completion time.
 4. Do not treat general categories as tasks.
-5. Output all responses in **strict JSON format** matching this schema:
+5. If a course has a undergraduate (4000) and graduate (6000) version, ignore the graduate level and only answer with respect to the undergraduate course.
+6. Output all responses in **strict JSON format** matching this schema:
 
 ${getCreationAgentResponseForm()}
 
@@ -105,7 +106,8 @@ interface Task {
 - Include all fields; do not add extra fields.
 - Do not wrap response with \`\`\`json\`\`\`
 - If insufficient info, leave the array empty.
-- The expectedTime must be a whole number in terms of minutes (minimum 0)
+- The expectedTime must be a whole number in terms of minutes (minimum 0).
+- The gradeType for a task should be one of the gradeTypes defined in the course object you provide.
 
 ${creationExamplePrompt}
 

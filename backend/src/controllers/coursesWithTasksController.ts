@@ -1,54 +1,65 @@
 import { Request, Response } from "express";
 import { courseWithTaskRepo } from "../repositories/courseWithTasksRepository";
+import type { Course } from "../../../shared/models/course";
+import type { Task } from "../../../shared/models/task";
 import type {
   NumericFieldValidationResult,
   ValidationResult,
 } from "../../../shared/models/validation";
 import {
-  attemptsToUpdateImmutable as attemptsToUpdateImmutableCourse,
   hasRequiredFields as hasCourseRequiredFields,
   isCourseTypeValid,
   setCourseDefaults,
   validateNumericCourseFieldValues,
 } from "../utils/courseUtils";
 import {
-  attemptsToUpdateImmutable as attemptsToUpdateImmutableTask,
-  setTaskDefaults,
   hasRequiredFields as hasTaskRequiredFields,
   isTaskTypeValid,
   normalizeTaskDates,
+  setTaskDefaults,
   validateNumericTakFieldValues,
 } from "../utils/taskUtils";
-import { Course } from "../../../shared/models/course";
-import { Task } from "../../../shared/models/task";
+import { v4 as uuidv4 } from "uuid";
+
 export async function createCourseWithTasks(req: Request, res: Response) {
   const { course: coursePayload, tasks: tasksPayload } = req.body;
   let errorMessage: string;
 
   try {
+    // --- Generate temporary IDs ---
+    const tempCourseId = uuidv4();
+    const tempCourse: Course = { ...coursePayload, courseId: tempCourseId };
+    const tempTasks = tasksPayload.map((task: Task) => ({
+      ...task,
+      taskId: uuidv4(),
+      courseId: tempCourseId,
+    }));
+
     // --- Validate Course ---
-    if (!hasCourseRequiredFields(coursePayload)) {
+    if (!hasCourseRequiredFields(tempCourse)) {
       errorMessage =
         "Course payload missing required fields: userId or courseName";
       return res.status(400).json({ message: errorMessage });
     }
 
-    const typeValidation: ValidationResult = isCourseTypeValid(coursePayload);
+    const typeValidation: ValidationResult = isCourseTypeValid(tempCourse);
     if (!typeValidation.isValid) {
       return res.status(400).json({ message: typeValidation.firstError });
     }
 
     const numericValidation: NumericFieldValidationResult =
-      validateNumericCourseFieldValues(coursePayload);
+      validateNumericCourseFieldValues(tempCourse);
     if (!numericValidation.isValid) {
       return res.status(400).json({ message: numericValidation.firstError });
     }
 
-    const validatedCourse: Course = setCourseDefaults(coursePayload);
+    const validatedCourse: Course = setCourseDefaults({
+      ...tempCourse,
+    });
 
     // --- Validate Tasks ---
     const validatedTasks: Task[] = [];
-    for (const rawTask of tasksPayload) {
+    for (const rawTask of tempTasks) {
       const normalizedTask = normalizeTaskDates(rawTask);
 
       if (!hasTaskRequiredFields(normalizedTask)) {
