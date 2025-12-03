@@ -383,7 +383,7 @@ function TaskPage() {
             <div className="modal-hdr">
               <h2>Proposed Course & Tasks</h2>
               <button
-                className="modal-close-btn"
+                className="modal-clse-btn"
                 onClick={() => setShowProposedTasks(false)}
               >
                 ×
