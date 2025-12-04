@@ -133,7 +133,7 @@ Your goal:
   Rank all provided tasks from highest priority to lowest priority.
 
 Priority criteria (in order of importance):
-  1. Earlier due dates have higher priority.
+  1. Earlier due dates increases priority.
   2. Higher weighting (percent of total grade or importance) increases priority.
   3. Larger deliverables (implied by description length/complexity) may increase priority
       if due dates and weights are similar.
@@ -153,9 +153,15 @@ Rules:
      If two tasks come from the same course, the one with the earlier due date or higher weight
      must be placed higher.
 
-  3. If the tasks are already in valid priority order, return the task ids as-is.
+  3. Course boundaries must not constrain the ranking. Tasks from different courses may appear in any relative order. You must evaluate all tasks together and produce a single, unified priority list.
 
-  4. You must return **only** the JSON array of IDs.  
+Do not group, chunk, or sort tasks by course. Do not output rankings like “all Course A tasks first, then Course B.”
+
+Instead, assess every task globally and rank them based on overall urgency, importance, weighting, and due date—irrespective of which course they belong to.
+
+  4. If the tasks are already in valid priority order, return the task ids as-is.
+
+  5. You must return **only** the JSON array of IDs.  
      No explanations, no text, no comments—only the array.
 
 Return format:

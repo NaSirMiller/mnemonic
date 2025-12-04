@@ -103,12 +103,12 @@ class LLMService {
     );
 
     tasks.forEach((task, i) => {
-      console.log(`task=${JSON.stringify(task, null, 2)}`);
-      console.log(
-        `task.dueDate type: ${
-          task.dueDate instanceof Date ? "Date" : typeof task.dueDate
-        }, value: ${task.dueDate}`
-      );
+      // console.log(`task=${JSON.stringify(task, null, 2)}`);
+      // console.log(
+      //   `task.dueDate type: ${
+      //     task.dueDate instanceof Date ? "Date" : typeof task.dueDate
+      //   }, value: ${task.dueDate}`
+      // );
       const courseName = courseMap.get(task.courseId!)!;
       tasksMap[i] = task;
       stringifiedTasks.push(`id=${i}:${taskToString(task, courseName)}`);
