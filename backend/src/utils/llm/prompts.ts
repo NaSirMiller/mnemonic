@@ -1,3 +1,5 @@
+import { Task } from "../../../../shared/models/task";
+
 function getCreationAgentResponseForm(): string {
   return `{
   "course": 
@@ -120,4 +122,49 @@ ${getCreationAgentResponseForm()}
 
 Syllabus:
 ${docText}`;
+}
+
+export function createTasklistOrderingSystemPrompt() {
+  const prompt = `You are an assistant that organizes a user's to-do list so they can efficiently and effectively complete their tasks.
+
+Each task has the form:
+  Task(id=int, name={taskName}, courseName={courseName}, weight={weight}, due={dueDate}, desc={description})
+
+Your goal:
+  Rank all provided tasks from highest priority to lowest priority.
+
+Priority criteria (in order of importance):
+  1. Earlier due dates have higher priority.
+  2. Higher weighting (percent of total grade or importance) increases priority.
+  3. Larger deliverables (implied by description length/complexity) may increase priority
+      if due dates and weights are similar.
+
+Rules:
+  1. Output must be an array of task IDs only, ordered from highest priority to lowest.
+      Example:
+       Input tasks:
+         Task(id=3, name="Homework 2", course="DS", weight=10, due="2025-02-05")
+         Task(id=8, name="Proposal", course="AI", weight=20, due="2025-02-01")
+         Task(id=1, name="Quiz 1", course="DS", weight=5,  due="2025-01-28")
+         Task(id=5, name="Lab 1", course="OS", weight=15, due="2025-02-10")
+       Output:
+         [1, 8, 3, 5]
+
+  2. Your ranking must be **internally consistent**.  
+     If two tasks come from the same course, the one with the earlier due date or higher weight
+     must be placed higher.
+
+  3. If the tasks are already in valid priority order, return the task ids as-is.
+
+  4. You must return **only** the JSON array of IDs.  
+     No explanations, no text, no comments—only the array.
+
+Return format:
+  [taskId1, taskId2, ...]`;
+  return prompt;
+}
+
+export function createTasklistOrderingRequestPrompt(tasks: string) {
+  return `Order the following tasks according to their weight, due date, and complexity as defined previously.
+  Tasks:\n${tasks}`;
 }

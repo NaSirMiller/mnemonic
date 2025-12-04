@@ -189,10 +189,10 @@ export function normalizeTaskDates(task: Task): Task {
   return normalizedTask;
 }
 
-export function taskToString(task: Task): string {
+export function taskToString(task: Task, courseName: string): string {
   const taskName: string = task.title!;
   const weighting: number = task.weight!;
   const dueDate: Date = task.dueDate!;
   const description: string | undefined = task.description;
-  return `Task(name=${taskName}, weight=${weighting}, due=${dueDate}, desc=${description})`;
+  return `Task(name=${taskName}, courseName=${courseName} weight=${weighting}, due=${dueDate}, desc=${description})`;
 }

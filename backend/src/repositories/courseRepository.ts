@@ -4,11 +4,35 @@ import { Course } from "../../../shared/models/course";
 export class CourseRepository {
   private db = admin.firestore();
 
-  async getAllCourses(userId: string): Promise<Course[]> {
-    const snapshot = await this.db
-      .collection("courses")
-      .where("userId", "==", userId)
-      .get();
+  async getAllCourses(userId: string, courseIds?: string[]): Promise<Course[]> {
+    const coursesRef = this.db.collection("courses");
+
+    // Case 1: Fetch only selected course IDs
+    if (courseIds && courseIds.length > 0) {
+      const chunked = [];
+      for (let i = 0; i < courseIds.length; i += 10) {
+        chunked.push(courseIds.slice(i, i + 10));
+      }
+
+      const results: Course[] = [];
+
+      for (const chunk of chunked) {
+        const snapshot = await coursesRef
+          .where("userId", "==", userId)
+          .where("courseId", "in", chunk)
+          .get();
+
+        snapshot.forEach((doc) => {
+          const data = doc.data() as Course;
+          results.push({ ...data, courseId: doc.id });
+        });
+      }
+
+      return results;
+    }
+
+    // Case 2: Fetch all courses for the user
+    const snapshot = await coursesRef.where("userId", "==", userId).get();
 
     if (snapshot.empty) {
       throw new Error("Courses not found");
@@ -18,20 +42,6 @@ export class CourseRepository {
       const data = doc.data() as Course;
       return { ...data, courseId: doc.id };
     });
-  }
-
-  async getSingleCourse(userId: string, courseId: string): Promise<Course> {
-    const doc = await this.db.collection("courses").doc(courseId).get();
-    if (!doc.exists) {
-      throw new Error("Course not found");
-    }
-
-    const data = doc.data() as Course;
-    if (data.userId !== userId) {
-      throw new Error("Unauthorized: user does not own this course");
-    }
-
-    return { ...data, courseId: doc.id };
   }
 
   async createCourse(course: Course): Promise<Course> {
