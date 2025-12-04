@@ -1,5 +1,7 @@
 // frontend/src/pages/tasks/TaskPage.tsx
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { useAuth } from "../../hooks/useAuth";
 
@@ -10,7 +12,7 @@ import type { FullUser } from "../../../../shared/models/user";
 import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
 import { getTasks, updateTask } from "../../services/tasksService";
-import { getDocText } from "../../services/llmService";
+import { getDocText, getTasksList } from "../../services/llmService";
 
 import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
@@ -19,6 +21,7 @@ import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 import "./TaskPage.css";
 import { SyllabusUploader } from "../../components/file/SyllabusUploader";
 import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
+import { LoadingSpinner } from "../../components/general/LoadingSpinner";
 
 function TaskPage() {
   const { uid } = useAuth();
@@ -36,6 +39,7 @@ function TaskPage() {
   const [syllabusFile, setSyllabusFile] = useState<File | null>(null);
   const [showProposedTasks, setShowProposedTasks] = useState(false);
   const [proposedDocText, setProposedDocText] = useState<string | null>(null);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
 
   // --- Helper: sort tasks ---
   const sortTasks = (tasks: Task[]) => {
@@ -72,6 +76,62 @@ function TaskPage() {
     }
     loadUser();
   }, [uid]);
+
+  // Update tasklist
+  const handleTasklistReorder = async () => {
+    if (!availableTasks || availableTasks.length === 0) {
+      toast.warn("No tasks available to reorder.");
+      return;
+    }
+
+    setShowLoadingModal(true);
+
+    // console.log("Hello World!");
+    // const sleep = (ms: number) =>
+    //   new Promise((resolve) => setTimeout(resolve, ms));
+    // await sleep(5000);
+    // console.log("Delay done.");
+    // setShowLoadingModal(false);
+
+    try {
+      console.log("Awaiting LLMs tasklist reordering...");
+
+      const { tasks } = await getTasksList(availableTasks);
+      const tasksWithDates = tasks.map((t) => ({
+        ...t,
+        dueDate:
+          t.dueDate instanceof Date
+            ? t.dueDate
+            : t.dueDate
+            ? new Date(t.dueDate)
+            : null,
+        createdAt:
+          t.createdAt instanceof Date
+            ? t.createdAt
+            : t.createdAt
+            ? new Date(t.createdAt)
+            : new Date(),
+        lastUpdatedAt:
+          t.lastUpdatedAt instanceof Date
+            ? t.lastUpdatedAt
+            : t.lastUpdatedAt
+            ? new Date(t.lastUpdatedAt)
+            : new Date(),
+      }));
+      setAvailableTasks(tasksWithDates);
+
+      console.log("Successfully reordered tasks!", tasksWithDates);
+      toast.success("Tasks reordered successfully!");
+    } catch (err) {
+      console.error("Failed to reorder tasks:", err);
+
+      const msg =
+        err instanceof Error ? err.message : "Failed to reorder tasks.";
+      toast.error(msg);
+    } finally {
+      setShowLoadingModal(false);
+    }
+  };
 
   // --- Fetch courses ---
   useEffect(() => {
@@ -117,7 +177,29 @@ function TaskPage() {
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
 
-        const sorted = sortTasks(tasks);
+        const tasksWithDates = tasks.map((t) => ({
+          ...t,
+          dueDate:
+            t.dueDate instanceof Date
+              ? t.dueDate
+              : t.dueDate
+              ? new Date(t.dueDate)
+              : null,
+          createdAt:
+            t.createdAt instanceof Date
+              ? t.createdAt
+              : t.createdAt
+              ? new Date(t.createdAt)
+              : new Date(),
+          lastUpdatedAt:
+            t.lastUpdatedAt instanceof Date
+              ? t.lastUpdatedAt
+              : t.lastUpdatedAt
+              ? new Date(t.lastUpdatedAt)
+              : new Date(),
+        }));
+
+        const sorted = sortTasks(tasksWithDates);
         setAvailableTasks(sorted);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
@@ -394,6 +476,19 @@ function TaskPage() {
           </div>
         </div>
       )}
+      {showLoadingModal && (
+        <div className="modal-olay">
+          <LoadingSpinner spinnerSize={100} />
+        </div>
+      )}
+      <div className="task-page-optimize-tasklist-cont">
+        <button
+          className="task-page-optimize-tasklist-button"
+          onClick={() => handleTasklistReorder()}
+        >
+          Optimize Tasklist
+        </button>
+      </div>
     </div>
   );
 }

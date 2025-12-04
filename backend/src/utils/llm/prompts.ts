@@ -1,5 +1,3 @@
-import { Task } from "../../../../shared/models/task";
-
 function getCreationAgentResponseForm(): string {
   return `{
   "course": 
@@ -110,6 +108,7 @@ interface Task {
 - If insufficient info, leave the array empty.
 - The expectedTime must be a whole number in terms of minutes (minimum 0).
 - The gradeType for a task should be one of the gradeTypes defined in the course object you provide.
+- If a due date is not provided for a task, put null.
 
 ${creationExamplePrompt}
 

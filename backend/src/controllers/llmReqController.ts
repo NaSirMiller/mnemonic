@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { courseCreationLLMService, tasksListLMService } from "../services/llm";
+import { courseCreationLLMService, tasksListLLMService } from "../services/llm";
 
 export async function getProposedCourseInfo(
   request: Request,
@@ -24,7 +24,7 @@ export async function getProposedCourseInfo(
 export async function getTasksList(request: Request, response: Response) {
   const { tasks } = request.body;
   try {
-    const tasksList = await courseCreationLLMService.getTasksOrdering(tasks);
+    const tasksList = await tasksListLLMService.getTasksOrdering(tasks);
     response.status(200).json({ tasks: tasksList });
   } catch (err) {
     let errorMessage: string;

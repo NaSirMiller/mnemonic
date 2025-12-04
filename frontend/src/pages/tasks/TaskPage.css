@@ -134,6 +134,19 @@
   cursor: pointer;
 }
 
+.task-page-optimize-tasklist-button {
+  padding: 8px 20px;
+  color: white;
+
+  font-size: 18px;
+
+  border-radius: 10px;
+  background-color: #2f4872;
+}
+.task-page-optimize-tasklist-button:hover {
+  cursor: pointer;
+}
+
 /* courses */
 .task-page-course-cont {
   height: 80px;
@@ -261,4 +274,15 @@
 }
 .modal-clse-btn:hover {
   color: #e5e7eb;
+}
+
+.task-page-optimize-tasklist-cont {
+  width: 100%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 30px;
 }

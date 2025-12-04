@@ -99,12 +99,12 @@ export function setTaskDefaults(task: Task): Task {
     expectedTime: 0,
     weight: task.weight ?? -1,
     gradeType: task.gradeType!,
-    dueDate: task.dueDate ?? null,
+    dueDate: task.dueDate ? new Date(task.dueDate) : null, // convert if exists
     description: task.description ?? "",
     grade: task.grade ?? 0,
     priority: task.priority ?? -1,
-    createdAt: task.createdAt ?? now,
-    lastUpdatedAt: task.lastUpdatedAt ?? now,
+    createdAt: task.createdAt ? new Date(task.createdAt) : now,
+    lastUpdatedAt: task.lastUpdatedAt ? new Date(task.lastUpdatedAt) : now,
     isComplete: task.isComplete ?? false,
   };
 }

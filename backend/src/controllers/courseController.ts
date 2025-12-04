@@ -74,12 +74,9 @@ export async function getCourse(request: Request, response: Response) {
   let coursesRetrieved: Course[];
 
   try {
-    if (!courseId) {
-      coursesRetrieved = await courseRepo.getAllCourses(userId);
-    } else {
-      const course = await courseRepo.getSingleCourse(userId, courseId);
-      coursesRetrieved = [course];
-    }
+    if (courseId)
+      coursesRetrieved = await courseRepo.getAllCourses(userId, [courseId]);
+    else coursesRetrieved = await courseRepo.getAllCourses(userId);
 
     return response.status(200).json({
       message: "Successfully retrieved courses",
@@ -164,7 +161,6 @@ export async function deleteCourse(request: Request, response: Response) {
     return response.status(200).json({
       message: `Successfully deleted course ${courseId} and all related tasks.`,
     });
-
   } catch (err) {
     errorMessage =
       err instanceof Error
