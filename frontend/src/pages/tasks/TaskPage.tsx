@@ -1,5 +1,7 @@
 // frontend/src/pages/tasks/TaskPage.tsx
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { useAuth } from "../../hooks/useAuth";
 
@@ -10,7 +12,7 @@ import type { FullUser } from "../../../../shared/models/user";
 import { getUser } from "../../services/authService";
 import { getCourses } from "../../services/coursesService";
 import { getTasks, updateTask } from "../../services/tasksService";
-import { getDocText } from "../../services/llmService";
+import { getDocText, getTasksList } from "../../services/llmService";
 
 import TaskCard from "../../components/tasks/TaskCard/TaskCard";
 import EditTask from "../../components/tasks/EditTask/EditTask";
@@ -19,12 +21,17 @@ import EditCourse from "../../components/tasks/EditCourse/EditCourse";
 import "./TaskPage.css";
 import { SyllabusUploader } from "../../components/file/SyllabusUploader";
 import { ProposedTasksViewer } from "../../components/tasks/ProposedTasksViewer";
+import { LoadingSpinner } from "../../components/general/LoadingSpinner";
 
 function TaskPage() {
   const { uid } = useAuth();
   const [user, setUser] = useState<FullUser>();
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
+
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
+
+  // 🌟 ADDED: global “master” ordering from LLM
+  const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
 
   const [selectedCourseTab, setSelectedCourseTab] = useState("All Courses");
   const [selectedGrade, setSelectedGrade] = useState(0.0);
@@ -36,27 +43,26 @@ function TaskPage() {
   const [syllabusFile, setSyllabusFile] = useState<File | null>(null);
   const [showProposedTasks, setShowProposedTasks] = useState(false);
   const [proposedDocText, setProposedDocText] = useState<string | null>(null);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
 
   // --- Helper: sort tasks ---
   const sortTasks = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
-      // 1. Incomplete tasks first
       if ((a.isComplete ?? false) && !(b.isComplete ?? false)) return 1;
       if (!(a.isComplete ?? false) && (b.isComplete ?? false)) return -1;
 
-      // 2. Sort by due date
       if (!a.dueDate && !b.dueDate) return 0;
-      if (!a.dueDate) return 1; // a goes later
-      if (!b.dueDate) return -1; // b goes later
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
       return a.dueDate.getTime() - b.dueDate.getTime();
     });
   };
 
-  // --- Helper: get course name from courseId ---
+  // Helper
   const getCourseName = (courseId: string | null | undefined) => {
     if (!courseId) return "";
     const match = availableCourses.find((c) => c.courseId === courseId);
-    return match?.courseName ?? courseId; // fallback to ID
+    return match?.courseName ?? courseId;
   };
 
   // --- Load user profile ---
@@ -73,6 +79,36 @@ function TaskPage() {
     loadUser();
   }, [uid]);
 
+  // --- LLM Tasklist Reorder ---
+  const handleTasklistReorder = async () => {
+    if (!availableTasks || availableTasks.length === 0) {
+      toast.warn("No tasks available to reorder.");
+      return;
+    }
+
+    setShowLoadingModal(true);
+
+    try {
+      const { tasks } = await getTasksList(availableTasks);
+      const tasksWithDates = tasks.map((t) => ({
+        ...t,
+        dueDate: t.dueDate ? new Date(t.dueDate) : null,
+        createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
+        lastUpdatedAt: t.lastUpdatedAt ? new Date(t.lastUpdatedAt) : new Date(),
+      }));
+
+      setOrderedTasks(tasksWithDates);
+      setAvailableTasks(tasksWithDates);
+
+      toast.success("Tasks reordered successfully!");
+    } catch (err) {
+      console.error("Failed to reorder tasks:", err);
+      toast.error("Failed to reorder tasks.");
+    } finally {
+      setShowLoadingModal(false);
+    }
+  };
+
   // --- Fetch courses ---
   useEffect(() => {
     if (!uid) return;
@@ -87,7 +123,7 @@ function TaskPage() {
     fetchCourses();
   }, [uid]);
 
-  // --- Fetch tasks ---
+  // --- Fetch tasks (preserve LLM ordering) ---
   useEffect(() => {
     if (!uid) return;
 
@@ -107,7 +143,6 @@ function TaskPage() {
 
           setSelectedGrade(selectedCourse.currentGrade ?? 0);
 
-          // Calculate total time spent
           const totalHoursDecimal = tasks.reduce(
             (sum, t) => sum + (t.currentTime ?? 0),
             0
@@ -117,17 +152,40 @@ function TaskPage() {
           setSelectedTimeSpent(`${hours}hr ${minutes}min`);
         }
 
-        const sorted = sortTasks(tasks);
-        setAvailableTasks(sorted);
+        const tasksWithDates = tasks.map((t) => ({
+          ...t,
+          dueDate: t.dueDate ? new Date(t.dueDate) : null,
+          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
+          lastUpdatedAt: t.lastUpdatedAt
+            ? new Date(t.lastUpdatedAt)
+            : new Date(),
+        }));
+
+        if (orderedTasks.length > 0) {
+          const filtered = orderedTasks.filter((t) => {
+            if (selectedCourseTab === "All Courses") return true;
+
+            const course = availableCourses.find(
+              (c) => c.courseName === selectedCourseTab
+            );
+            return t.courseId === course?.courseId;
+          });
+
+          setAvailableTasks(filtered);
+          return;
+        }
+
+        // Default (no LLM ordering yet)
+        setAvailableTasks(tasksWithDates);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
       }
     }
 
     fetchTasks();
-  }, [selectedCourseTab, availableCourses, uid]);
+  }, [selectedCourseTab, availableCourses, uid, orderedTasks]);
 
-  // --- Prevent background scroll when modals open ---
+  // --- Prevent background scroll ---
   useEffect(() => {
     document.body.style.overflow =
       showEditTask || showEditCourse ? "hidden" : "auto";
@@ -198,6 +256,20 @@ function TaskPage() {
       }
 
       const sorted = sortTasks(tasks);
+
+      if (orderedTasks.length > 0) {
+        const filtered = orderedTasks.filter((t) => {
+          if (selectedCourseTab === "All Courses") return true;
+          const course = availableCourses.find(
+            (c) => c.courseName === selectedCourseTab
+          );
+          return t.courseId === course?.courseId;
+        });
+
+        setAvailableTasks(filtered);
+        return;
+      }
+
       setAvailableTasks(sorted);
     } catch (err) {
       console.error("Failed to refresh tasks:", err);
@@ -205,9 +277,9 @@ function TaskPage() {
   };
 
   const handleSyllabusSubmit = (file: File) => {
-    setSyllabusFile(file); // store file to pass to ProposedTasksViewer
-    setShowSyllabusForm(false); // close uploader popup
-    setShowProposedTasks(true); // open ProposedTasksViewer popup
+    setSyllabusFile(file);
+    setShowSyllabusForm(false);
+    setShowProposedTasks(true);
   };
 
   useEffect(() => {
@@ -217,7 +289,7 @@ function TaskPage() {
       try {
         const { doc } = await getDocText(syllabusFile);
         setProposedDocText(doc);
-        setShowProposedTasks(true); // show viewer after processing
+        setShowProposedTasks(true);
       } catch (err) {
         console.error("Failed to load syllabus:", err);
       }
@@ -340,7 +412,7 @@ function TaskPage() {
         </div>
       </div>
 
-      {/* Edit Modals */}
+      {/* Modals */}
       {showEditTask && (
         <div className="opacity" onClick={() => setShowEditTask(false)}>
           <EditTask
@@ -358,10 +430,7 @@ function TaskPage() {
       )}
       {showSyllabusForm && (
         <div className="modal-olay" onClick={() => setShowSyllabusForm(false)}>
-          <div
-            className="modal-cnt"
-            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-          >
+          <div className="modal-cnt" onClick={(e) => e.stopPropagation()}>
             <div className="modal-hdr">
               <h2>Upload Syllabus</h2>
               <button
@@ -394,6 +463,21 @@ function TaskPage() {
           </div>
         </div>
       )}
+
+      {showLoadingModal && (
+        <div className="modal-olay">
+          <LoadingSpinner spinnerSize={100} />
+        </div>
+      )}
+
+      <div className="task-page-optimize-tasklist-cont">
+        <button
+          className="task-page-optimize-tasklist-button"
+          onClick={() => handleTasklistReorder()}
+        >
+          Optimize Tasklist
+        </button>
+      </div>
     </div>
   );
 }

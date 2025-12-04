@@ -99,12 +99,12 @@ export function setTaskDefaults(task: Task): Task {
     expectedTime: 0,
     weight: task.weight ?? -1,
     gradeType: task.gradeType!,
-    dueDate: task.dueDate ?? null,
+    dueDate: task.dueDate ? new Date(task.dueDate) : null, // convert if exists
     description: task.description ?? "",
     grade: task.grade ?? 0,
     priority: task.priority ?? -1,
-    createdAt: task.createdAt ?? now,
-    lastUpdatedAt: task.lastUpdatedAt ?? now,
+    createdAt: task.createdAt ? new Date(task.createdAt) : now,
+    lastUpdatedAt: task.lastUpdatedAt ? new Date(task.lastUpdatedAt) : now,
     isComplete: task.isComplete ?? false,
   };
 }
@@ -189,10 +189,10 @@ export function normalizeTaskDates(task: Task): Task {
   return normalizedTask;
 }
 
-export function taskToString(task: Task): string {
+export function taskToString(task: Task, courseName: string): string {
   const taskName: string = task.title!;
   const weighting: number = task.weight!;
   const dueDate: Date = task.dueDate!;
   const description: string | undefined = task.description;
-  return `Task(name=${taskName}, weight=${weighting}, due=${dueDate}, desc=${description})`;
+  return `Task(name=${taskName}, courseName=${courseName} weight=${weighting}, due=${dueDate}, desc=${description})`;
 }

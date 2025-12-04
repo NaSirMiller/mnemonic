@@ -1,9 +1,12 @@
 import { LLMClient } from "../utils/llm/llmClient";
 import { LLMInstance } from "../utils/llm/llmInstance";
 import { LLMInstanceConfig } from "../../../shared/models/llm";
+import { courseRepo } from "../repositories/courseRepository";
 import {
   creationSystemPrompt,
   getCreationRequestPrompt,
+  createTasklistOrderingSystemPrompt,
+  createTasklistOrderingRequestPrompt,
 } from "../utils/llm/prompts";
 import { taskToString } from "../utils/taskUtils";
 
@@ -21,6 +24,14 @@ const courseTasksConfig: LLMInstanceConfig = {
 
 const courseTaskCreator = new LLMInstance(client, courseTasksConfig);
 
+const tasklistConfig: LLMInstanceConfig = {
+  name: "Tasklist Orderer",
+  model: DEFAULT_MODEL_NAME,
+  systemPrompt: createTasklistOrderingSystemPrompt(),
+};
+
+const taskListOrderer = new LLMInstance(client, tasklistConfig);
+
 export class CourseTasksCreationError extends Error {
   public code: string;
 
@@ -35,14 +46,13 @@ export class CourseTasksCreationError extends Error {
     }
   }
 }
-
 class LLMService {
-  constructor(private llm = courseTaskCreator) {}
+  constructor(private llm: LLMInstance) {} // removed default
+
   async getCourseAndTasks(
     docText: string
   ): Promise<CourseTasksCreationResponse> {
     const requestPrompt: string = getCreationRequestPrompt(docText);
-    // console.log(`Model used: ${this.llm.getModel()}`);
 
     const maxNumAttempts = 3;
     let attempt = 0;
@@ -51,19 +61,12 @@ class LLMService {
     while (attempt < maxNumAttempts) {
       try {
         response = await this.llm.generate(requestPrompt);
-
-        // Log raw LLM response
-        // console.log(`Attempt #${attempt + 1} response:`, response);
-
-        // Parse JSON
         const proposals: CourseTasksCreationResponse = JSON.parse(response);
 
-        // Validate required fields
         if (!proposals.course || !proposals.tasks) {
           throw new Error("Incomplete LLM response: missing course or tasks");
         }
 
-        // Return valid response
         return proposals;
       } catch (error: unknown) {
         console.error(
@@ -75,12 +78,11 @@ class LLMService {
         attempt += 1;
         if (attempt < maxNumAttempts) {
           console.log("Retrying...");
-          await new Promise((res) => setTimeout(res, 1000)); // Slightly longer wait
+          await new Promise((res) => setTimeout(res, 1000));
         }
       }
     }
 
-    // Throw instead of returning empty object
     throw new CourseTasksCreationError(
       `LLM failed to generate a valid CourseTasksCreationResponse after ${maxNumAttempts} attempts.`,
       "llm-error"
@@ -88,23 +90,41 @@ class LLMService {
   }
 
   async getTasksOrdering(tasks: Task[]): Promise<Task[]> {
+    if (tasks.length === 0) return [];
+
     const tasksMap: Record<number, Task> = {};
     const stringifiedTasks: string[] = [];
-    let task: Task;
-    for (let i = 0; i < tasks.length; i++) {
-      // Assign each task a non invasive id based on its positioning in the original order.
-      task = tasks[i];
+    const uniqueCourseIds = [...new Set(tasks.map((t) => t.courseId!))];
+    const userId = tasks[0].userId!;
+    const courses = await courseRepo.getAllCourses(userId, uniqueCourseIds);
+
+    const courseMap = new Map(
+      courses.map((course) => [course.courseId!, course.courseName!])
+    );
+
+    tasks.forEach((task, i) => {
+      // console.log(`task=${JSON.stringify(task, null, 2)}`);
+      // console.log(
+      //   `task.dueDate type: ${
+      //     task.dueDate instanceof Date ? "Date" : typeof task.dueDate
+      //   }, value: ${task.dueDate}`
+      // );
+      const courseName = courseMap.get(task.courseId!)!;
       tasksMap[i] = task;
-      stringifiedTasks.push(`id=${i}:${taskToString(task)}`); // Convert task to string representation with id assigned.
-    }
-    // const tasksListString: string = stringifiedTasks.join("\n"); // TODO: Use in actual prompt.
-    const response: string = await this.llm.generate(""); // TODO: Add actual prompt.
+      stringifiedTasks.push(`id=${i}:${taskToString(task, courseName)}`);
+    });
+
+    // Build the task list ordering prompt
+    const tasksListString = stringifiedTasks.join("\n");
+
+    const response: string = await this.llm.generate(
+      createTasklistOrderingRequestPrompt(tasksListString)
+    );
+
     const taskIdOrdering: number[] = JSON.parse(response);
-    const orderedTasks: Task[] = [];
-    for (const taskId of taskIdOrdering) {
-      orderedTasks.push(tasksMap[taskId]);
-    }
-    return orderedTasks;
+    return taskIdOrdering.map((taskId) => tasksMap[taskId]);
   }
 }
-export const llmService = new LLMService();
+
+export const courseCreationLLMService = new LLMService(courseTaskCreator);
+export const tasksListLLMService = new LLMService(taskListOrderer);

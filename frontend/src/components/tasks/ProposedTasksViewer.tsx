@@ -121,6 +121,10 @@ export function ProposedTasksViewer({
         currentTime: 0,
         grade: 0,
         isComplete: false,
+        dueDate:
+          t.dueDate && !isNaN(new Date(t.dueDate).getTime())
+            ? new Date(t.dueDate)
+            : null,
         createdAt: new Date(),
         lastUpdatedAt: new Date(),
       }));
