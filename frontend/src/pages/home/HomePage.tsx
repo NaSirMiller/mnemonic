@@ -3,20 +3,20 @@ import { useAuth } from "../../hooks/useAuth";
 
 import { getTasks } from "../../services/tasksService";
 import { getCourses } from "../../services/coursesService";
+import "./HomePage.css";
+
 import type { Task } from "../../../../shared/models/task";
 import type { Course } from "../../../../shared/models/course";
-
-import "./HomePage.css";
 
 function HomePage() {
   const { accessToken, uid } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]); // store courses
+  const [courses, setCourses] = useState<Course[]>([]);
 
   // --- Fetch tasks ---
   const fetchTaskList = async (userId: string) => {
     try {
-      const tasksRetrieved = await getTasks(userId, null, null);
+      const tasksRetrieved = await getTasks(userId);
       setTasks(tasksRetrieved);
     } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -39,36 +39,20 @@ function HomePage() {
     fetchCourses(uid);
   }, [uid]);
 
-  // --- Helper: order tasks by due date ---
-  const orderTasks = (tasks: Task[]): Task[] => {
-    return tasks
-      .filter((task) => !task.isComplete)
-      .sort((a, b) => {
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return a.dueDate.getTime() - b.dueDate.getTime();
-      });
-  };
-
-  const orderedTasks = orderTasks(tasks);
-
-  // --- Helper: get course name by courseId ---
-  const getCourseName = (courseId: string | undefined) => {
-    if (!courseId) return "";
-    const match = courses.find((c) => c.courseId === courseId);
-    return match?.courseName ?? courseId; // fallback to ID
-  };
-
   // --- Calendar state ---
   const [days, setDays] = useState<Date[]>([]);
   const [month] = useState(new Date().getMonth());
   const [events, setEvents] = useState<any[]>([]);
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
 
-  // Build calendar days
+  // --- Helper functions ---
+  const abrvMonth = (monthIndex: number) => months[monthIndex].slice(0, 3);
+  const getDateKey = (date: Date) => date.toISOString().split("T")[0];
+
+  // Build calendar
   useEffect(() => {
     const today = new Date();
     const year = today.getFullYear();
@@ -84,9 +68,6 @@ function HomePage() {
     }
     setDays(tempDays);
   }, [month]);
-
-  const abrvMonth = (monthIndex: number) => months[monthIndex].slice(0, 3);
-  const getDateKey = (date: Date) => date.toISOString().split("T")[0];
 
   // Fetch Google Calendar events
   useEffect(() => {
@@ -132,15 +113,35 @@ function HomePage() {
     }
   });
 
+  // --- Get course name helper ---
+  const getCourseName = (courseId?: string) => {
+    if (!courseId) return "";
+    const course = courses.find((c) => c.courseId === courseId);
+    return course?.courseName ?? courseId;
+  };
+
+  // --- Order tasks helper ---
+  const orderTasks = (tasks: Task[]): Task[] =>
+    tasks
+      .filter((task) => !task.isComplete)
+      .sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return a.dueDate.getTime() - b.dueDate.getTime();
+      });
+
+  const orderedTasks = orderTasks(tasks);
+
   return (
     <div className="home-page">
-      {/* LEFT SIDE — TASK LIST */}
       <div className="home-page-left">
         <div className="home-page-title">Tasks</div>
+
         <div className="home-page-task-type-cont">
           <div className="home-page-task-type">Name</div>
           <div className="home-page-task-type">Date</div>
         </div>
+
         <div className="home-page-task-cont">
           {orderedTasks.map((task, i) => (
             <div key={"task-" + i} className="home-page-task">
@@ -150,6 +151,7 @@ function HomePage() {
                   {getCourseName(task.courseId)}
                 </span>
               </div>
+
               <div className="home-page-task-date">
                 {task.dueDate
                   ? task.dueDate.toLocaleDateString("en-US", {
@@ -163,9 +165,10 @@ function HomePage() {
         </div>
       </div>
 
-      {/* RIGHT SIDE — CALENDAR */}
+      {/* Calendar */}
       <div className="home-page-right">
         <div className="home-page-title">Calendar</div>
+
         <div className="home-page-week-cont">
           {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
             <div key={day} className="home-page-week">
@@ -173,6 +176,7 @@ function HomePage() {
             </div>
           ))}
         </div>
+
         <div className="home-page-calendar-cont">
           {days.map((day, i) => {
             const dayKey = getDateKey(day);
@@ -185,6 +189,7 @@ function HomePage() {
                     ? abrvMonth(day.getMonth()) + " " + day.getDate()
                     : day.getDate()}
                 </div>
+
                 {dayEvents.map((event, j) => (
                   <div key={j} className="calendar-event">
                     <span className="calendar-event-text">
