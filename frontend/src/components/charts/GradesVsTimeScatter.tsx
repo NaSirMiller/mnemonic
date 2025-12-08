@@ -118,7 +118,7 @@ export default function GradesVsTimeScatter({ data }: { data: any[] }) {
     <Scatter
       name="Grades vs Time"
       data={cleanData}
-      fill="#2F4872"
+      fill="#bec9c7"
       line={false}
       shape="circle"
     />
