@@ -2,52 +2,19 @@
 
 ## Who We Are
 
-With Mnemonic we aim to simplify the academic experience with an one-stop application. More specifically, user's will be able to take notes and optimize the studying process with the help of AI.
+With Mnemonic we aim to simplify the academic experience with an one-stop application. More specifically, user's will be able to optimize the studying process with the help of AI.
 
 ## Features
+### Course & Task Management
+User's can create "courses" mimicing their schedule so they can easily organize their tasks across their different courses. Additionally, each course can have a task that needs to be completed. This can be a range of things, a homework, an exam, emailing a professor, etc. Each of these tasks can be assigned to their respective course "categories" denoting how it factors into the course's academic grade. 
 
-### Calendar & Notifications
+A user will have many different task lists or to-do list. There is a jumbo list that factors in all courses, and course specific lists as well.
 
-- Calendar management
-- Google Calendar integration
-- Notification system based on calendar events
-- Track due dates, tasks, and deadlines from uploaded files
+### AI
+If a user would like to make their studying process more streamlined they can ask AI to help! Specifically, Mnemonic's AI can extract tasks and create courses from academic syllabi -- meaning no more manually adding course tasks to your tasks manager! Moreover, when you want to revision your to-do list you can ask Mnemonic's AI to update the tasks list such that it ranks the tasks according to factors like grade weight, due dates, and complexity.
 
-### AI & LLM Integration
+### Other Coure Features
+Mnemonic manually adds your tasks to your calendar so you can skip the tedious parts of tasks management.
 
-- File uploads and direct messaging to LLM
-- AI-powered task prioritization based on weighting of exams and assignments
-- LLM for general AI application support
-
-<!-- ### Document & Assignment Management
-
-- Document manager for organizing course materials
-- Organize documents by class and relevance
-- Adjust plans based on hours allocated and grade weightings
-- Track time spent on assignments
-- Start/stop timer when using the application
-- Visualizations and reports based on time allocation -->
-
-### Task Visualization & Planning
-
-- To-do list page/widget for tasks
-- Visualization of tasks to do next based on AI/weighting
-- Summary of important dates
-- File editing capabilities
-- Syllabus and assignment document scraping
-
-<!-- ### Study & Note Tools
-
-- Transcribe handwritten notes to typed text (PDF or DOC)
-- Edit PDFs, images, and slides (highlighting, adding notes)
-- Summarize long notes into bullet points (“study mode”)
-- Optional: generate flashcards from notes -->
-
-- Clickable definitions for terms in context
-
-### Progress & Grade Tracking
-
-- Progress bars and assignment completion tracking
-- Grade tracking with “what-if” scenarios for desired letter grades
-- Graphs showing grade improvement or decline over time
-- Writing and managing notes directly in the app
+## Inquiries & Suggestions
+Do you have questions regarding Mnemonic? Or featuring you would like to see? Feel free to add an issue!
