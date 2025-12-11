@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 
 import { getTasks } from "../../services/tasksService";
+import { getCourses } from "../../services/coursesService";
 import "./HomePage.css";
+
 import type { Task } from "../../../../shared/models/task";
 import type { Course } from "../../../../shared/models/course";
-
 
 function HomePage() {
   const { accessToken, uid } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
 
+  // --- Fetch tasks ---
   const fetchTaskList = async (userId: string) => {
     try {
       const tasksRetrieved = await getTasks(userId);
@@ -20,34 +23,36 @@ function HomePage() {
     }
   };
 
-  useEffect(() => {
-    if (!uid) {
-      console.log("User id is not set on the home page.");
-      return;
+  // --- Fetch courses ---
+  const fetchCourses = async (userId: string) => {
+    try {
+      const coursesRetrieved = await getCourses(userId, null);
+      setCourses(coursesRetrieved);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
     }
+  };
+
+  useEffect(() => {
+    if (!uid) return;
     fetchTaskList(uid);
-    console.log("Tasks retrieved!");
+    fetchCourses(uid);
   }, [uid]);
 
+  // --- Calendar state ---
   const [days, setDays] = useState<Date[]>([]);
   const [month] = useState(new Date().getMonth());
   const [events, setEvents] = useState<any[]>([]);
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December",
   ];
 
-  // Build the calendar days
+  // --- Helper functions ---
+  const abrvMonth = (monthIndex: number) => months[monthIndex].slice(0, 3);
+  const getDateKey = (date: Date) => date.toISOString().split("T")[0];
+
+  // Build calendar
   useEffect(() => {
     const today = new Date();
     const year = today.getFullYear();
@@ -63,10 +68,6 @@ function HomePage() {
     }
     setDays(tempDays);
   }, [month]);
-
-  const abrvMonth = (monthIndex: number) => months[monthIndex].slice(0, 3);
-
-  const getDateKey = (date: Date) => date.toISOString().split("T")[0];
 
   // Fetch Google Calendar events
   useEffect(() => {
@@ -112,59 +113,62 @@ function HomePage() {
     }
   });
 
+  // --- Get course name helper ---
+  const getCourseName = (courseId?: string) => {
+    if (!courseId) return "";
+    const course = courses.find((c) => c.courseId === courseId);
+    return course?.courseName ?? courseId;
+  };
 
-  /** 
-   * Function to order tasks — filters out completed tasks and sorts by due date. 
-   * Can be updated in the future to use different ordering logic.
-   */
-  const orderTasks = (tasks: Task[]): Task[] => {
-    return tasks
+  // --- Order tasks helper ---
+  const orderTasks = (tasks: Task[]): Task[] =>
+    tasks
       .filter((task) => !task.isComplete)
       .sort((a, b) => {
-        if (!a.dueDate) return 1; // Tasks without due date go last
+        if (!a.dueDate) return 1;
         if (!b.dueDate) return -1;
-        return a.dueDate.getTime() - b.dueDate.getTime(); // Soonest due date first
+        return a.dueDate.getTime() - b.dueDate.getTime();
       });
-  };
 
   const orderedTasks = orderTasks(tasks);
 
   return (
     <div className="home-page">
-      {/* LEFT SIDE — TASK LIST */}
       <div className="home-page-left">
         <div className="home-page-title">Tasks</div>
+
         <div className="home-page-task-type-cont">
           <div className="home-page-task-type">Name</div>
           <div className="home-page-task-type">Date</div>
         </div>
+
         <div className="home-page-task-cont">
-          {orderedTasks.map((task, i) => {
-            // courses does not exist yet
-            // const course = courses.find(c => c.id === task.courseId);
-            return (
-              <div key={"task-" + i} className="home-page-task">
-                <div className="home-page-task-name tooltip">
-                  {task.title}
-                  <span className="tooltip-text">{ task.courseId }</span>
-                </div>
-                <div className="home-page-task-date">
-                  {task.dueDate
-                    ? task.dueDate.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : "No due date"}
-                </div>
+          {orderedTasks.map((task, i) => (
+            <div key={"task-" + i} className="home-page-task">
+              <div className="home-page-task-name tooltip">
+                {task.title}
+                <span className="tooltip-text">
+                  {getCourseName(task.courseId)}
+                </span>
               </div>
-            );
-          })}
+
+              <div className="home-page-task-date">
+                {task.dueDate
+                  ? task.dueDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : "No due date"}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* RIGHT SIDE — CALENDAR */}
+      {/* Calendar */}
       <div className="home-page-right">
         <div className="home-page-title">Calendar</div>
+
         <div className="home-page-week-cont">
           {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
             <div key={day} className="home-page-week">
@@ -172,24 +176,25 @@ function HomePage() {
             </div>
           ))}
         </div>
+
         <div className="home-page-calendar-cont">
           {days.map((day, i) => {
             const dayKey = getDateKey(day);
             const dayEvents = eventsByDate[dayKey] || [];
 
             return (
-              <div
-                key={"calendar-card-" + i}
-                className="home-page-calendar-card"
-              >
+              <div key={"calendar-card-" + i} className="home-page-calendar-card">
                 <div className="home-page-date-label">
                   {day.getDate() === 1
                     ? abrvMonth(day.getMonth()) + " " + day.getDate()
                     : day.getDate()}
                 </div>
+
                 {dayEvents.map((event, j) => (
                   <div key={j} className="calendar-event">
-                    <span className="calendar-event-text">{event.summary || "Untitled Event"}</span>
+                    <span className="calendar-event-text">
+                      {event.summary || "Untitled Event"}
+                    </span>
                   </div>
                 ))}
               </div>
