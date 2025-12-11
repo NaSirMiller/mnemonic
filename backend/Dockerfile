@@ -1,15 +1,16 @@
 FROM node:20
 
-WORKDIR /app
+WORKDIR /app/backend
 
-COPY package*.json ./
-
+# 1) Install backend dependencies
+COPY backend/package*.json ./
 RUN npm install
 
-COPY . .
+# 2) Copy backend source code
+COPY backend ./
 
-# Use ENV for port configuration
-ENV PORT=${BACKEND_PORT}
+# 3) Copy shared models into /app/shared
+COPY shared /app/shared
 
-# Use CMD with port from environment
-CMD ["sh", "-c", "npm run start:dev -- -p $PORT"]
+# 4) Start the dev server
+CMD ["npm", "run", "start:dev"]
